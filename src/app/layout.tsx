@@ -19,7 +19,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Valor Board — Dark and Darker Leaderboard",
+  title: "Dark and Darker Codex — Leaderboards, Builds & Market",
   description:
     "Dark and Darker leaderboard — track the top champions, character levels, and live server population.",
 };

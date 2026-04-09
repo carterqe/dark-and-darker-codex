@@ -8,7 +8,7 @@ export default function Footer() {
           <div className="flex items-center gap-2">
             <Swords className="w-4 h-4 text-gold-dark" />
             <span className="font-cinzel text-sm text-gold-dark">
-              Valor Board
+              Dark and Darker Codex
             </span>
           </div>
           <p className="text-xs text-text-secondary">

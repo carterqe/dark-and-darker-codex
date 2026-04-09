@@ -40,7 +40,7 @@ export default function Navbar() {
             <Link href="/" className="flex items-center gap-2 group shrink-0">
               <Swords className="w-6 h-6 text-gold-primary group-hover:text-gold-light transition-colors" />
               <span className="font-cinzel font-bold text-lg text-gold-primary group-hover:text-gold-light transition-colors hidden sm:inline">
-                Valor Board
+                DaD Codex
               </span>
             </Link>
 

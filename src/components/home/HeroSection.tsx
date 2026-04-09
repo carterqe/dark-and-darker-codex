@@ -23,7 +23,7 @@ export default function HeroSection() {
         </p>
 
         <ShimmerText className="text-5xl sm:text-7xl lg:text-8xl mb-6 leading-tight">
-          Valor Board
+          Dark and Darker Codex
         </ShimmerText>
 
         <p className="text-text-secondary text-lg sm:text-xl max-w-xl mx-auto leading-relaxed">

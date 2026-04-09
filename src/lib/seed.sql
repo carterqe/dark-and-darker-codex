@@ -1,5 +1,5 @@
 -- ============================================
--- Valor Board — Database Schema & Seed Data
+-- Dark and Darker Codex — Database Schema & Seed Data
 -- ============================================
 
 -- Players table

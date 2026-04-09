@@ -1,5 +1,5 @@
 -- ============================================================
--- Valor Board — Builds System Schema
+-- Dark and Darker Codex — Builds System Schema
 -- Run this in your Supabase SQL editor (Dashboard > SQL Editor)
 -- ============================================================
 
