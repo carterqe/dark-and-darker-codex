@@ -1,0 +1,648 @@
+"use client";
+
+import { useState, useEffect, useRef, useMemo } from "react";
+import { motion } from "framer-motion";
+import {
+  Store, Search, ChevronDown, Coins, Clock, TrendingDown, TrendingUp,
+  BarChart3, Package,
+} from "lucide-react";
+import { DarkerDBMarketListing, fetchMarket, getRarityStyle } from "@/lib/darkerdb";
+import { formatNumber, timeAgo } from "@/lib/utils";
+import ShimmerText from "@/components/ui/ShimmerText";
+import MedievalButton from "@/components/ui/MedievalButton";
+
+const RARITIES = ["", "Poor", "Common", "Uncommon", "Rare", "Epic", "Legendary", "Unique", "Artifact"];
+const STATUS_FILTERS = [
+  { value: "", label: "All" },
+  { value: "false", label: "Active" },
+  { value: "true", label: "Sold" },
+];
+const SORT_OPTIONS = [
+  { value: "newest", label: "Newest First" },
+  { value: "price_asc", label: "Price: Low to High" },
+  { value: "price_desc", label: "Price: High to Low" },
+];
+
+const ALL_MARKET_STATS = [
+  "armor_rating", "magic_resistance", "strength", "dexterity", "agility", "vigor",
+  "knowledge", "will", "max_health", "move_speed", "action_speed",
+  "weapon_damage", "additional_weapon_damage", "physical_damage_bonus",
+  "magical_damage", "armor_penetration", "magic_penetration",
+  "physical_healing", "magical_healing", "physical_power", "magical_power",
+  "luck", "resourcefulness", "persuasiveness", "cooldown_reduction_bonus",
+  "buff_duration_bonus", "debuff_duration_bonus", "spell_casting_speed",
+  "regular_interaction_speed", "magical_interaction_speed",
+];
+
+function formatStatLabel(s: string): string {
+  return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+const pillClass = (active: boolean) =>
+  `px-3 py-1.5 text-xs font-medium rounded-sm cursor-pointer transition-all duration-200 whitespace-nowrap ${
+    active
+      ? "text-gold-light bg-bg-tertiary border border-gold-primary/40"
+      : "text-text-secondary border border-border-subtle hover:text-gold-primary hover:border-gold-dark"
+  }`;
+const selectClass =
+  "bg-bg-secondary border border-border-subtle rounded-sm px-3 py-1.5 text-xs text-text-primary focus:outline-none focus:border-gold-primary/50 transition-all cursor-pointer appearance-none pr-7";
+const inputClass =
+  "w-full bg-bg-secondary border border-border-subtle rounded-sm px-3 py-2 text-xs text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-gold-primary/50 transition-all";
+
+function extractStats(listing: DarkerDBMarketListing): { name: string; value: string }[] {
+  const stats: { name: string; value: string }[] = [];
+  for (const [key, value] of Object.entries(listing)) {
+    if ((key.startsWith("primary_") || key.startsWith("secondary_")) && value != null && value !== 0) {
+      if (key.startsWith("primary_") || key.startsWith("secondary_")) {
+        const name = key.replace(/^(primary_|secondary_)/, "").replace(/_/g, " ");
+        stats.push({ name, value: String(value) });
+      }
+    }
+  }
+  return stats;
+}
+
+export default function BazaarClient() {
+  const [listings, setListings] = useState<DarkerDBMarketListing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [cursor, setCursor] = useState<string | undefined>();
+  const [hasMore, setHasMore] = useState(false);
+
+  // Filters
+  const [search, setSearch] = useState("");
+  const [rarity, setRarity] = useState("");
+  const [soldFilter, setSoldFilter] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
+  const [stats, setStats] = useState<string[]>([]);
+  const [slot, setSlot] = useState("");
+
+  // Price summary for searched item
+  const [expandedRow, setExpandedRow] = useState<number | null>(null);
+
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  const hasActiveFilter = !!(search.trim() || rarity || soldFilter || minPrice || maxPrice || slot || stats.length > 0);
+
+  const load = (append: boolean = false, cursorVal?: string) => {
+    if (!append) setLoading(true);
+    else setLoadingMore(true);
+
+    const params: Record<string, string | number> = {};
+
+    if (hasActiveFilter) {
+      params.fetchAll = "true";
+    } else {
+      params.limit = 50;
+      if (cursorVal) params.cursor = cursorVal;
+    }
+
+    if (search.trim()) {
+      params.archetype = search.trim();
+    } else if (slot) {
+      // No text search — push slot filtering to the server via archetype param
+      params.archetype = slot;
+    }
+    if (rarity) params.rarity = rarity;
+    if (soldFilter) params.has_sold = soldFilter;
+
+    // Price range
+    if (minPrice && maxPrice) {
+      params.price = `${minPrice}:${maxPrice}`;
+    } else if (minPrice) {
+      params.price = `>=${minPrice}`;
+    } else if (maxPrice) {
+      params.price = `<=${maxPrice}`;
+    }
+
+    fetchMarket(params)
+      .then((res) => {
+        const items = res.body || [];
+        if (append) {
+          setListings((prev) => [...prev, ...items]);
+        } else {
+          setListings(items);
+        }
+        if (!hasActiveFilter && items.length > 0 && res.pagination?.next) {
+          const u = new URL(res.pagination.next);
+          setCursor(u.searchParams.get("cursor") || undefined);
+          setHasMore(true);
+        } else if (!hasActiveFilter && items.length >= 50) {
+          setCursor(String((items[items.length - 1] as Record<string, unknown>)?.cursor || ""));
+          setHasMore(true);
+        } else {
+          setHasMore(false);
+        }
+      })
+      .catch(console.error)
+      .finally(() => {
+        setLoading(false);
+        setLoadingMore(false);
+      });
+  };
+
+  useEffect(() => {
+    setCursor(undefined);
+    setExpandedRow(null);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => load(), search || minPrice || maxPrice ? 500 : 0);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [search, rarity, soldFilter, minPrice, maxPrice, slot, stats]);
+
+  // Compute available stats from loaded listings
+  const availableStats = useMemo(() => {
+    const found = new Set<string>();
+    for (const listing of listings) {
+      for (const s of ALL_MARKET_STATS) {
+        if (found.has(s)) continue;
+        const pKey = `primary_${s}`;
+        const sKey = `secondary_${s}`;
+        if ((listing[pKey] != null && listing[pKey] !== 0) ||
+            (listing[sKey] != null && listing[sKey] !== 0)) {
+          found.add(s);
+        }
+      }
+    }
+    return ALL_MARKET_STATS.filter((s) => found.has(s));
+  }, [listings]);
+
+  // Reset stats if no longer available
+  useEffect(() => {
+    if (stats.length > 0) {
+      const valid = stats.filter((s) => availableStats.includes(s));
+      if (valid.length !== stats.length) setStats(valid);
+    }
+  }, [availableStats, stats]);
+
+  // Client-side stat + slot filter + sort
+  const sortedListings = useMemo(() => {
+    let filtered = listings;
+
+    // Slot filter: match against item name / archetype
+    if (slot) {
+      const slotLower = slot.toLowerCase();
+      filtered = filtered.filter((l) => {
+        const name = (l.item || l.archetype || "").toLowerCase();
+        const archetype = (l.archetype || "").toLowerCase();
+        return name.includes(slotLower) || archetype.includes(slotLower);
+      });
+    }
+
+    // Multi-stat filter: listing must have ALL selected stats
+    if (stats.length > 0) {
+      filtered = filtered.filter((l) =>
+        stats.every((s) => {
+          const pVal = l[`primary_${s}`];
+          const sVal = l[`secondary_${s}`];
+          return (pVal != null && pVal !== 0) || (sVal != null && sVal !== 0);
+        })
+      );
+    }
+
+    const copy = [...filtered];
+    if (sortBy === "price_asc") copy.sort((a, b) => a.price - b.price);
+    else if (sortBy === "price_desc") copy.sort((a, b) => b.price - a.price);
+    return copy;
+  }, [listings, sortBy, stats, slot]);
+
+  // Price analytics when searching a specific item
+  const priceAnalytics = useMemo(() => {
+    if (!search.trim() || listings.length === 0) return null;
+    const active = listings.filter((l) => !l.has_sold && !l.has_expired);
+    const sold = listings.filter((l) => l.has_sold);
+    if (active.length === 0 && sold.length === 0) return null;
+
+    const activePrices = active.map((l) => l.price);
+    const soldPrices = sold.map((l) => l.price);
+
+    return {
+      activeCount: active.length,
+      soldCount: sold.length,
+      lowestActive: activePrices.length ? Math.min(...activePrices) : null,
+      highestActive: activePrices.length ? Math.max(...activePrices) : null,
+      avgActive: activePrices.length ? Math.round(activePrices.reduce((a, b) => a + b, 0) / activePrices.length) : null,
+      avgSold: soldPrices.length ? Math.round(soldPrices.reduce((a, b) => a + b, 0) / soldPrices.length) : null,
+      lastSoldPrice: sold.length ? sold[0].price : null,
+    };
+  }, [listings, search]);
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-10"
+      >
+        <ShimmerText as="h1" className="text-4xl sm:text-5xl mb-3">
+          The Bazaar
+        </ShimmerText>
+        <p className="text-text-secondary">
+          Real-time marketplace &mdash; monitor prices, find deals, track sales
+        </p>
+      </motion.div>
+
+      {/* Filters */}
+      <div className="space-y-3 mb-6">
+        {/* Rarity */}
+        <div>
+          <span className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">Rarity</span>
+          <div className="flex flex-wrap gap-1.5">
+            {RARITIES.map((r) => (
+              <button key={r || "all-r"} onClick={() => setRarity(r)} className={pillClass(rarity === r)}>
+                {r || "All"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Status */}
+        <div>
+          <span className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">Status</span>
+          <div className="flex flex-wrap gap-1.5">
+            {STATUS_FILTERS.map((s) => (
+              <button key={s.value || "all-s"} onClick={() => setSoldFilter(s.value)} className={pillClass(soldFilter === s.value)}>
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Price range + Sort + Search row */}
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className="flex flex-wrap items-end gap-3">
+            {/* Price range */}
+            <div>
+              <span className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">Price Range</span>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  className={`${inputClass} w-20`}
+                />
+                <span className="text-text-secondary text-xs">–</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  className={`${inputClass} w-20`}
+                />
+              </div>
+            </div>
+
+            {/* Gear Slot */}
+            <div>
+              <span className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">Gear Slot</span>
+              <div className="relative">
+                <select value={slot} onChange={(e) => setSlot(e.target.value)} className={selectClass}>
+                  <option value="">All Slots</option>
+                  <optgroup label="Armor">
+                    <option value="Boots">Boots</option>
+                    <option value="Chest">Chest</option>
+                    <option value="Gloves">Gloves</option>
+                    <option value="Helmet">Helmet</option>
+                    <option value="Legs">Legs</option>
+                    <option value="Cape">Cape</option>
+                  </optgroup>
+                  <optgroup label="Accessories">
+                    <option value="Necklace">Necklace</option>
+                    <option value="Ring">Ring</option>
+                  </optgroup>
+                  <optgroup label="Weapons">
+                    <option value="Sword">Sword</option>
+                    <option value="Axe">Axe</option>
+                    <option value="Mace">Mace</option>
+                    <option value="Dagger">Dagger</option>
+                    <option value="Staff">Staff</option>
+                    <option value="Bow">Bow</option>
+                    <option value="Crossbow">Crossbow</option>
+                    <option value="Shield">Shield</option>
+                  </optgroup>
+                  <optgroup label="Utility">
+                    <option value="Potion">Potion</option>
+                    <option value="Lantern">Lantern</option>
+                    <option value="Torch">Torch</option>
+                  </optgroup>
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-text-secondary pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Stat Bonus (multi-select) */}
+            <div>
+              <span className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">
+                Stat Bonus {stats.length > 0 && `(${stats.length})`}
+              </span>
+              <div className="relative">
+                <select
+                  value=""
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val && !stats.includes(val)) {
+                      setStats([...stats, val]);
+                    }
+                  }}
+                  className={selectClass}
+                >
+                  <option value="">{stats.length > 0 ? "Add stat..." : "Any Stat"}</option>
+                  {availableStats
+                    .filter((s) => !stats.includes(s))
+                    .map((s) => (
+                      <option key={s} value={s}>{formatStatLabel(s)}</option>
+                    ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-text-secondary pointer-events-none" />
+              </div>
+              {stats.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {stats.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setStats(stats.filter((x) => x !== s))}
+                      className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium bg-gold-primary/15 text-gold-light border border-gold-primary/30 rounded-sm hover:bg-accent-red/20 hover:text-accent-red hover:border-accent-red/30 transition-all cursor-pointer"
+                    >
+                      {formatStatLabel(s)} ×
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Sort */}
+            <div>
+              <span className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">Sort By</span>
+              <div className="relative">
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className={selectClass}>
+                  {SORT_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-text-secondary pointer-events-none" />
+              </div>
+            </div>
+          </div>
+
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gold-dark" />
+            <input
+              type="text"
+              placeholder="Search item name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full sm:w-64 pl-10 pr-4 py-2.5 bg-bg-secondary border border-border-subtle rounded-sm text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-gold-primary/50 transition-all"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Price Analytics Card */}
+      {priceAnalytics && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-bg-secondary border border-gold-primary/20 rounded-sm p-5 mb-6"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart3 className="w-4 h-4 text-gold-primary" />
+            <h3 className="font-cinzel font-bold text-sm text-gold-primary">
+              Price Summary — {search}
+            </h3>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {priceAnalytics.activeCount > 0 && (
+              <>
+                <div>
+                  <p className="text-[10px] text-text-secondary uppercase tracking-wider">Active Listings</p>
+                  <p className="text-lg font-cinzel font-bold text-gold-primary">{priceAnalytics.activeCount}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-text-secondary uppercase tracking-wider flex items-center gap-1">
+                    <TrendingDown className="w-3 h-3 text-accent-emerald" /> Lowest
+                  </p>
+                  <p className="text-lg font-cinzel font-bold text-accent-emerald">{formatNumber(priceAnalytics.lowestActive!)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-text-secondary uppercase tracking-wider flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3 text-accent-red" /> Highest
+                  </p>
+                  <p className="text-lg font-cinzel font-bold text-accent-red">{formatNumber(priceAnalytics.highestActive!)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-text-secondary uppercase tracking-wider">Avg Active Price</p>
+                  <p className="text-lg font-cinzel font-bold text-gold-light">{formatNumber(priceAnalytics.avgActive!)}</p>
+                </div>
+              </>
+            )}
+            {priceAnalytics.soldCount > 0 && (
+              <>
+                <div>
+                  <p className="text-[10px] text-text-secondary uppercase tracking-wider">Recent Sales</p>
+                  <p className="text-lg font-cinzel font-bold text-text-primary">{priceAnalytics.soldCount}</p>
+                </div>
+                {priceAnalytics.avgSold != null && (
+                  <div>
+                    <p className="text-[10px] text-text-secondary uppercase tracking-wider">Avg Sold Price</p>
+                    <p className="text-lg font-cinzel font-bold text-text-primary">{formatNumber(priceAnalytics.avgSold)}</p>
+                  </div>
+                )}
+                {priceAnalytics.lastSoldPrice != null && (
+                  <div>
+                    <p className="text-[10px] text-text-secondary uppercase tracking-wider">Last Sold</p>
+                    <p className="text-lg font-cinzel font-bold text-text-primary">{formatNumber(priceAnalytics.lastSoldPrice)}</p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Table */}
+      {loading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="h-14 bg-bg-secondary/50 rounded-sm animate-pulse" style={{ animationDelay: `${i * 40}ms` }} />
+          ))}
+        </div>
+      ) : sortedListings.length === 0 ? (
+        <div className="text-center py-20">
+          <Store className="w-12 h-12 text-gold-dark mx-auto mb-4" />
+          <p className="font-cinzel text-lg text-text-secondary">The marketplace is empty...</p>
+          <p className="text-sm text-text-secondary/60 mt-2">Try adjusting your filters.</p>
+        </div>
+      ) : (
+        <>
+          <p className="text-xs text-text-secondary mb-3">
+            {sortedListings.length} listing{sortedListings.length !== 1 ? "s" : ""}
+            {stats.length > 0 && (
+              <span> with <span className="text-gold-primary font-medium">{stats.map(formatStatLabel).join(" + ")}</span></span>
+            )}
+            {slot && (
+              <span> in <span className="text-gold-primary font-medium">{slot}</span></span>
+            )}
+          </p>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gold-dark/30">
+                  <th className="py-3 px-4 text-left text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider">Item</th>
+                  <th className="py-3 px-4 text-right text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider">Price</th>
+                  <th className="py-3 px-4 text-right text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider hidden md:table-cell">Qty</th>
+                  <th className="py-3 px-4 text-left text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider hidden lg:table-cell">Stats</th>
+                  <th className="py-3 px-4 text-right text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider hidden md:table-cell">
+                    <Clock className="w-3 h-3 inline" /> Time
+                  </th>
+                  <th className="py-3 px-4 text-right text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedListings.map((listing, i) => {
+                  const rs = getRarityStyle(listing.rarity);
+                  const stats = extractStats(listing);
+                  const isExpanded = expandedRow === listing.id;
+                  const sockets = [listing.socket_1, listing.socket_2, listing.socket_3, listing.socket_4, listing.socket_5]
+                    .filter(Boolean) as string[];
+
+                  return (
+                    <motion.tr
+                      key={listing.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2, delay: Math.min(i * 0.015, 0.3) }}
+                      className="border-b border-border-subtle hover:bg-bg-tertiary/50 transition-all cursor-pointer"
+                      onClick={() => setExpandedRow(isExpanded ? null : listing.id)}
+                    >
+                      {/* Item */}
+                      <td className="py-3 px-4">
+                        <div>
+                          <span className={`font-medium text-sm ${rs.text}`}>
+                            {listing.item || listing.archetype}
+                          </span>
+                          <span className={`block text-[10px] uppercase tracking-wider ${rs.text} opacity-60`}>
+                            {listing.rarity}
+                            {sockets.length > 0 && (
+                              <span className="ml-1.5 text-blue-400">
+                                {sockets.length} gem{sockets.length !== 1 ? "s" : ""}
+                              </span>
+                            )}
+                          </span>
+                          {/* Expanded stats */}
+                          {isExpanded && stats.length > 0 && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              className="mt-2 space-y-0.5"
+                            >
+                              {stats.map((s) => (
+                                <div key={s.name} className="flex justify-between text-[10px] py-0.5 px-2 bg-bg-primary/30 rounded-sm">
+                                  <span className="text-text-secondary capitalize">{s.name}</span>
+                                  <span className={`font-bold ${Number(s.value) >= 0 ? "text-accent-emerald" : "text-accent-red"}`}>
+                                    {Number(s.value) > 0 ? "+" : ""}{s.value}
+                                  </span>
+                                </div>
+                              ))}
+                              {sockets.length > 0 && (
+                                <div className="flex gap-1 pt-1">
+                                  {sockets.map((s, j) => (
+                                    <span key={j} className="text-[9px] px-1.5 py-0.5 bg-blue-400/10 text-blue-400 border border-blue-400/20 rounded-sm">
+                                      {String(s).replace(/_\d+$/, "").replace(/([A-Z])/g, " $1").trim()}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </motion.div>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Price */}
+                      <td className="py-3 px-4 text-right align-top">
+                        <span className="font-cinzel font-bold text-gold-primary text-sm flex items-center justify-end gap-1">
+                          <Coins className="w-3 h-3 text-gold-dark" />
+                          {formatNumber(listing.price)}
+                        </span>
+                        {listing.quantity > 1 && (
+                          <span className="block text-[10px] text-text-secondary">
+                            {formatNumber(Math.round(listing.price_per_unit))} ea
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Qty */}
+                      <td className="py-3 px-4 text-right text-sm text-text-secondary hidden md:table-cell align-top">
+                        <span className="flex items-center justify-end gap-1">
+                          <Package className="w-3 h-3" />
+                          {listing.quantity}
+                        </span>
+                      </td>
+
+                      {/* Stats preview */}
+                      <td className="py-3 px-4 text-left text-xs text-text-secondary hidden lg:table-cell align-top">
+                        {stats.length > 0 ? (
+                          <div className="flex flex-wrap gap-1 max-w-[200px]">
+                            {stats.slice(0, 3).map((s) => (
+                              <span
+                                key={s.name}
+                                className={`text-[10px] px-1.5 py-0.5 rounded-sm ${
+                                  Number(s.value) >= 0
+                                    ? "bg-accent-emerald/10 text-accent-emerald"
+                                    : "bg-accent-red/10 text-accent-red"
+                                }`}
+                              >
+                                {s.name.slice(0, 12)} {Number(s.value) > 0 ? "+" : ""}{s.value}
+                              </span>
+                            ))}
+                            {stats.length > 3 && (
+                              <span className="text-[10px] text-text-secondary/40">+{stats.length - 3}</span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-text-secondary/30">&mdash;</span>
+                        )}
+                      </td>
+
+                      {/* Time */}
+                      <td className="py-3 px-4 text-right text-xs text-text-secondary hidden md:table-cell align-top">
+                        {listing.has_sold && listing.sold_at
+                          ? <span className="text-accent-emerald">Sold {timeAgo(listing.sold_at)}</span>
+                          : timeAgo(listing.created_at)
+                        }
+                      </td>
+
+                      {/* Status */}
+                      <td className="py-3 px-4 text-right align-top">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-sm ${
+                          listing.has_sold
+                            ? "bg-accent-emerald/20 text-accent-emerald"
+                            : listing.has_expired
+                              ? "bg-accent-red/20 text-accent-red"
+                              : "bg-gold-primary/20 text-gold-primary"
+                        }`}>
+                          {listing.has_sold ? "SOLD" : listing.has_expired ? "EXPIRED" : "ACTIVE"}
+                        </span>
+                      </td>
+                    </motion.tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {hasMore && (
+            <div className="flex justify-center mt-8">
+              <MedievalButton variant="secondary" onClick={() => load(true, cursor)} loading={loadingMore}>
+                Load More Listings
+              </MedievalButton>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
