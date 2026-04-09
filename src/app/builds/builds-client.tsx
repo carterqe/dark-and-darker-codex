@@ -42,14 +42,11 @@ export default function BuildsClient() {
     if (sortBy === "newest") query = query.order("created_at", { ascending: false });
     else query = query.order("vote_count", { ascending: false });
 
-    query
-      .limit(50)
-      .then(({ data, error }) => {
-        if (error) console.error("Builds fetch error:", error);
-        setBuilds((data as Build[]) ?? []);
-      })
-      .catch((err) => console.error("Builds query failed:", err))
-      .finally(() => setLoading(false));
+    query.limit(50).then(({ data, error }) => {
+      if (error) console.error("Builds fetch error:", error);
+      setBuilds((data as Build[]) ?? []);
+      setLoading(false);
+    });
   }, [supabase, classFilter, sortBy]);
 
   return (
