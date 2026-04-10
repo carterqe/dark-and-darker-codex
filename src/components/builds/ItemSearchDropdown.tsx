@@ -85,10 +85,11 @@ export default function ItemSearchDropdown({
       items = items.filter((item) => item.name.toLowerCase().includes(q));
     }
 
-    // Sort: exact name matches first, then alphabetical
+    // Sort alphabetically
     items.sort((a, b) => a.name.localeCompare(b.name));
 
-    setFilteredResults(items.slice(0, 30));
+    // If searching, show all matches; otherwise cap to avoid huge initial list
+    setFilteredResults(query.trim() ? items : items.slice(0, 100));
   }, [allItems, selectedClass, query]);
 
   // Close on outside click
@@ -170,7 +171,7 @@ export default function ItemSearchDropdown({
               className="w-full pl-8 pr-3 py-2 bg-transparent text-xs text-text-primary placeholder:text-text-secondary/50 focus:outline-none"
             />
           </div>
-          <div className="max-h-56 overflow-y-auto">
+          <div className="max-h-72 overflow-y-auto">
             {fetching ? (
               <div className="px-3 py-4 text-center text-xs text-text-secondary/50">
                 Loading items...
