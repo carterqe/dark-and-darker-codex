@@ -13,10 +13,14 @@ export interface ClassPerksSkills {
   skills: SkillData[];
 }
 
-const WIKI = "https://darkanddarker.wiki.spellsandguns.com/Special:Redirect/file";
+const WIKI = "https://darkanddarker.wiki.spellsandguns.com/Special:FilePath";
 
 export function getPerkIconUrl(name: string): string {
-  return `${WIKI}/${encodeURIComponent(name.replace(/ /g, "_"))}.png`;
+  return `${WIKI}/Perk_${encodeURIComponent(name.replace(/ /g, "_"))}.png`;
+}
+
+export function getSkillIconUrl(name: string): string {
+  return `${WIKI}/Skill_${encodeURIComponent(name.replace(/ /g, "_"))}.png`;
 }
 
 export const CLASS_DATA: Record<string, ClassPerksSkills> = {

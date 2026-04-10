@@ -240,6 +240,7 @@ export default function CreateBuildClient() {
                 key={key}
                 slotLabel={label}
                 slotType={slot_type}
+                selectedClass={selectedClass}
                 value={equipment[key as GearSlotKey] ?? null}
                 onChange={(item) =>
                   setEquipment((prev) => ({ ...prev, [key]: item }))

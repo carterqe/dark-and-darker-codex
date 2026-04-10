@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { DarkerDBItem, getRarityStyle } from "@/lib/darkerdb";
+import { DarkerDBItem } from "@/lib/darkerdb";
 import type { BuildGearItem } from "@/lib/build-types";
 import ItemSearchDropdown from "./ItemSearchDropdown";
 
 interface GearSlotEditorProps {
   slotLabel: string;
   slotType: string;
+  selectedClass?: string;
   value: BuildGearItem | null;
   onChange: (item: BuildGearItem | null) => void;
 }
@@ -18,12 +19,14 @@ interface StatRange {
   label: string;
   min: number;
   max: number;
+  category: "primary" | "secondary";
 }
 
 function extractStatRanges(item: DarkerDBItem): StatRange[] {
   const ranges: StatRange[] = [];
   const seen = new Set<string>();
 
+  // Primary stats
   for (const [key, value] of Object.entries(item)) {
     if (!key.startsWith("primary_min_")) continue;
     if (value == null || value === 0) continue;
@@ -41,6 +44,31 @@ function extractStatRanges(item: DarkerDBItem): StatRange[] {
       label: statName.replace(/_/g, " "),
       min: minVal,
       max: maxVal,
+      category: "primary",
+    });
+  }
+
+  // Secondary stats (enchantable via merchant)
+  for (const [key, value] of Object.entries(item)) {
+    if (!key.startsWith("secondary_min_")) continue;
+    // Skip enchanted variants — they're a sub-range of secondary
+    if (key.includes("enchanted")) continue;
+    if (value == null || value === 0) continue;
+
+    const statName = key.slice("secondary_min_".length);
+    if (seen.has(statName)) continue;
+    seen.add(statName);
+
+    const minVal = value as number;
+    const maxKey = `secondary_max_${statName}`;
+    const maxVal = (item[maxKey] as number) ?? minVal;
+
+    ranges.push({
+      key: `secondary_${statName}`,
+      label: statName.replace(/_/g, " "),
+      min: minVal,
+      max: maxVal,
+      category: "secondary",
     });
   }
 
@@ -48,12 +76,16 @@ function extractStatRanges(item: DarkerDBItem): StatRange[] {
 }
 
 function formatStatLabel(s: string): string {
-  return s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return s
+    .replace(/^secondary_/, "")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 export default function GearSlotEditor({
   slotLabel,
   slotType,
+  selectedClass,
   value,
   onChange,
 }: GearSlotEditorProps) {
@@ -61,7 +93,6 @@ export default function GearSlotEditor({
   const [statsOpen, setStatsOpen] = useState(false);
   const [statValues, setStatValues] = useState<Record<string, number>>({});
 
-  // When item changes, fetch stat ranges
   const fetchItemStats = useCallback(async (itemId: number) => {
     const res = await fetch(`/api/items/${itemId}`);
     if (!res.ok) return;
@@ -70,7 +101,6 @@ export default function GearSlotEditor({
     const ranges = extractStatRanges(item);
     setStatRanges(ranges);
 
-    // Initialize stat values from existing build data or defaults
     const defaults: Record<string, number> = {};
     for (const r of ranges) {
       defaults[r.key] = value?.stats?.[r.key] ?? r.min;
@@ -109,13 +139,15 @@ export default function GearSlotEditor({
     }
   };
 
-  const rs = value ? getRarityStyle(value.rarity) : null;
+  const primaryStats = statRanges.filter((s) => s.category === "primary");
+  const secondaryStats = statRanges.filter((s) => s.category === "secondary");
 
   return (
     <div className="space-y-1">
       <ItemSearchDropdown
         slotLabel={slotLabel}
         slotType={slotType}
+        selectedClass={selectedClass}
         value={value}
         onChange={handleItemChange}
       />
@@ -136,38 +168,85 @@ export default function GearSlotEditor({
                 </span>
               )}
             </span>
-            {statsOpen ? (
-              <ChevronUp className="w-3 h-3" />
-            ) : (
-              <ChevronDown className="w-3 h-3" />
-            )}
+            {statsOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           </button>
 
           {statsOpen && (
-            <div className="px-3 pb-2 space-y-1.5">
-              {statRanges.map((stat) => (
-                <div key={stat.key} className="flex items-center gap-2">
-                  <span className="text-[10px] text-text-secondary capitalize w-24 shrink-0 truncate" title={formatStatLabel(stat.key)}>
-                    {formatStatLabel(stat.key)}
+            <div className="px-3 pb-2 space-y-2">
+              {/* Primary stats */}
+              {primaryStats.length > 0 && (
+                <div>
+                  <span className="text-[9px] text-gold-dark uppercase tracking-wider font-bold block mb-1">
+                    Primary
                   </span>
-                  <input
-                    type="number"
-                    step="any"
-                    min={stat.min}
-                    max={stat.max}
-                    value={statValues[stat.key] ?? stat.min}
-                    onChange={(e) => updateStat(stat.key, parseFloat(e.target.value) || stat.min)}
-                    className="w-16 px-1.5 py-0.5 bg-bg-secondary border border-border-subtle rounded-sm text-[10px] text-text-primary text-center focus:outline-none focus:border-gold-primary/50"
-                  />
-                  <span className="text-[9px] text-text-secondary/50 shrink-0">
-                    {stat.min}–{stat.max}
-                  </span>
+                  <div className="space-y-1">
+                    {primaryStats.map((stat) => (
+                      <StatRow
+                        key={stat.key}
+                        stat={stat}
+                        value={statValues[stat.key] ?? stat.min}
+                        onChange={(val) => updateStat(stat.key, val)}
+                      />
+                    ))}
+                  </div>
                 </div>
-              ))}
+              )}
+
+              {/* Secondary stats (enchantable) */}
+              {secondaryStats.length > 0 && (
+                <div>
+                  <span className="text-[9px] text-blue-400 uppercase tracking-wider font-bold block mb-1">
+                    Secondary (Enchantable)
+                  </span>
+                  <div className="space-y-1">
+                    {secondaryStats.map((stat) => (
+                      <StatRow
+                        key={stat.key}
+                        stat={stat}
+                        value={statValues[stat.key] ?? stat.min}
+                        onChange={(val) => updateStat(stat.key, val)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function StatRow({
+  stat,
+  value,
+  onChange,
+}: {
+  stat: StatRange;
+  value: number;
+  onChange: (val: number) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span
+        className="text-[10px] text-text-secondary capitalize w-24 shrink-0 truncate"
+        title={formatStatLabel(stat.key)}
+      >
+        {formatStatLabel(stat.key)}
+      </span>
+      <input
+        type="number"
+        step="any"
+        min={stat.min}
+        max={stat.max}
+        value={value}
+        onChange={(e) => onChange(parseFloat(e.target.value) || stat.min)}
+        className="w-16 px-1.5 py-0.5 bg-bg-secondary border border-border-subtle rounded-sm text-[10px] text-text-primary text-center focus:outline-none focus:border-gold-primary/50"
+      />
+      <span className="text-[9px] text-text-secondary/50 shrink-0">
+        {stat.min}–{stat.max}
+      </span>
     </div>
   );
 }

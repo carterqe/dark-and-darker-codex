@@ -17,7 +17,7 @@ import {
   type BuildComment,
 } from "@/lib/build-types";
 import { getClassPortrait, getRarityStyle } from "@/lib/darkerdb";
-import { getClassData, getPerkIconUrl } from "@/lib/class-data";
+import { getClassData, getPerkIconUrl, getSkillIconUrl } from "@/lib/class-data";
 import { timeAgo } from "@/lib/utils";
 
 const CLASS_COLORS: Record<string, string> = {
@@ -410,7 +410,7 @@ export default function BuildDetailClient({ id }: { id: string }) {
   );
 }
 
-function PerkSkillIcon({ name }: { name: string }) {
+function PerkSkillIcon({ name, type }: { name: string; type: "perk" | "skill" }) {
   const [failed, setFailed] = useState(false);
   if (failed) {
     return (
@@ -419,9 +419,10 @@ function PerkSkillIcon({ name }: { name: string }) {
       </div>
     );
   }
+  const iconUrl = type === "perk" ? getPerkIconUrl(name) : getSkillIconUrl(name);
   return (
     <img
-      src={getPerkIconUrl(name)}
+      src={iconUrl}
       alt={name}
       className="w-8 h-8 rounded-sm object-cover bg-bg-tertiary border border-border-subtle shrink-0"
       onError={() => setFailed(true)}
@@ -439,7 +440,8 @@ function PerkSkillSection({
   className: string;
 }) {
   const classData = getClassData(className);
-  const allItems = title === "Perks" ? classData?.perks : classData?.skills;
+  const isPerk = title === "Perks";
+  const allItems = isPerk ? classData?.perks : classData?.skills;
 
   return (
     <div>
@@ -449,7 +451,7 @@ function PerkSkillSection({
           const data = allItems?.find((p) => p.name === name);
           return (
             <div key={name} className="flex items-start gap-3 py-2 px-3 bg-bg-primary/40 rounded-sm">
-              <PerkSkillIcon name={name} />
+              <PerkSkillIcon name={name} type={isPerk ? "perk" : "skill"} />
               <div className="min-w-0">
                 <span className="text-sm font-medium text-text-primary block">{name}</span>
                 {data?.description && (

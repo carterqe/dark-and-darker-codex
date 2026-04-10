@@ -8,6 +8,7 @@ import type { BuildGearItem } from "@/lib/build-types";
 interface ItemSearchDropdownProps {
   slotLabel: string;
   slotType: string;
+  selectedClass?: string;
   value: BuildGearItem | null;
   onChange: (item: BuildGearItem | null) => void;
 }
@@ -15,39 +16,60 @@ interface ItemSearchDropdownProps {
 export default function ItemSearchDropdown({
   slotLabel,
   slotType,
+  selectedClass,
   value,
   onChange,
 }: ItemSearchDropdownProps) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<DarkerDBItem[]>([]);
+  const [allItems, setAllItems] = useState<DarkerDBItem[]>([]);
+  const [filteredResults, setFilteredResults] = useState<DarkerDBItem[]>([]);
   const [open, setOpen] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const [loaded, setLoaded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const search = useCallback(
-    async (q: string) => {
-      setFetching(true);
-      const params = new URLSearchParams({ slot_type: slotType, limit: "10" });
-      if (q) params.set("name", q);
-      const res = await fetch(`/api/items?${params.toString()}`);
-      if (res.ok) {
-        const data = await res.json();
-        setResults(data.body ?? []);
-      }
-      setFetching(false);
-    },
-    [slotType]
-  );
+  // Fetch ALL items for this slot once when dropdown opens
+  const fetchSlotItems = useCallback(async () => {
+    if (loaded) return;
+    setFetching(true);
+    const params = new URLSearchParams({ slot_type: slotType, fetchAll: "true" });
+    const res = await fetch(`/api/items?${params.toString()}`);
+    if (res.ok) {
+      const data = await res.json();
+      setAllItems(data.body ?? []);
+      setLoaded(true);
+    }
+    setFetching(false);
+  }, [slotType, loaded]);
 
+  // Re-fetch when slot type changes
   useEffect(() => {
-    if (!open) return;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => search(query), query ? 300 : 0);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [query, open, search]);
+    setLoaded(false);
+    setAllItems([]);
+  }, [slotType]);
+
+  // Filter items by class and search query
+  useEffect(() => {
+    let items = allItems;
+
+    // Filter by class: show items usable by the selected class
+    if (selectedClass) {
+      items = items.filter(
+        (item) => !item.required_class || item.required_class === selectedClass
+      );
+    }
+
+    // Filter by search query
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      items = items.filter((item) => item.name.toLowerCase().includes(q));
+    }
+
+    // Sort: exact name matches first, then alphabetical
+    items.sort((a, b) => a.name.localeCompare(b.name));
+
+    setFilteredResults(items.slice(0, 30));
+  }, [allItems, selectedClass, query]);
 
   // Close on outside click
   useEffect(() => {
@@ -89,7 +111,7 @@ export default function ItemSearchDropdown({
         type="button"
         onClick={() => {
           setOpen(!open);
-          if (!open) search(query);
+          if (!open) fetchSlotItems();
         }}
         className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-bg-primary border border-border-subtle rounded-sm text-xs transition-all hover:border-gold-primary/40 text-left"
       >
@@ -128,17 +150,17 @@ export default function ItemSearchDropdown({
               className="w-full pl-8 pr-3 py-2 bg-transparent text-xs text-text-primary placeholder:text-text-secondary/50 focus:outline-none"
             />
           </div>
-          <div className="max-h-48 overflow-y-auto">
+          <div className="max-h-56 overflow-y-auto">
             {fetching ? (
               <div className="px-3 py-4 text-center text-xs text-text-secondary/50">
-                Searching...
+                Loading items...
               </div>
-            ) : results.length === 0 ? (
+            ) : filteredResults.length === 0 ? (
               <div className="px-3 py-4 text-center text-xs text-text-secondary/50">
                 No items found
               </div>
             ) : (
-              results.map((item) => {
+              filteredResults.map((item) => {
                 const style = getRarityStyle(item.rarity);
                 return (
                   <button

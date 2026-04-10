@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Check, Info } from "lucide-react";
-import { type PerkData, type SkillData, getPerkIconUrl } from "@/lib/class-data";
+import { type PerkData, type SkillData, getPerkIconUrl, getSkillIconUrl } from "@/lib/class-data";
 
 interface PerkSkillSelectorProps {
   type: "perk" | "skill";
@@ -12,7 +12,7 @@ interface PerkSkillSelectorProps {
   onChange: (selected: string[]) => void;
 }
 
-function PerkIcon({ name }: { name: string }) {
+function PerkSkillIcon({ name, type }: { name: string; type: "perk" | "skill" }) {
   const [failed, setFailed] = useState(false);
 
   if (failed) {
@@ -25,9 +25,11 @@ function PerkIcon({ name }: { name: string }) {
     );
   }
 
+  const iconUrl = type === "perk" ? getPerkIconUrl(name) : getSkillIconUrl(name);
+
   return (
     <img
-      src={getPerkIconUrl(name)}
+      src={iconUrl}
       alt={name}
       className="w-8 h-8 rounded-sm object-cover bg-bg-tertiary border border-border-subtle shrink-0"
       onError={() => setFailed(true)}
@@ -73,7 +75,7 @@ export default function PerkSkillSelector({
                     : "border-border-subtle hover:border-gold-primary/30 cursor-pointer"
               }`}
             >
-              <PerkIcon name={item.name} />
+              <PerkSkillIcon name={item.name} type={type} />
               <div className="flex-1 min-w-0">
                 <span
                   className={`text-xs font-medium block ${
