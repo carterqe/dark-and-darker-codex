@@ -270,10 +270,10 @@ export default function BazaarClient() {
         </div>
 
         {/* Price range + Sort + Search row */}
-        <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end justify-between gap-3">
           <div className="flex flex-wrap items-end gap-3">
             {/* Price range */}
-            <div>
+            <div className="w-full sm:w-auto">
               <span className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">Price Range</span>
               <div className="flex items-center gap-1.5">
                 <input
@@ -281,7 +281,7 @@ export default function BazaarClient() {
                   placeholder="Min"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
-                  className={`${inputClass} w-20`}
+                  className={`${inputClass} w-full sm:w-20`}
                 />
                 <span className="text-text-secondary text-xs">–</span>
                 <input
@@ -289,7 +289,7 @@ export default function BazaarClient() {
                   placeholder="Max"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
-                  className={`${inputClass} w-20`}
+                  className={`${inputClass} w-full sm:w-20`}
                 />
               </div>
             </div>

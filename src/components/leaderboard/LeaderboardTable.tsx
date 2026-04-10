@@ -64,19 +64,19 @@ export default function LeaderboardTable() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gold-dark/30">
-                <th className="py-3 px-4 text-left text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider w-16">
+                <th className="py-3 px-2 sm:px-4 text-left text-[10px] sm:text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider w-10 sm:w-16">
                   #
                 </th>
-                <th className="py-3 px-4 text-left text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider">
+                <th className="py-3 px-2 sm:px-4 text-left text-[10px] sm:text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider">
                   Player
                 </th>
-                <th className="py-3 px-4 text-left text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider hidden md:table-cell">
+                <th className="py-3 px-2 sm:px-4 text-left text-[10px] sm:text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider hidden md:table-cell">
                   Class
                 </th>
-                <th className="py-3 px-4 text-right text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider">
+                <th className="py-3 px-2 sm:px-4 text-right text-[10px] sm:text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider">
                   Score
                 </th>
-                <th className="py-3 px-4 text-center text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider w-12">
+                <th className="py-3 px-2 sm:px-4 text-center text-[10px] sm:text-xs font-cinzel font-bold text-gold-dark uppercase tracking-wider w-10 sm:w-12">
                   Trend
                 </th>
               </tr>

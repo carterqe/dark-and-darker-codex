@@ -111,15 +111,15 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
               </button>
 
               {/* Item image showcase */}
-              <div className="flex items-center justify-center py-14 px-8 bg-gradient-to-b from-bg-tertiary/80 via-bg-secondary to-bg-secondary border-b border-border-subtle min-h-[260px] relative overflow-hidden">
+              <div className="flex items-center justify-center py-10 sm:py-14 px-6 sm:px-8 bg-gradient-to-b from-bg-tertiary/80 via-bg-secondary to-bg-secondary border-b border-border-subtle min-h-[200px] sm:min-h-[260px] relative overflow-hidden">
                 {/* Radial glow behind item */}
                 <div className={`absolute inset-0 flex items-center justify-center pointer-events-none`}>
-                  <div className={`w-48 h-48 rounded-full ${rarity.bg} blur-[60px] opacity-60`} />
+                  <div className={`w-36 h-36 sm:w-48 sm:h-48 rounded-full ${rarity.bg} blur-[60px] opacity-60`} />
                 </div>
 
                 <div className="relative">
                   {/* Ornate frame */}
-                  <div className={`relative w-48 h-48 flex items-center justify-center border-2 ${rarity.border} bg-bg-primary/50 rounded-sm`}>
+                  <div className={`relative w-36 h-36 sm:w-48 sm:h-48 flex items-center justify-center border-2 ${rarity.border} bg-bg-primary/50 rounded-sm`}>
                     {/* Corner ornaments */}
                     <span className={`absolute -top-px -left-px w-4 h-4 border-t-2 border-l-2 ${rarity.border}`} />
                     <span className={`absolute -top-px -right-px w-4 h-4 border-t-2 border-r-2 ${rarity.border}`} />
@@ -133,7 +133,7 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
                       <img
                         src={imgSrcs[imgFailed]}
                         alt={item.name}
-                        className="relative z-10 w-36 h-36 object-contain drop-shadow-[0_0_20px_rgba(201,168,76,0.4)]"
+                        className="relative z-10 w-28 h-28 sm:w-36 sm:h-36 object-contain drop-shadow-[0_0_20px_rgba(201,168,76,0.4)]"
                         onError={() => setImgFailed((f) => f + 1)}
                       />
                     ) : (

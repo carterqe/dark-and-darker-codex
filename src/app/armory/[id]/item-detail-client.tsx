@@ -65,7 +65,7 @@ export default function ItemDetailClient({ item }: ItemDetailClientProps) {
         <span className={`text-xs uppercase tracking-wider font-bold ${rarity.text}`}>
           {item.rarity}
         </span>
-        <h1 className={`font-cinzel font-bold text-3xl ${rarity.text} mt-1 mb-2`}>
+        <h1 className={`font-cinzel font-bold text-2xl sm:text-3xl ${rarity.text} mt-1 mb-2`}>
           {item.name}
         </h1>
         <p className="text-sm text-text-secondary mb-4">

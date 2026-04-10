@@ -111,7 +111,7 @@ export default function RealmClient() {
 
       {/* Population cards */}
       {pop && (
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {[
             { label: "Online", value: pop.num_online, icon: Users, color: "text-accent-emerald" },
             { label: "In Lobby", value: pop.num_lobby, icon: DoorOpen, color: "text-gold-primary" },
@@ -120,7 +120,7 @@ export default function RealmClient() {
             <motion.div key={s.label} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
               className="bg-bg-secondary border border-border-subtle rounded-sm p-4 text-center">
               <s.icon className={`w-5 h-5 mx-auto mb-2 ${s.color}`} />
-              <p className={`text-2xl font-cinzel font-bold ${s.color}`}>{formatNumber(s.value)}</p>
+              <p className={`text-xl sm:text-2xl font-cinzel font-bold ${s.color}`}>{formatNumber(s.value)}</p>
               <p className="text-xs text-text-secondary">{s.label}</p>
             </motion.div>
           ))}

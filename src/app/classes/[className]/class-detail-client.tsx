@@ -92,7 +92,7 @@ export default function ClassDetailClient({ className }: ClassDetailClientProps)
           <img src={getClassPortrait(className)} alt={className} className="w-full h-full object-cover" />
         </div>
         <div className="text-center sm:text-left">
-          <ShimmerText as="h1" className="text-4xl">
+          <ShimmerText as="h1" className="text-3xl sm:text-4xl">
             {className}
           </ShimmerText>
           <p className="text-text-secondary mt-1">Leaderboard performance across all categories</p>

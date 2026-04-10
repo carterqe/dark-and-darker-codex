@@ -37,14 +37,14 @@ export default function LeaderboardRow({ entry, index }: LeaderboardRowProps) {
       className={`group border-b border-border-subtle hover:bg-bg-tertiary/50 hover:border-l-2 hover:border-l-gold-primary transition-all duration-200 ${rowBg}`}
     >
       {/* Position */}
-      <td className="py-3 px-4 w-16">
+      <td className="py-3 px-2 sm:px-4 w-10 sm:w-16">
         <RankBadge rank={pos} />
       </td>
 
       {/* Player */}
-      <td className="py-3 px-4">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full border border-border-subtle overflow-hidden flex-shrink-0">
+      <td className="py-3 px-2 sm:px-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-border-subtle overflow-hidden flex-shrink-0">
             <img
               src={getClassPortrait(entry.class)}
               alt={entry.class}
@@ -52,11 +52,11 @@ export default function LeaderboardRow({ entry, index }: LeaderboardRowProps) {
               loading="lazy"
             />
           </div>
-          <div>
-            <span className="font-medium text-text-primary text-sm">
+          <div className="min-w-0">
+            <span className="font-medium text-text-primary text-xs sm:text-sm block truncate">
               {entry.character}
             </span>
-            <span className="block text-xs text-text-secondary">
+            <span className="block text-[10px] sm:text-xs text-text-secondary truncate">
               {entry.rank || entry.class}
             </span>
           </div>
@@ -64,17 +64,17 @@ export default function LeaderboardRow({ entry, index }: LeaderboardRowProps) {
       </td>
 
       {/* Class */}
-      <td className="py-3 px-4 text-sm text-text-secondary hidden md:table-cell">
+      <td className="py-3 px-2 sm:px-4 text-sm text-text-secondary hidden md:table-cell">
         {entry.class}
       </td>
 
       {/* Score */}
-      <td className="py-3 px-4 text-right font-cinzel font-bold text-gold-primary text-sm">
+      <td className="py-3 px-2 sm:px-4 text-right font-cinzel font-bold text-gold-primary text-xs sm:text-sm">
         {formatNumber(entry.score)}
       </td>
 
       {/* Trend */}
-      <td className="py-3 px-4 text-center w-12">
+      <td className="py-3 px-2 sm:px-4 text-center w-10 sm:w-12">
         <TrendArrow trend={getTrend(entry)} />
       </td>
     </motion.tr>

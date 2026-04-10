@@ -35,7 +35,7 @@ export default function RootLayout({
         <AuthProvider>
           <ParticleBackground />
           <Navbar />
-          <main className="flex-1 pt-16 relative z-10">{children}</main>
+          <main className="flex-1 pt-14 sm:pt-16 relative z-10">{children}</main>
           <Footer />
         </AuthProvider>
       </body>
