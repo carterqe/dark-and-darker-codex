@@ -18,6 +18,7 @@ export interface BuildGearItem {
   item_name: string;
   rarity: string;
   gear_score: number;
+  stats?: Record<string, number>; // Custom stat roll values, e.g. { "strength": 2.1 }
 }
 
 export type BuildEquipment = Partial<Record<GearSlotKey, BuildGearItem | null>>;

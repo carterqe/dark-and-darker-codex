@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Plus, X, AlertCircle, Hammer, Lock } from "lucide-react";
+import { AlertCircle, Hammer, Lock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import {
   BUILD_CLASSES,
@@ -13,7 +13,9 @@ import {
   type GearSlotKey,
 } from "@/lib/build-types";
 import { getClassPortrait } from "@/lib/darkerdb";
-import ItemSearchDropdown from "@/components/builds/ItemSearchDropdown";
+import { getClassData } from "@/lib/class-data";
+import GearSlotEditor from "@/components/builds/GearSlotEditor";
+import PerkSkillSelector from "@/components/builds/PerkSkillSelector";
 import ShimmerText from "@/components/ui/ShimmerText";
 import MedievalButton from "@/components/ui/MedievalButton";
 
@@ -32,31 +34,24 @@ export default function CreateBuildClient() {
   const [selectedClass, setSelectedClass] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [equipment, setEquipment] = useState<BuildEquipment>({});
-  const [perks, setPerks] = useState<string[]>([""]);
-  const [skills, setSkills] = useState<string[]>([""]);
+  const [perks, setPerks] = useState<string[]>([]);
+  const [skills, setSkills] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const addPerk = () => {
-    if (perks.length < 4) setPerks([...perks, ""]);
-  };
-  const removePerk = (i: number) =>
-    setPerks(perks.filter((_, idx) => idx !== i));
-  const updatePerk = (i: number, val: string) =>
-    setPerks(perks.map((p, idx) => (idx === i ? val : p)));
-
-  const addSkill = () => {
-    if (skills.length < 2) setSkills([...skills, ""]);
-  };
-  const removeSkill = (i: number) =>
-    setSkills(skills.filter((_, idx) => idx !== i));
-  const updateSkill = (i: number, val: string) =>
-    setSkills(skills.map((s, idx) => (idx === i ? val : s)));
+  const classData = selectedClass ? getClassData(selectedClass) : null;
 
   const toggleTag = (tag: string) => {
     setTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
+  };
+
+  // Reset perks/skills when class changes
+  const handleClassChange = (cls: string) => {
+    setSelectedClass(cls);
+    setPerks([]);
+    setSkills([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,9 +63,6 @@ export default function CreateBuildClient() {
 
     setSubmitting(true);
     setError(null);
-
-    const filteredPerks = perks.filter((p) => p.trim());
-    const filteredSkills = skills.filter((s) => s.trim());
 
     // Strip empty/null gear slots before saving
     const cleanEquipment: Record<string, unknown> = {};
@@ -87,8 +79,8 @@ export default function CreateBuildClient() {
         class: selectedClass,
         tags,
         equipment: cleanEquipment,
-        perks: filteredPerks,
-        skills: filteredSkills,
+        perks,
+        skills,
       })
       .select("id")
       .single();
@@ -102,7 +94,6 @@ export default function CreateBuildClient() {
     router.push(`/builds/${data.id}`);
   };
 
-  // Show nothing while auth is loading
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
@@ -115,7 +106,6 @@ export default function CreateBuildClient() {
     );
   }
 
-  // Gate: if not logged in, show prompt
   if (!user) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
@@ -164,7 +154,7 @@ export default function CreateBuildClient() {
               <button
                 key={cls}
                 type="button"
-                onClick={() => setSelectedClass(cls)}
+                onClick={() => handleClassChange(cls)}
                 className={`flex flex-col items-center gap-1.5 p-2 rounded-sm border transition-all ${
                   selectedClass === cls
                     ? "border-gold-primary/50 bg-gold-primary/10"
@@ -242,11 +232,11 @@ export default function CreateBuildClient() {
         <div className="bg-bg-secondary border border-border-subtle rounded-sm p-6">
           <span className={sectionLabel}>Gear Slots</span>
           <p className="text-xs text-text-secondary mb-4">
-            Search and select items from the Armory for each slot.
+            Select items from the Armory, then customize stat rolls.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {GEAR_SLOTS.map(({ key, label, slot_type }) => (
-              <ItemSearchDropdown
+              <GearSlotEditor
                 key={key}
                 slotLabel={label}
                 slotType={slot_type}
@@ -261,84 +251,58 @@ export default function CreateBuildClient() {
 
         {/* Perks */}
         <div className="bg-bg-secondary border border-border-subtle rounded-sm p-6">
-          <div className="flex items-center justify-between mb-3">
-            <span className={`${sectionLabel} mb-0`}>
-              Perks <span className="text-text-secondary font-normal normal-case">(up to 4)</span>
+          <span className={sectionLabel}>
+            Perks{" "}
+            <span className="text-text-secondary font-normal normal-case">
+              (select up to 4)
             </span>
-            {perks.length < 4 && (
-              <button
-                type="button"
-                onClick={addPerk}
-                className="flex items-center gap-1 text-xs text-gold-primary hover:text-gold-light transition-colors"
-              >
-                <Plus className="w-3 h-3" /> Add Perk
-              </button>
-            )}
-          </div>
-          <div className="space-y-2">
-            {perks.map((perk, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={perk}
-                  onChange={(e) => updatePerk(i, e.target.value)}
-                  placeholder={`Perk ${i + 1}`}
-                  maxLength={60}
-                  className={`${inputClass} flex-1`}
-                />
-                {perks.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removePerk(i)}
-                    className="text-text-secondary hover:text-accent-red transition-colors p-1"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
+          </span>
+          {classData ? (
+            <>
+              <p className="text-xs text-text-secondary mb-3">
+                {perks.length}/4 selected for {selectedClass}
+              </p>
+              <PerkSkillSelector
+                type="perk"
+                items={classData.perks}
+                selected={perks}
+                max={4}
+                onChange={setPerks}
+              />
+            </>
+          ) : (
+            <p className="text-xs text-text-secondary/50 py-4 text-center">
+              Select a class above to see available perks.
+            </p>
+          )}
         </div>
 
         {/* Skills */}
         <div className="bg-bg-secondary border border-border-subtle rounded-sm p-6">
-          <div className="flex items-center justify-between mb-3">
-            <span className={`${sectionLabel} mb-0`}>
-              Skills <span className="text-text-secondary font-normal normal-case">(up to 2)</span>
+          <span className={sectionLabel}>
+            Skills{" "}
+            <span className="text-text-secondary font-normal normal-case">
+              (select up to 2)
             </span>
-            {skills.length < 2 && (
-              <button
-                type="button"
-                onClick={addSkill}
-                className="flex items-center gap-1 text-xs text-gold-primary hover:text-gold-light transition-colors"
-              >
-                <Plus className="w-3 h-3" /> Add Skill
-              </button>
-            )}
-          </div>
-          <div className="space-y-2">
-            {skills.map((skill, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={skill}
-                  onChange={(e) => updateSkill(i, e.target.value)}
-                  placeholder={`Skill ${i + 1}`}
-                  maxLength={60}
-                  className={`${inputClass} flex-1`}
-                />
-                {skills.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeSkill(i)}
-                    className="text-text-secondary hover:text-accent-red transition-colors p-1"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
+          </span>
+          {classData ? (
+            <>
+              <p className="text-xs text-text-secondary mb-3">
+                {skills.length}/2 selected for {selectedClass}
+              </p>
+              <PerkSkillSelector
+                type="skill"
+                items={classData.skills}
+                selected={skills}
+                max={2}
+                onChange={setSkills}
+              />
+            </>
+          ) : (
+            <p className="text-xs text-text-secondary/50 py-4 text-center">
+              Select a class above to see available skills.
+            </p>
+          )}
         </div>
 
         {/* Submit */}
