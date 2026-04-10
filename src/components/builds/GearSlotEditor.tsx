@@ -14,6 +14,18 @@ interface GearSlotEditorProps {
   onChange: (item: BuildGearItem | null) => void;
 }
 
+// Maximum number of secondary stat rolls allowed per rarity
+const RARITY_MAX_ROLLS: Record<string, number> = {
+  Poor: 0,
+  Common: 0,
+  Uncommon: 1,
+  Rare: 2,
+  Epic: 3,
+  Legendary: 4,
+  Unique: 5,
+  Artifact: 5,
+};
+
 interface StatRange {
   key: string;
   label: string;
@@ -93,14 +105,21 @@ export default function GearSlotEditor({
     onChange({ ...item, stats: {} });
   };
 
+  const maxRolls = RARITY_MAX_ROLLS[value?.rarity ?? ""] ?? 0;
+  const enabledSecondaryCount = Object.keys(enabledStats).filter((k) =>
+    statRanges.find((r) => r.key === k)?.category === "secondary"
+  ).length;
+
   const toggleStat = (key: string) => {
     const range = statRanges.find((r) => r.key === key);
-    if (!range) return;
+    if (!range || range.category === "primary") return;
 
     const next = { ...enabledStats };
     if (key in next) {
       delete next[key];
     } else {
+      // Enforce rarity roll limit
+      if (enabledSecondaryCount >= maxRolls) return;
       next[key] = range.min;
     }
     setEnabledStats(next);
@@ -156,21 +175,31 @@ export default function GearSlotEditor({
           {statsOpen && (
             <div className="px-3 pb-2 space-y-2">
               {primaryStats.length > 0 && (
-                <StatGroup
-                  label="Primary"
-                  labelColor="text-gold-dark"
-                  stats={primaryStats}
-                  enabled={enabledStats}
-                  onToggle={toggleStat}
-                  onValueChange={updateStatValue}
-                />
+                <div>
+                  <span className="text-[9px] text-gold-dark uppercase tracking-wider font-bold block mb-1">
+                    Primary (Fixed)
+                  </span>
+                  <div className="space-y-1">
+                    {primaryStats.map((stat) => (
+                      <div key={stat.key} className="flex items-center gap-2">
+                        <span className="text-[10px] capitalize w-24 shrink-0 truncate text-text-secondary/60" title={formatStatLabel(stat.key)}>
+                          {formatStatLabel(stat.key)}
+                        </span>
+                        <span className="text-[9px] text-text-secondary/40">
+                          {stat.min}–{stat.max}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
               {secondaryStats.length > 0 && (
                 <StatGroup
-                  label="Secondary (Enchantable)"
+                  label={`Secondary (Socketable) — ${enabledSecondaryCount}/${maxRolls} rolls`}
                   labelColor="text-blue-400"
                   stats={secondaryStats}
                   enabled={enabledStats}
+                  atLimit={enabledSecondaryCount >= maxRolls}
                   onToggle={toggleStat}
                   onValueChange={updateStatValue}
                 />
@@ -188,6 +217,7 @@ function StatGroup({
   labelColor,
   stats,
   enabled,
+  atLimit,
   onToggle,
   onValueChange,
 }: {
@@ -195,6 +225,7 @@ function StatGroup({
   labelColor: string;
   stats: StatRange[];
   enabled: Record<string, number>;
+  atLimit?: boolean;
   onToggle: (key: string) => void;
   onValueChange: (key: string, val: number) => void;
 }) {
@@ -206,16 +237,20 @@ function StatGroup({
       <div className="space-y-1">
         {stats.map((stat) => {
           const isEnabled = stat.key in enabled;
+          const isDisabled = !isEnabled && atLimit;
           return (
             <div key={stat.key} className="flex items-center gap-2">
               {/* Toggle checkbox */}
               <button
                 type="button"
                 onClick={() => onToggle(stat.key)}
+                disabled={isDisabled}
                 className={`w-3.5 h-3.5 rounded-sm border shrink-0 flex items-center justify-center transition-all ${
                   isEnabled
                     ? "bg-gold-primary/30 border-gold-primary/60"
-                    : "border-border-subtle hover:border-gold-primary/40"
+                    : isDisabled
+                      ? "border-border-subtle/30 cursor-not-allowed opacity-30"
+                      : "border-border-subtle hover:border-gold-primary/40"
                 }`}
               >
                 {isEnabled && <span className="text-[8px] text-gold-primary">✓</span>}
@@ -223,7 +258,7 @@ function StatGroup({
 
               <span
                 className={`text-[10px] capitalize w-24 shrink-0 truncate ${
-                  isEnabled ? "text-text-primary" : "text-text-secondary/50"
+                  isEnabled ? "text-text-primary" : isDisabled ? "text-text-secondary/25" : "text-text-secondary/50"
                 }`}
                 title={formatStatLabel(stat.key)}
               >
@@ -246,7 +281,7 @@ function StatGroup({
                   </span>
                 </>
               ) : (
-                <span className="text-[9px] text-text-secondary/30">
+                <span className={`text-[9px] ${isDisabled ? "text-text-secondary/15" : "text-text-secondary/30"}`}>
                   {stat.min}–{stat.max}
                 </span>
               )}
