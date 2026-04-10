@@ -87,7 +87,13 @@ export default function CreateBuildClient() {
         .single();
 
       if (dbError) {
-        setError(dbError.message);
+        console.error("Build creation failed:", dbError);
+        setError(`Failed to create build: ${dbError.message} (code: ${dbError.code})`);
+        return;
+      }
+
+      if (!data) {
+        setError("Build was created but no ID was returned. Check your Supabase RLS policies.");
         return;
       }
 
@@ -312,6 +318,12 @@ export default function CreateBuildClient() {
         </div>
 
         {/* Submit */}
+        {error && (
+          <div className="flex items-center gap-2.5 bg-accent-red/10 border border-accent-red/30 rounded-sm px-4 py-3">
+            <AlertCircle className="w-4 h-4 text-accent-red shrink-0" />
+            <p className="text-sm text-accent-red">{error}</p>
+          </div>
+        )}
         <div className="flex items-center justify-end gap-4">
           <button
             type="button"
