@@ -5,6 +5,28 @@ import { Search, X, ChevronDown } from "lucide-react";
 import { getRarityStyle, type DarkerDBItem } from "@/lib/darkerdb";
 import type { BuildGearItem } from "@/lib/build-types";
 
+// DarkerDB uses a bitmask for required_class
+const CLASS_BITMASK: Record<string, number> = {
+  Fighter: 1,
+  Barbarian: 2,
+  Rogue: 4,
+  Ranger: 8,
+  Wizard: 16,
+  Cleric: 32,
+  Bard: 64,
+  Warlock: 128,
+  Druid: 256,
+  Sorcerer: 512,
+};
+
+function canClassEquip(requiredClass: unknown, className: string): boolean {
+  if (requiredClass == null) return true;
+  const mask = typeof requiredClass === "number" ? requiredClass : parseInt(String(requiredClass), 10);
+  if (isNaN(mask)) return true;
+  const classBit = CLASS_BITMASK[className] ?? 0;
+  return (mask & classBit) !== 0;
+}
+
 interface ItemSearchDropdownProps {
   slotLabel: string;
   slotType: string;
@@ -52,11 +74,9 @@ export default function ItemSearchDropdown({
   useEffect(() => {
     let items = allItems;
 
-    // Filter by class: show items usable by the selected class
+    // Filter by class: use bitmask to check if class can equip item
     if (selectedClass) {
-      items = items.filter(
-        (item) => !item.required_class || item.required_class === selectedClass
-      );
+      items = items.filter((item) => canClassEquip(item.required_class, selectedClass));
     }
 
     // Filter by search query

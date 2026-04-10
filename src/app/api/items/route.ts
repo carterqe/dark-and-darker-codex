@@ -13,18 +13,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data);
   }
 
-  // Fetch all pages for the given filters (capped at 500 items for safety)
+  // Fetch all pages for the given filters
   const filterParams = new URLSearchParams();
   for (const [key, val] of params.entries()) {
     if (key !== "fetchAll" && key !== "limit" && key !== "page") {
       filterParams.set(key, val);
     }
   }
-  filterParams.set("limit", "50");
+  filterParams.set("limit", "100");
 
   const allItems: unknown[] = [];
   let page = 1;
-  const maxPages = 10; // 50 * 10 = 500 items max
+  const maxPages = 30; // 100 * 30 = 3000 items max (covers full item DB)
 
   while (page <= maxPages) {
     filterParams.set("page", String(page));
