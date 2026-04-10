@@ -64,34 +64,39 @@ export default function CreateBuildClient() {
     setSubmitting(true);
     setError(null);
 
-    // Strip empty/null gear slots before saving
-    const cleanEquipment: Record<string, unknown> = {};
-    for (const [slot, item] of Object.entries(equipment)) {
-      if (item) cleanEquipment[slot] = item;
-    }
+    try {
+      // Strip empty/null gear slots before saving
+      const cleanEquipment: Record<string, unknown> = {};
+      for (const [slot, item] of Object.entries(equipment)) {
+        if (item) cleanEquipment[slot] = item;
+      }
 
-    const { data, error: dbError } = await supabase
-      .from("builds")
-      .insert({
-        author_id: user.id,
-        title: title.trim(),
-        description: description.trim(),
-        class: selectedClass,
-        tags,
-        equipment: cleanEquipment,
-        perks,
-        skills,
-      })
-      .select("id")
-      .single();
+      const { data, error: dbError } = await supabase
+        .from("builds")
+        .insert({
+          author_id: user.id,
+          title: title.trim(),
+          description: description.trim(),
+          class: selectedClass,
+          tags,
+          equipment: cleanEquipment,
+          perks,
+          skills,
+        })
+        .select("id")
+        .single();
 
-    if (dbError) {
-      setError(dbError.message);
+      if (dbError) {
+        setError(dbError.message);
+        return;
+      }
+
+      router.push(`/builds/${data.id}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
       setSubmitting(false);
-      return;
     }
-
-    router.push(`/builds/${data.id}`);
   };
 
   if (loading) {

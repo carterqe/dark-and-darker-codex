@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data);
   }
 
-  // Fetch all pages for the given filters
+  // Fetch all pages for the given filters — first page to get total, then rest in parallel
   const filterParams = new URLSearchParams();
   for (const [key, val] of params.entries()) {
     if (key !== "fetchAll" && key !== "limit" && key !== "page") {
@@ -21,21 +21,32 @@ export async function GET(request: NextRequest) {
     }
   }
   filterParams.set("limit", "100");
+  filterParams.set("page", "1");
 
-  const allItems: unknown[] = [];
-  let page = 1;
-  const maxPages = 30; // 100 * 30 = 3000 items max (covers full item DB)
+  const firstRes = await fetch(`${API_BASE}/items?${filterParams.toString()}`);
+  const firstData = await firstRes.json();
+  const allItems: unknown[] = firstData.body ?? [];
 
-  while (page <= maxPages) {
-    filterParams.set("page", String(page));
-    const res = await fetch(`${API_BASE}/items?${filterParams.toString()}`);
-    const data = await res.json();
+  const totalPages = firstData.pagination?.num_pages ?? 1;
+  const maxPages = Math.min(totalPages, 30);
 
-    if (!data.body || data.body.length === 0) break;
-    allItems.push(...data.body);
-
-    if (!data.pagination || page >= data.pagination.num_pages) break;
-    page++;
+  if (maxPages > 1) {
+    // Fetch remaining pages in parallel
+    const pagePromises = [];
+    for (let page = 2; page <= maxPages; page++) {
+      const p = new URLSearchParams(filterParams);
+      p.set("page", String(page));
+      pagePromises.push(
+        fetch(`${API_BASE}/items?${p.toString()}`)
+          .then((r) => r.json())
+          .then((d) => d.body ?? [])
+          .catch(() => [])
+      );
+    }
+    const results = await Promise.all(pagePromises);
+    for (const items of results) {
+      allItems.push(...items);
+    }
   }
 
   return NextResponse.json({
