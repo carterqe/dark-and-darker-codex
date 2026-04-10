@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -45,40 +46,44 @@ export default function BuildDetailClient({ id }: { id: string }) {
 
   useEffect(() => {
     const fetchBuild = async () => {
-      const { data, error } = await supabase
+      // Run all queries in parallel instead of sequentially
+      const buildQuery = supabase
         .from("builds")
         .select("*, profiles!author_id(username)")
         .eq("id", id)
         .single();
 
-      if (error || !data) {
-        setNotFound(true);
-        setLoading(false);
-        return;
-      }
-
-      setBuild(data as Build);
-      setVoteCount(data.vote_count ?? 0);
-
-      // Check if current user has voted
-      if (user) {
-        const { data: voteRow } = await supabase
-          .from("build_votes")
-          .select("user_id")
-          .eq("build_id", id)
-          .eq("user_id", user.id)
-          .maybeSingle();
-        setHasVoted(!!voteRow);
-      }
-
-      // Fetch comments
-      const { data: cmts } = await supabase
+      const commentsQuery = supabase
         .from("build_comments")
         .select("*, profiles!author_id(username)")
         .eq("build_id", id)
         .order("created_at", { ascending: true });
 
-      setComments((cmts as BuildComment[]) ?? []);
+      const voteQuery = user
+        ? supabase
+            .from("build_votes")
+            .select("user_id")
+            .eq("build_id", id)
+            .eq("user_id", user.id)
+            .maybeSingle()
+        : null;
+
+      const [buildRes, commentsRes, voteRes] = await Promise.all([
+        buildQuery,
+        commentsQuery,
+        voteQuery,
+      ]);
+
+      if (buildRes.error || !buildRes.data) {
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
+
+      setBuild(buildRes.data as Build);
+      setVoteCount(buildRes.data.vote_count ?? 0);
+      setComments((commentsRes.data as BuildComment[]) ?? []);
+      setHasVoted(!!voteRes?.data);
       setLoading(false);
     };
 
@@ -182,10 +187,12 @@ export default function BuildDetailClient({ id }: { id: string }) {
         className="bg-bg-secondary border border-border-subtle rounded-sm p-6"
       >
         <div className="flex items-start gap-4">
-          <img
+          <Image
             src={getClassPortrait(build.class)}
             alt={build.class}
-            className="w-16 h-16 rounded-sm object-cover opacity-90 shrink-0"
+            width={64}
+            height={64}
+            className="rounded-sm object-cover opacity-90 shrink-0"
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-4">

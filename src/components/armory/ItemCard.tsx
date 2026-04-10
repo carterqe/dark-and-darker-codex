@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { DarkerDBItem, getRarityStyle } from "@/lib/darkerdb";
 import { formatNumber } from "@/lib/utils";
 import { Coins, Shield } from "lucide-react";
@@ -15,10 +14,9 @@ export default function ItemCard({ item, index, onClick }: ItemCardProps) {
   const rarity = getRarityStyle(item.rarity);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: Math.min(index * 0.02, 0.3) }}
+    <div
+      className="animate-fade-in-up"
+      style={{ animationDelay: `${Math.min(index * 20, 300)}ms` }}
     >
       <div
         onClick={onClick}
@@ -62,6 +60,6 @@ export default function ItemCard({ item, index, onClick }: ItemCardProps) {
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

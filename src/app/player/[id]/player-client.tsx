@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   Calendar, Shield, Swords, Star, User, Award,
@@ -105,10 +106,12 @@ export default function PlayerProfileClient({
             ))}
           </svg>
           <div className="absolute inset-3 rounded-full overflow-hidden border-2 border-gold-dark">
-            <img
+            <Image
               src={getClassPortrait(character.class)}
               alt={character.name}
-              className="w-full h-full object-cover"
+              fill
+              sizes="96px"
+              className="object-cover"
             />
           </div>
         </div>

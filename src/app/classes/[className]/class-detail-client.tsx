@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -88,8 +89,8 @@ export default function ClassDetailClient({ className }: ClassDetailClientProps)
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row items-center gap-6 mb-10"
       >
-        <div className="w-24 h-24 rounded-full border-2 border-gold-primary overflow-hidden">
-          <img src={getClassPortrait(className)} alt={className} className="w-full h-full object-cover" />
+        <div className="relative w-24 h-24 rounded-full border-2 border-gold-primary overflow-hidden">
+          <Image src={getClassPortrait(className)} alt={className} fill sizes="96px" className="object-cover" />
         </div>
         <div className="text-center sm:text-left">
           <ShimmerText as="h1" className="text-3xl sm:text-4xl">

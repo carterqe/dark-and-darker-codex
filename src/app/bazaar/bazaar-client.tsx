@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { motion } from "framer-motion";
 import {
   Store, Search, ChevronDown, Coins, Clock, TrendingDown, TrendingUp,
   BarChart3, Package,
@@ -66,6 +65,7 @@ export default function BazaarClient() {
   const [listings, setListings] = useState<DarkerDBMarketListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState(false);
   const [cursor, setCursor] = useState<string | undefined>();
   const [hasMore, setHasMore] = useState(false);
 
@@ -87,7 +87,7 @@ export default function BazaarClient() {
   const hasActiveFilter = !!(search.trim() || rarity || soldFilter || minPrice || maxPrice || slot || stats.length > 0);
 
   const load = (append: boolean = false, cursorVal?: string) => {
-    if (!append) setLoading(true);
+    if (!append) { setLoading(true); setError(false); }
     else setLoadingMore(true);
 
     const params: Record<string, string | number> = {};
@@ -136,7 +136,7 @@ export default function BazaarClient() {
           setHasMore(false);
         }
       })
-      .catch(console.error)
+      .catch(() => setError(true))
       .finally(() => {
         setLoading(false);
         setLoadingMore(false);
@@ -230,18 +230,14 @@ export default function BazaarClient() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-10"
-      >
+      <div className="text-center mb-10 animate-fade-in-up">
         <ShimmerText as="h1" className="text-4xl sm:text-5xl mb-3">
           The Bazaar
         </ShimmerText>
         <p className="text-text-secondary">
           Real-time marketplace &mdash; monitor prices, find deals, track sales
         </p>
-      </motion.div>
+      </div>
 
       {/* Filters */}
       <div className="space-y-3 mb-6">
@@ -402,11 +398,7 @@ export default function BazaarClient() {
 
       {/* Price Analytics Card */}
       {priceAnalytics && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-bg-secondary border border-gold-primary/20 rounded-sm p-5 mb-6"
-        >
+        <div className="bg-bg-secondary border border-gold-primary/20 rounded-sm p-5 mb-6 animate-fade-in-up">
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="w-4 h-4 text-gold-primary" />
             <h3 className="font-cinzel font-bold text-sm text-gold-primary">
@@ -459,7 +451,7 @@ export default function BazaarClient() {
               </>
             )}
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* Table */}
@@ -468,6 +460,12 @@ export default function BazaarClient() {
           {Array.from({ length: 10 }).map((_, i) => (
             <div key={i} className="h-14 bg-bg-secondary/50 rounded-sm animate-pulse" style={{ animationDelay: `${i * 40}ms` }} />
           ))}
+        </div>
+      ) : error ? (
+        <div className="text-center py-20">
+          <Store className="w-12 h-12 text-accent-red/60 mx-auto mb-4" />
+          <p className="font-cinzel text-lg text-text-secondary">Failed to load marketplace data</p>
+          <p className="text-sm text-text-secondary/60 mt-2">Please try again later.</p>
         </div>
       ) : sortedListings.length === 0 ? (
         <div className="text-center py-20">
@@ -510,12 +508,10 @@ export default function BazaarClient() {
                     .filter(Boolean) as string[];
 
                   return (
-                    <motion.tr
+                    <tr
                       key={listing.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.2, delay: Math.min(i * 0.015, 0.3) }}
-                      className="border-b border-border-subtle hover:bg-bg-tertiary/50 transition-all cursor-pointer"
+                      className="border-b border-border-subtle hover:bg-bg-tertiary/50 transition-all cursor-pointer animate-fade-in-up"
+                      style={{ animationDelay: `${Math.min(i * 15, 300)}ms` }}
                       onClick={() => setExpandedRow(isExpanded ? null : listing.id)}
                     >
                       {/* Item */}
@@ -534,11 +530,7 @@ export default function BazaarClient() {
                           </span>
                           {/* Expanded stats */}
                           {isExpanded && stats.length > 0 && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              className="mt-2 space-y-0.5"
-                            >
+                            <div className="mt-2 space-y-0.5 animate-fade-in-up">
                               {stats.map((s) => (
                                 <div key={s.name} className="flex justify-between text-[10px] py-0.5 px-2 bg-bg-primary/30 rounded-sm">
                                   <span className="text-text-secondary capitalize">{s.name}</span>
@@ -556,7 +548,7 @@ export default function BazaarClient() {
                                   ))}
                                 </div>
                               )}
-                            </motion.div>
+                            </div>
                           )}
                         </div>
                       </td>
@@ -627,7 +619,7 @@ export default function BazaarClient() {
                           {listing.has_sold ? "SOLD" : listing.has_expired ? "EXPIRED" : "ACTIVE"}
                         </span>
                       </td>
-                    </motion.tr>
+                    </tr>
                   );
                 })}
               </tbody>

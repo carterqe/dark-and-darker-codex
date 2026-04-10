@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import Image from "next/image";
 import { LeaderboardPlayer, getClassPortrait } from "@/lib/darkerdb";
 import { formatNumber } from "@/lib/utils";
 import RankBadge from "@/components/ui/RankBadge";
@@ -30,11 +30,9 @@ export default function LeaderboardRow({ entry, index }: LeaderboardRowProps) {
     : "";
 
   return (
-    <motion.tr
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: Math.min(index * 0.03, 0.5) }}
-      className={`group border-b border-border-subtle hover:bg-bg-tertiary/50 hover:border-l-2 hover:border-l-gold-primary transition-all duration-200 ${rowBg}`}
+    <tr
+      className={`group border-b border-border-subtle hover:bg-bg-tertiary/50 hover:border-l-2 hover:border-l-gold-primary transition-all duration-200 animate-fade-in-up ${rowBg}`}
+      style={{ animationDelay: `${Math.min(index * 30, 500)}ms` }}
     >
       {/* Position */}
       <td className="py-3 px-2 sm:px-4 w-10 sm:w-16">
@@ -44,12 +42,13 @@ export default function LeaderboardRow({ entry, index }: LeaderboardRowProps) {
       {/* Player */}
       <td className="py-3 px-2 sm:px-4">
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-border-subtle overflow-hidden flex-shrink-0">
-            <img
+          <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-border-subtle overflow-hidden flex-shrink-0">
+            <Image
               src={getClassPortrait(entry.class)}
               alt={entry.class}
-              className="w-full h-full object-cover"
-              loading="lazy"
+              fill
+              sizes="32px"
+              className="object-cover"
             />
           </div>
           <div className="min-w-0">
@@ -77,6 +76,6 @@ export default function LeaderboardRow({ entry, index }: LeaderboardRowProps) {
       <td className="py-3 px-2 sm:px-4 text-center w-10 sm:w-12">
         <TrendArrow trend={getTrend(entry)} />
       </td>
-    </motion.tr>
+    </tr>
   );
 }

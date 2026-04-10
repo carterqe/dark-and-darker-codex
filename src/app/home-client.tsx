@@ -12,11 +12,12 @@ import { LeaderboardPlayer, fetchLeaderboard } from "@/lib/darkerdb";
 export default function HomeClient() {
   const [topPlayers, setTopPlayers] = useState<LeaderboardPlayer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     fetchLeaderboard({ category: "EA7_HR", limit: 3 })
       .then((res) => setTopPlayers(res.body))
-      .catch(console.error)
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -38,6 +39,10 @@ export default function HomeClient() {
               className="flex-1 h-72 bg-bg-secondary/50 rounded-sm animate-pulse"
             />
           ))}
+        </div>
+      ) : error ? (
+        <div className="text-center py-12">
+          <p className="text-text-secondary text-sm">Failed to load champions. Please try again later.</p>
         </div>
       ) : (
         <TopChampions champions={topPlayers} />

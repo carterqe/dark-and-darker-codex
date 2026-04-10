@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { DarkerDBItem } from "@/lib/darkerdb";
 import type { BuildGearItem } from "@/lib/build-types";
@@ -78,6 +78,8 @@ export default function GearSlotEditor({
   const [statsOpen, setStatsOpen] = useState(false);
   // Only tracks stats the user has explicitly enabled
   const [enabledStats, setEnabledStats] = useState<Record<string, number>>({});
+  const initialStatsRef = useRef(value?.stats);
+  initialStatsRef.current = value?.stats;
 
   const fetchItemStats = useCallback(async (itemId: number) => {
     const res = await fetch(`/api/items/${itemId}`);
@@ -86,8 +88,8 @@ export default function GearSlotEditor({
     const item = data.body as DarkerDBItem;
     setStatRanges(extractStatRanges(item));
     // Restore previously saved stats (from existing build data)
-    setEnabledStats(value?.stats ?? {});
-  }, [value?.stats]);
+    setEnabledStats(initialStatsRef.current ?? {});
+  }, []);
 
   useEffect(() => {
     if (value?.item_id) {

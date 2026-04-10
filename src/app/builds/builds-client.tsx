@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Hammer, Plus, ThumbsUp, Clock } from "lucide-react";
@@ -174,20 +175,21 @@ function BuildCard({ build, index }: { build: Build; index: number }) {
   const classColor = CLASS_COLORS[build.class] ?? "text-gold-primary";
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.4) }}
+    <div
+      className="animate-fade-in-up"
+      style={{ animationDelay: `${Math.min(index * 50, 400)}ms` }}
     >
       <Link href={`/builds/${build.id}`}>
         <div className="h-full bg-bg-secondary border border-border-subtle rounded-sm p-5 hover:border-gold-primary/30 hover:bg-bg-tertiary/50 transition-all group cursor-pointer">
           {/* Class + votes row */}
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">
-              <img
+              <Image
                 src={getClassPortrait(build.class)}
                 alt={build.class}
-                className="w-8 h-8 rounded-sm object-cover opacity-80"
+                width={32}
+                height={32}
+                className="rounded-sm object-cover opacity-80"
               />
               <span className={`text-xs font-cinzel font-bold ${classColor}`}>
                 {build.class}
@@ -235,6 +237,6 @@ function BuildCard({ build, index }: { build: Build; index: number }) {
           )}
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 }

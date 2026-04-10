@@ -24,6 +24,7 @@ export default function ParticleBackground() {
     if (!ctx) return;
 
     let animationId: number;
+    let resizeTimer: ReturnType<typeof setTimeout>;
     const particles: Particle[] = [];
     const maxParticles = 30;
 
@@ -31,6 +32,11 @@ export default function ParticleBackground() {
       if (!canvas) return;
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+    }
+
+    function debouncedResize() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 150);
     }
 
     function createParticle(): Particle {
@@ -95,11 +101,12 @@ export default function ParticleBackground() {
     }
 
     resize();
-    window.addEventListener("resize", resize);
+    window.addEventListener("resize", debouncedResize);
     animate();
 
     return () => {
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("resize", debouncedResize);
+      clearTimeout(resizeTimer);
       cancelAnimationFrame(animationId);
     };
   }, []);

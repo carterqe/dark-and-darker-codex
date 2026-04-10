@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import Image from "next/image";
 import { Crown } from "lucide-react";
 import { LeaderboardPlayer, getClassPortrait } from "@/lib/darkerdb";
 import { formatNumber } from "@/lib/utils";
@@ -13,7 +13,6 @@ interface ChampionCardProps {
 const rankStyles = {
   1: {
     borderColor: "border-gold-primary",
-    glowColor: "rgba(201, 168, 76, 0.3)",
     labelColor: "text-gold-light",
     bgGlow: "from-gold-primary/10",
     size: "md:scale-110",
@@ -21,7 +20,6 @@ const rankStyles = {
   },
   2: {
     borderColor: "border-silver",
-    glowColor: "rgba(168, 168, 184, 0.25)",
     labelColor: "text-silver",
     bgGlow: "from-silver/10",
     size: "",
@@ -29,7 +27,6 @@ const rankStyles = {
   },
   3: {
     borderColor: "border-bronze",
-    glowColor: "rgba(138, 103, 70, 0.25)",
     labelColor: "text-bronze",
     bgGlow: "from-bronze/10",
     size: "",
@@ -41,28 +38,12 @@ export default function ChampionCard({ entry, displayRank }: ChampionCardProps) 
   const style = rankStyles[displayRank as keyof typeof rankStyles] || rankStyles[3];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay: displayRank * 0.15 }}
-      className={`${style.size}`}
+    <div
+      className={`${style.size} animate-fade-in-up`}
+      style={{ animationDelay: `${displayRank * 150}ms` }}
     >
-      <motion.div
-        className={`relative bg-bg-secondary border ${style.borderColor} rounded-sm p-6 text-center overflow-hidden`}
-        whileHover={{
-          y: -4,
-          boxShadow: `0 0 40px ${style.glowColor}`,
-        }}
-        animate={{
-          boxShadow: [
-            `0 0 10px ${style.glowColor}`,
-            `0 0 25px ${style.glowColor}`,
-            `0 0 10px ${style.glowColor}`,
-          ],
-        }}
-        transition={{
-          boxShadow: { duration: 3, repeat: Infinity, ease: "easeInOut" },
-        }}
+      <div
+        className={`relative bg-bg-secondary border ${style.borderColor} rounded-sm p-6 text-center overflow-hidden glow-pulse hover:-translate-y-1 transition-transform duration-300`}
       >
         {/* Background gradient */}
         <div
@@ -83,13 +64,14 @@ export default function ChampionCard({ entry, displayRank }: ChampionCardProps) 
 
           {/* Avatar */}
           <div
-            className={`w-20 h-20 mx-auto rounded-full border-2 ${style.borderColor} overflow-hidden mb-4`}
+            className={`relative w-20 h-20 mx-auto rounded-full border-2 ${style.borderColor} overflow-hidden mb-4`}
           >
-            <img
+            <Image
               src={getClassPortrait(entry.class)}
               alt={entry.class}
-              className="w-full h-full object-cover"
-              loading="lazy"
+              fill
+              sizes="80px"
+              className="object-cover"
             />
           </div>
 
@@ -121,7 +103,7 @@ export default function ChampionCard({ entry, displayRank }: ChampionCardProps) 
             </span>
           </div>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

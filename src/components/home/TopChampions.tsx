@@ -9,7 +9,13 @@ interface TopChampionsProps {
 }
 
 export default function TopChampions({ champions }: TopChampionsProps) {
-  if (champions.length < 3) return null;
+  if (champions.length < 3) {
+    return (
+      <section className="py-12 px-4 text-center">
+        <p className="text-text-secondary text-sm">Leaderboard data unavailable right now.</p>
+      </section>
+    );
+  }
 
   // Reorder: 2nd, 1st, 3rd for visual hierarchy
   const ordered = [

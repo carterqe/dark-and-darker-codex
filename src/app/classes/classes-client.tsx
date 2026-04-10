@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import {
   LeaderboardPlayer,
@@ -114,18 +115,17 @@ export default function ClassesClient() {
           {classStats.map((cls, i) => {
             const tierStyle = TIER_COLORS[cls.tier];
             return (
-              <motion.div
+              <div
                 key={cls.name}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.05 }}
+                className="animate-fade-in-up"
+                style={{ animationDelay: `${Math.min(i * 50, 400)}ms` }}
               >
                 <Link href={`/classes/${cls.name}`}>
                   <div className="bg-bg-secondary border border-border-subtle rounded-sm p-5 hover:bg-bg-tertiary/50 hover:border-gold-dark/40 transition-all cursor-pointer group">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full border border-border-subtle overflow-hidden">
-                          <img src={getClassPortrait(cls.name)} alt={cls.name} className="w-full h-full object-cover" />
+                        <div className="relative w-12 h-12 rounded-full border border-border-subtle overflow-hidden">
+                          <Image src={getClassPortrait(cls.name)} alt={cls.name} fill sizes="48px" className="object-cover" />
                         </div>
                         <div>
                           <h3 className="font-cinzel font-bold text-lg text-text-primary group-hover:text-gold-primary transition-colors">
@@ -166,7 +166,7 @@ export default function ClassesClient() {
                     </div>
                   </div>
                 </Link>
-              </motion.div>
+              </div>
             );
           })}
         </div>
