@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/auth/AuthModal";
+import Toast from "@/components/ui/Toast";
 
 const navLinks = [
   { href: "/", label: "Hall", icon: Shield },
@@ -32,7 +33,7 @@ const navLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { user, profile, loading, openAuthModal, signOut } = useAuth();
+  const { user, profile, loading, openAuthModal, signOut, toast, clearToast } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -142,6 +143,7 @@ export default function Navbar() {
         )}
       </nav>
       <AuthModal />
+      <Toast message={toast} onClose={clearToast} />
     </>
   );
 }

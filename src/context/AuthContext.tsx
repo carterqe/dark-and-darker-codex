@@ -27,6 +27,8 @@ interface AuthContextType {
   openAuthModal: (tab?: "login" | "signup") => void;
   closeAuthModal: () => void;
   signOut: () => Promise<void>;
+  toast: string | null;
+  clearToast: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -38,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<"login" | "signup">("login");
+  const [toast, setToast] = useState<string | null>(null);
 
   const fetchProfile = useCallback(
     async (userId: string) => {
@@ -69,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       if (event === "SIGNED_IN") {
         setAuthModalOpen(false);
+        setToast("Welcome back, adventurer!");
       }
     });
 
@@ -81,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const closeAuthModal = () => setAuthModalOpen(false);
+  const clearToast = () => setToast(null);
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -100,6 +105,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         openAuthModal,
         closeAuthModal,
         signOut,
+        toast,
+        clearToast,
       }}
     >
       {children}
