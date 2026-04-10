@@ -32,6 +32,7 @@ create table if not exists builds (
   equipment jsonb default '{}',
   perks text[] default '{}',
   skills text[] default '{}',
+  spells text[] default '{}',
   vote_count integer default 0,
   is_public boolean default true,
   created_at timestamptz default now(),
@@ -125,3 +126,8 @@ create trigger builds_updated_at
 
 -- Profile creation is handled in application code (AuthModal.tsx)
 -- after successful signup, rather than via a database trigger.
+
+-- ============================================================
+-- Migration: Add spells column (run if table already exists)
+-- ============================================================
+-- alter table builds add column if not exists spells text[] default '{}';

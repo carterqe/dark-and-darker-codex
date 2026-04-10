@@ -33,6 +33,7 @@ export interface Build {
   equipment: BuildEquipment;
   perks: string[];
   skills: string[];
+  spells: string[];
   vote_count: number;
   is_public: boolean;
   created_at: string;

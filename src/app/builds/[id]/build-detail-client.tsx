@@ -329,6 +329,21 @@ export default function BuildDetailClient({ id }: { id: string }) {
                 className={build.class}
               />
             )}
+            {build.spells && build.spells.length > 0 && (
+              <div>
+                <h2 className="font-cinzel font-bold text-sm text-purple-400 mb-3">Memorized Spells</h2>
+                <div className="flex flex-wrap gap-1.5">
+                  {build.spells.map((spell) => (
+                    <span
+                      key={spell}
+                      className="text-[11px] px-2 py-1 bg-purple-400/10 text-purple-300 border border-purple-400/20 rounded-sm"
+                    >
+                      {spell}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
       </div>

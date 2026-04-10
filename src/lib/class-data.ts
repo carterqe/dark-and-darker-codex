@@ -8,9 +8,17 @@ export interface SkillData {
   description: string;
 }
 
+export interface SpellEntry {
+  name: string;
+  tier: number;
+}
+
 export interface ClassPerksSkills {
   perks: PerkData[];
   skills: SkillData[];
+  spells?: SpellEntry[];
+  songs?: SpellEntry[];
+  shapeshiftForms?: string[];
 }
 
 const WIKI = "https://darkanddarker.wiki.spellsandguns.com/Special:FilePath";
@@ -21,6 +29,38 @@ export function getPerkIconUrl(name: string): string {
 
 export function getSkillIconUrl(name: string): string {
   return `${WIKI}/Skill_${encodeURIComponent(name.replace(/ /g, "_"))}.png`;
+}
+
+export function getSpellIconUrl(name: string): string {
+  return `${WIKI}/Spell_${encodeURIComponent(name.replace(/ /g, "_"))}.png`;
+}
+
+// Returns the memory type label and available items based on selected skills
+export function getMemoryItems(className: string, selectedSkills: string[]): {
+  type: "spells" | "songs" | "forms";
+  label: string;
+  items: { name: string; tier?: number }[];
+}[] {
+  const data = CLASS_DATA[className];
+  if (!data) return [];
+
+  const results: { type: "spells" | "songs" | "forms"; label: string; items: { name: string; tier?: number }[] }[] = [];
+
+  const hasSpellMemory = selectedSkills.some((s) => s.startsWith("Spell Memory"));
+  const hasMusicMemory = selectedSkills.some((s) => s.startsWith("Music Memory"));
+  const hasShapeshiftMemory = selectedSkills.some((s) => s.startsWith("Shapeshift Memory"));
+
+  if (hasSpellMemory && data.spells) {
+    results.push({ type: "spells", label: "Spells", items: data.spells });
+  }
+  if (hasMusicMemory && data.songs) {
+    results.push({ type: "songs", label: "Songs", items: data.songs });
+  }
+  if (hasShapeshiftMemory && data.shapeshiftForms) {
+    results.push({ type: "forms", label: "Shapeshift Forms", items: data.shapeshiftForms.map((f) => ({ name: f })) });
+  }
+
+  return results;
 }
 
 export const CLASS_DATA: Record<string, ClassPerksSkills> = {
@@ -114,15 +154,18 @@ export const CLASS_DATA: Record<string, ClassPerksSkills> = {
   },
   Wizard: {
     perks: [
-      { name: "Arcane Feedback", description: "Successful spell hits restore 5% max spell memory." },
+      { name: "Arcane Feedback", description: "Successful spell hits restore spell memory." },
       { name: "Arcane Mastery", description: "Increase arcane spell damage by 5%." },
       { name: "Fire Mastery", description: "Increase fire spell damage by 5%." },
+      { name: "Ice Mastery", description: "Increase ice spell damage by 5%." },
       { name: "Ice Shield", description: "When hit, create a frost shield that reduces next damage by 20%." },
       { name: "Mana Surge", description: "Increase magical damage by 10% for 6s after casting." },
       { name: "Melt", description: "Fire spells apply a debuff reducing target's physical armor by 10%." },
       { name: "Quick Chant", description: "Increase spell casting speed by 15%." },
       { name: "Reactive Shield", description: "Automatically cast a shield when health drops below 15%." },
       { name: "Sage", description: "Increase knowledge by 10%." },
+      { name: "Spell Overload", description: "Spells deal 2% more damage per remaining spell count." },
+      { name: "Staff Mastery", description: "Increase magical damage by 5% when using a staff." },
     ],
     skills: [
       { name: "Arcane Shield", description: "Create a protective barrier absorbing damage." },
@@ -131,42 +174,102 @@ export const CLASS_DATA: Record<string, ClassPerksSkills> = {
       { name: "Spell Memory", description: "Memorize spells to cast in the dungeon." },
       { name: "Spell Memory 2", description: "Memorize additional spells to cast in the dungeon." },
     ],
+    spells: [
+      { name: "Zap", tier: 1 },
+      { name: "Light Orb", tier: 1 },
+      { name: "Magic Lock", tier: 2 },
+      { name: "Slow", tier: 2 },
+      { name: "Ignite", tier: 2 },
+      { name: "Ice Bolt", tier: 2 },
+      { name: "Magic Missile", tier: 3 },
+      { name: "Haste", tier: 3 },
+      { name: "Lightning Strike", tier: 4 },
+      { name: "Invisibility", tier: 4 },
+      { name: "Fireball", tier: 4 },
+      { name: "Explosion", tier: 5 },
+      { name: "Chain Lightning", tier: 6 },
+    ],
   },
   Cleric: {
     perks: [
       { name: "Advanced Healer", description: "Increase healing output by 5." },
       { name: "Blunt Weapon Mastery", description: "Increase physical damage by 5% with blunt weapons." },
       { name: "Brewmaster", description: "Potions last 30% longer." },
+      { name: "Faithfulness", description: "Increase duration of self-cast spells by 10%." },
       { name: "Holy Aura", description: "Increase HP recovery of yourself and nearby allies by 3." },
+      { name: "Holy Water", description: "Splash holy water to deal damage to undead and heal allies." },
       { name: "Kindness", description: "Healing spells also heal you for 15% of the amount." },
+      { name: "Over Healing", description: "Excess healing grants a shield up to 10% max HP." },
       { name: "Perseverance", description: "Reduce incoming damage by 3 from all sources." },
       { name: "Protection from Evil", description: "Reduce damage from undead monsters by 15%." },
       { name: "Requiem", description: "Resurrect an ally with 25% HP using a resurrection shrine." },
       { name: "Undead Slaying", description: "Increase damage to undead monsters by 20%." },
     ],
     skills: [
+      { name: "Divine Protection", description: "Grant a shield to yourself or ally that absorbs damage." },
       { name: "Holy Purification", description: "Create a zone that heals allies and damages undead." },
-      { name: "Judgment", description: "Release a wave of holy energy dealing damage in a cone." },
+      { name: "Judgement", description: "Release a wave of holy energy dealing damage in a cone." },
       { name: "Smite", description: "Imbue your weapon with holy power. Next attack deals bonus damage." },
       { name: "Spell Memory", description: "Memorize spells to cast in the dungeon." },
       { name: "Spell Memory 2", description: "Memorize additional spells to cast in the dungeon." },
+    ],
+    spells: [
+      { name: "Protection", tier: 1 },
+      { name: "Bless", tier: 1 },
+      { name: "Divine Strike", tier: 2 },
+      { name: "Cleanse", tier: 2 },
+      { name: "Lesser Heal", tier: 3 },
+      { name: "Bind", tier: 3 },
+      { name: "Holy Strike", tier: 4 },
+      { name: "Holy Light", tier: 5 },
+      { name: "Sanctuary", tier: 6 },
+      { name: "Locust Swarm", tier: 7 },
+      { name: "Earthquake", tier: 7 },
+      { name: "Resurrection", tier: 8 },
     ],
   },
   Bard: {
     perks: [
       { name: "Charismatic Performance", description: "Increase buff duration of songs by 2s." },
       { name: "Dancing Feet", description: "Increase move speed by 10% while playing music." },
+      { name: "Fermata", description: "Song effects linger 2s after the music stops." },
       { name: "Jolly Time", description: "Allies in range of your songs gain 10% action speed." },
       { name: "Lore Mastery", description: "Identify items 50% faster." },
       { name: "Melodic Protection", description: "Allies in range of your songs gain 10 armor rating." },
       { name: "Rapier Mastery", description: "Increase physical damage by 3 when using a rapier." },
+      { name: "Reinforced Instruments", description: "Instruments take less durability damage." },
       { name: "Story Teller", description: "Increase interaction speed by 25%." },
+      { name: "Superior Dexterity", description: "Increase dexterity by 10%." },
+      { name: "Wanderer's Luck", description: "Increase luck by 50." },
       { name: "War Song", description: "Allies in range of your songs gain 3 physical power." },
     ],
     skills: [
+      { name: "Dissonance", description: "Play a jarring note that interrupts enemies." },
       { name: "Encore", description: "Play the last song again instantly without cost." },
+      { name: "Party Maker", description: "Throw a party popper that stuns nearby enemies." },
       { name: "Music Memory", description: "Memorize songs to play in the dungeon." },
       { name: "Music Memory 2", description: "Memorize additional songs to play in the dungeon." },
+    ],
+    songs: [
+      { name: "Aria of Alacrity", tier: 1 },
+      { name: "Ballad of Courage", tier: 1 },
+      { name: "Beats of Alacrity", tier: 1 },
+      { name: "Harmonic Shield", tier: 1 },
+      { name: "Lament of Languor", tier: 2 },
+      { name: "Song of Silence", tier: 2 },
+      { name: "Tranquility", tier: 2 },
+      { name: "Chaotic Discord", tier: 3 },
+      { name: "Din of Darkness", tier: 3 },
+      { name: "Peacemaking", tier: 3 },
+      { name: "Piercing Shrill", tier: 3 },
+      { name: "Rousing Rhythms", tier: 3 },
+      { name: "Shriek of Weakness", tier: 3 },
+      { name: "Song of Shadow", tier: 3 },
+      { name: "Chorale of Clarity", tier: 3 },
+      { name: "Banshees Howl", tier: 3 },
+      { name: "Accelerando", tier: 4 },
+      { name: "Allegro", tier: 4 },
+      { name: "Unchained Harmony", tier: 5 },
     ],
   },
   Warlock: {
@@ -176,33 +279,75 @@ export const CLASS_DATA: Record<string, ClassPerksSkills> = {
       { name: "Dark Enhancement", description: "Dark magic spells deal 10% bonus damage." },
       { name: "Dark Reflection", description: "Reflect 10% of magical damage taken back to the attacker." },
       { name: "Demon Armor", description: "Gain 10 armor rating when you summon a demon." },
-      { name: "Infernal Surge", description: "After casting, gain 5% action speed for 5s." },
+      { name: "Immortal Lament", description: "When health drops below 15%, gain damage reduction for 3s." },
+      { name: "Infernal Pledge", description: "Spells cost health instead of spell memory." },
       { name: "Malice", description: "Deal 5% more damage to players." },
+      { name: "Shadow Touch", description: "Melee attacks apply a dark curse reducing healing by 50%." },
       { name: "Soul Collector", description: "Killing a target restores 10% of max HP." },
       { name: "Torture Mastery", description: "Increase damage of damage-over-time effects by 10%." },
+      { name: "Vampirism", description: "Spell damage heals you for a portion of damage dealt." },
     ],
     skills: [
+      { name: "Blood Pact", description: "Sacrifice health to empower your next spell." },
+      { name: "Blow of Corruption", description: "Melee strike that applies a curse dealing damage over time." },
+      { name: "Dark Offering", description: "Sacrifice health to restore spell casts." },
       { name: "Phantomize", description: "Become ethereal for 4s, passing through obstacles and becoming untargetable." },
       { name: "Spell Memory", description: "Memorize spells to cast in the dungeon." },
       { name: "Spell Memory 2", description: "Memorize additional spells to cast in the dungeon." },
     ],
+    spells: [
+      { name: "Power of Sacrifice", tier: 1 },
+      { name: "Curse of Weakness", tier: 1 },
+      { name: "Bolt of Darkness", tier: 1 },
+      { name: "Curse of Pain", tier: 2 },
+      { name: "Bloodstained Blade", tier: 2 },
+      { name: "Spell Predation", tier: 3 },
+      { name: "Evil Eye", tier: 3 },
+      { name: "Ray of Darkness", tier: 4 },
+      { name: "Life Drain", tier: 4 },
+      { name: "Hellfire", tier: 4 },
+      { name: "Flame Walker", tier: 5 },
+      { name: "Eldritch Shield", tier: 5 },
+      { name: "Summon Hydra", tier: 6 },
+    ],
   },
   Druid: {
     perks: [
-      { name: "Animal Kinship", description: "Reduce damage taken from animals by 25%." },
       { name: "Dreamwalk", description: "Gain 10% move speed in human form." },
       { name: "Enhanced Wildness", description: "Increase damage in animal form by 5." },
       { name: "Force of Nature", description: "Increase spell damage by 10% in human form." },
       { name: "Herbal Sensing", description: "Highlight nearby herbs and healing items." },
+      { name: "Lifebloom Aura", description: "Nearby allies slowly regenerate health." },
       { name: "Natural Healing", description: "Slowly regenerate 1 HP every 3s." },
+      { name: "Shapeshift Mastery", description: "Reduce cooldown of shapeshifting." },
       { name: "Spirit Bond", description: "While in animal form, reduce damage taken by 5%." },
+      { name: "Spirit Magic Mastery", description: "Increase spell damage by 5%." },
+      { name: "Sun and Moon", description: "Alternate between bonus spell damage and bonus healing." },
       { name: "Thorn Coat", description: "Attackers take 5 physical damage when striking you in melee." },
     ],
     skills: [
-      { name: "Nature's Touch", description: "Heal yourself or an ally for a moderate amount." },
       { name: "Shapeshift Memory", description: "Memorize animal forms to shapeshift into." },
+      { name: "Shapeshift Memory 2", description: "Memorize additional animal forms." },
       { name: "Spell Memory", description: "Memorize spells to cast in the dungeon." },
-      { name: "Spell Memory 2", description: "Memorize additional spells to cast in the dungeon." },
+    ],
+    spells: [
+      { name: "Nature's Touch", tier: 1 },
+      { name: "Barkskin Armor", tier: 2 },
+      { name: "Orb of Nature", tier: 2 },
+      { name: "Dreamfire", tier: 3 },
+      { name: "Thorn Barrier", tier: 4 },
+      { name: "Entangling Vines", tier: 4 },
+      { name: "Restore", tier: 5 },
+      { name: "Summon Treant", tier: 5 },
+      { name: "Tree of Life", tier: 6 },
+      { name: "Mending Grove", tier: 6 },
+    ],
+    shapeshiftForms: [
+      "Bear",
+      "Chicken",
+      "Panther",
+      "Rat",
+      "Penguin",
     ],
   },
 };

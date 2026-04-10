@@ -13,9 +13,10 @@ import {
   type GearSlotKey,
 } from "@/lib/build-types";
 import { getClassPortrait } from "@/lib/darkerdb";
-import { getClassData } from "@/lib/class-data";
+import { getClassData, getMemoryItems } from "@/lib/class-data";
 import GearSlotEditor from "@/components/builds/GearSlotEditor";
 import PerkSkillSelector from "@/components/builds/PerkSkillSelector";
+import SpellSelector from "@/components/builds/SpellSelector";
 import ShimmerText from "@/components/ui/ShimmerText";
 import MedievalButton from "@/components/ui/MedievalButton";
 
@@ -36,6 +37,7 @@ export default function CreateBuildClient() {
   const [equipment, setEquipment] = useState<BuildEquipment>({});
   const [perks, setPerks] = useState<string[]>([]);
   const [skills, setSkills] = useState<string[]>([]);
+  const [spells, setSpells] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,6 +54,7 @@ export default function CreateBuildClient() {
     setSelectedClass(cls);
     setPerks([]);
     setSkills([]);
+    setSpells([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,6 +85,7 @@ export default function CreateBuildClient() {
           equipment: cleanEquipment,
           perks,
           skills,
+          spells,
         })
         .select("id")
         .single();
@@ -307,7 +311,12 @@ export default function CreateBuildClient() {
                 items={classData.skills}
                 selected={skills}
                 max={2}
-                onChange={setSkills}
+                onChange={(next) => {
+                  setSkills(next);
+                  // Clear spells if all memory skills are deselected
+                  const hasMemory = next.some((s) => s.includes("Memory"));
+                  if (!hasMemory) setSpells([]);
+                }}
               />
             </>
           ) : (
@@ -316,6 +325,29 @@ export default function CreateBuildClient() {
             </p>
           )}
         </div>
+
+        {/* Spells / Songs / Forms (shown when a memory skill is selected) */}
+        {selectedClass && (() => {
+          const memoryGroups = getMemoryItems(selectedClass, skills);
+          if (memoryGroups.length === 0) return null;
+          return (
+            <div className="bg-bg-secondary border border-border-subtle rounded-sm p-6 space-y-4">
+              <span className={sectionLabel}>Memorized Spells / Songs / Forms</span>
+              <p className="text-xs text-text-secondary mb-3">
+                Select the spells, songs, or forms your character has memorized.
+              </p>
+              {memoryGroups.map((group) => (
+                <SpellSelector
+                  key={group.type}
+                  label={group.label}
+                  items={group.items}
+                  selected={spells}
+                  onChange={setSpells}
+                />
+              ))}
+            </div>
+          );
+        })()}
 
         {/* Submit */}
         {error && (
