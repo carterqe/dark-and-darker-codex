@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   ThumbsUp,
@@ -35,6 +36,7 @@ const CLASS_COLORS: Record<string, string> = {
 
 export default function BuildDetailClient({ id }: { id: string }) {
   const { supabase, user, profile, openAuthModal } = useAuth();
+  const router = useRouter();
   const [build, setBuild] = useState<Build | null>(null);
   const [comments, setComments] = useState<BuildComment[]>([]);
   const [hasVoted, setHasVoted] = useState(false);
@@ -43,6 +45,8 @@ export default function BuildDetailClient({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
     const fetchBuild = async () => {
@@ -141,6 +145,21 @@ export default function BuildDetailClient({ id }: { id: string }) {
     setComments((prev) => prev.filter((c) => c.id !== commentId));
   };
 
+  const deleteBuild = async () => {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
+    setDeleting(true);
+    const { error } = await supabase.from("builds").delete().eq("id", id);
+    if (!error) {
+      router.push("/builds");
+    } else {
+      setDeleting(false);
+      setConfirmDelete(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-4">
@@ -211,18 +230,46 @@ export default function BuildDetailClient({ id }: { id: string }) {
                   · {timeAgo(build.created_at)}
                 </p>
               </div>
-              {/* Vote button */}
-              <button
-                onClick={toggleVote}
-                className={`flex flex-col items-center gap-1 px-4 py-2 rounded-sm border transition-all shrink-0 ${
-                  hasVoted
-                    ? "bg-gold-primary/20 border-gold-primary/50 text-gold-primary"
-                    : "border-border-subtle text-text-secondary hover:border-gold-primary/30 hover:text-gold-primary"
-                }`}
-              >
-                <ThumbsUp className={`w-5 h-5 ${hasVoted ? "fill-current" : ""}`} />
-                <span className="text-xs font-cinzel font-bold">{voteCount}</span>
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                {/* Vote button */}
+                <button
+                  onClick={toggleVote}
+                  className={`flex flex-col items-center gap-1 px-4 py-2 rounded-sm border transition-all ${
+                    hasVoted
+                      ? "bg-gold-primary/20 border-gold-primary/50 text-gold-primary"
+                      : "border-border-subtle text-text-secondary hover:border-gold-primary/30 hover:text-gold-primary"
+                  }`}
+                >
+                  <ThumbsUp className={`w-5 h-5 ${hasVoted ? "fill-current" : ""}`} />
+                  <span className="text-xs font-cinzel font-bold">{voteCount}</span>
+                </button>
+
+                {/* Delete button — author only */}
+                {user?.id === build.author_id && (
+                  <div className="flex items-center gap-1.5">
+                    {confirmDelete && (
+                      <button
+                        onClick={() => setConfirmDelete(false)}
+                        className="text-xs text-text-secondary hover:text-text-primary transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    <button
+                      onClick={deleteBuild}
+                      disabled={deleting}
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-sm border text-xs font-cinzel font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                        confirmDelete
+                          ? "bg-accent-red/20 border-accent-red/60 text-accent-red hover:bg-accent-red/30"
+                          : "border-border-subtle text-text-secondary/50 hover:border-accent-red/40 hover:text-accent-red"
+                      }`}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      {confirmDelete ? "Confirm" : "Delete"}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
             {/* Tags */}
             {build.tags.length > 0 && (
