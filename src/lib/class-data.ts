@@ -383,8 +383,6 @@ export const CLASS_DATA: Record<string, ClassPerksSkills> = {
       "Penguin",
     ],
   },
-};
-
   Sorcerer: {
     perks: [
       { name: "Arcane Mastery", description: "Increase arcane spell damage by 5%." },
