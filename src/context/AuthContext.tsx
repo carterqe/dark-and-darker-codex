@@ -28,6 +28,7 @@ interface AuthContextType {
   closeAuthModal: () => void;
   signOut: () => Promise<void>;
   toast: string | null;
+  showToast: (message: string) => void;
   clearToast: () => void;
 }
 
@@ -85,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const closeAuthModal = () => setAuthModalOpen(false);
+  const showToast = (message: string) => setToast(message);
   const clearToast = () => setToast(null);
 
   const signOut = async () => {
@@ -106,6 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         closeAuthModal,
         signOut,
         toast,
+        showToast,
         clearToast,
       }}
     >

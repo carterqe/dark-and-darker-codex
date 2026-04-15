@@ -12,6 +12,7 @@ import {
   Globe,
   Swords,
   Hammer,
+  ScrollText,
   LogOut,
   LogIn,
   Menu,
@@ -29,6 +30,7 @@ const navLinks = [
   { href: "/classes", label: "Classes", icon: Users },
   { href: "/realm", label: "Realm", icon: Globe },
   { href: "/builds", label: "Builds", icon: Hammer },
+  { href: "/quests", label: "Quests", icon: ScrollText },
 ];
 
 export default function Navbar() {
@@ -143,7 +145,7 @@ export default function Navbar() {
         )}
       </nav>
       <AuthModal />
-      <Toast message={toast} onClose={clearToast} />
+      <Toast message={toast} onClose={clearToast} duration={5000} />
     </>
   );
 }

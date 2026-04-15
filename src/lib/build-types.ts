@@ -7,8 +7,10 @@ export const GEAR_SLOTS = [
   { key: "back", label: "Back", slot_type: "Back" },
   { key: "necklace", label: "Necklace", slot_type: "Necklace" },
   { key: "ring", label: "Ring", slot_type: "Ring" },
-  { key: "primary", label: "Primary Weapon", slot_type: "Primary" },
-  { key: "secondary", label: "Secondary / Off-hand", slot_type: "Secondary" },
+  { key: "primary", label: "Weapon 1", slot_type: "Primary" },
+  { key: "secondary", label: "Weapon 1 Off-hand", slot_type: "Secondary" },
+  { key: "weapon2", label: "Weapon 2", slot_type: "Primary" },
+  { key: "weapon2_offhand", label: "Weapon 2 Off-hand", slot_type: "Secondary" },
 ] as const;
 
 export type GearSlotKey = (typeof GEAR_SLOTS)[number]["key"];
@@ -19,6 +21,7 @@ export interface BuildGearItem {
   rarity: string;
   gear_score: number;
   stats?: Record<string, number>; // Custom stat roll values, e.g. { "strength": 2.1 }
+  hand?: ("main" | "off")[]; // Weapon hand usage tags (weapon slots only)
 }
 
 export type BuildEquipment = Partial<Record<GearSlotKey, BuildGearItem | null>>;

@@ -1,6 +1,6 @@
 "use client";
 
-import { DarkerDBItem, getRarityStyle } from "@/lib/darkerdb";
+import { DarkerDBItem, getRarityStyle, getItemClasses } from "@/lib/darkerdb";
 import { formatNumber } from "@/lib/utils";
 import { Coins, Shield } from "lucide-react";
 
@@ -12,6 +12,7 @@ interface ItemCardProps {
 
 export default function ItemCard({ item, index, onClick }: ItemCardProps) {
   const rarity = getRarityStyle(item.rarity);
+  const classes = getItemClasses(item.required_class);
 
   return (
     <div
@@ -43,6 +44,12 @@ export default function ItemCard({ item, index, onClick }: ItemCardProps) {
         {/* Type info */}
         <p className="text-[11px] text-text-secondary mb-3">
           {[item.type, item.slot_type, item.armor_type].filter(Boolean).join(" · ")}
+        </p>
+
+        {/* Classes */}
+        <p className="text-[10px] text-text-secondary/60 mb-3">
+          <span className="text-text-secondary/40">Classes: </span>
+          {classes === "All" ? "All" : classes.join(", ")}
         </p>
 
         {/* Bottom stats */}

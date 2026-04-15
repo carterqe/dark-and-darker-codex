@@ -21,6 +21,7 @@ import {
 import { getClassPortrait, getRarityStyle } from "@/lib/darkerdb";
 import { getClassData, getPerkIconUrl, getSkillIconUrl } from "@/lib/class-data";
 import { timeAgo } from "@/lib/utils";
+import CharacterStatPanel from "@/components/builds/CharacterStatPanel";
 
 const CLASS_COLORS: Record<string, string> = {
   Fighter: "text-red-400",
@@ -321,13 +322,18 @@ export default function BuildDetailClient({ id }: { id: string }) {
                       <span className="text-[10px] text-text-secondary uppercase tracking-wider w-24 shrink-0">
                         {label}
                       </span>
-                      <div className="flex items-center gap-2 text-right">
+                      <div className="flex items-center gap-2 text-right flex-wrap justify-end">
                         <Link
                           href={`/armory/${item.item_id}`}
                           className={`text-xs font-medium hover:underline ${rs.text}`}
                         >
                           {item.item_name}
                         </Link>
+                        {item.hand && item.hand.length > 0 && item.hand.map((h) => (
+                          <span key={h} className="text-[9px] px-1.5 py-0.5 bg-gold-primary/10 text-gold-dark border border-gold-primary/20 rounded-sm">
+                            {h === "main" ? "Main Hand" : "Off Hand"}
+                          </span>
+                        ))}
                         {item.gear_score > 0 && (
                           <span className="text-[10px] text-text-secondary/50 shrink-0">
                             GS {item.gear_score}
@@ -394,6 +400,17 @@ export default function BuildDetailClient({ id }: { id: string }) {
           </motion.div>
         )}
       </div>
+
+      {/* Character Stats */}
+      {gearEntries.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <CharacterStatPanel equipment={build.equipment ?? {}} selectedClass={build.class} />
+        </motion.div>
+      )}
 
       {/* Comments */}
       <motion.div
@@ -516,10 +533,10 @@ function PerkSkillSection({
     <div>
       <h2 className="font-cinzel font-bold text-sm text-gold-primary mb-3">{title}</h2>
       <div className="space-y-2">
-        {names.map((name) => {
+        {names.map((name, i) => {
           const data = allItems?.find((p) => p.name === name);
           return (
-            <div key={name} className="flex items-start gap-3 py-2 px-3 bg-bg-primary/40 rounded-sm">
+            <div key={`${name}-${i}`} className="flex items-start gap-3 py-2 px-3 bg-bg-primary/40 rounded-sm">
               <PerkSkillIcon name={name} type={isPerk ? "perk" : "skill"} />
               <div className="min-w-0">
                 <span className="text-sm font-medium text-text-primary block">{name}</span>

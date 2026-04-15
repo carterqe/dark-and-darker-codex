@@ -17,6 +17,7 @@ import { getClassData, getMemoryItems } from "@/lib/class-data";
 import GearSlotEditor from "@/components/builds/GearSlotEditor";
 import PerkSkillSelector from "@/components/builds/PerkSkillSelector";
 import SpellSelector from "@/components/builds/SpellSelector";
+import CharacterStatPanel from "@/components/builds/CharacterStatPanel";
 import ShimmerText from "@/components/ui/ShimmerText";
 import MedievalButton from "@/components/ui/MedievalButton";
 
@@ -27,7 +28,7 @@ const sectionLabel =
   "text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-2";
 
 export default function CreateBuildClient() {
-  const { supabase, user, profile, loading, openAuthModal } = useAuth();
+  const { user, profile, loading, openAuthModal, showToast } = useAuth();
   const router = useRouter();
 
   const [title, setTitle] = useState("");
@@ -47,6 +48,18 @@ export default function CreateBuildClient() {
     setTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
+  };
+
+  const clearAll = () => {
+    setTitle("");
+    setDescription("");
+    setSelectedClass("");
+    setTags([]);
+    setEquipment({});
+    setPerks([]);
+    setSkills([]);
+    setSpells([]);
+    setError(null);
   };
 
   // Reset perks/skills when class changes
@@ -74,34 +87,30 @@ export default function CreateBuildClient() {
         if (item) cleanEquipment[slot] = item;
       }
 
-      const { data, error: dbError } = await supabase
-        .from("builds")
-        .insert({
-          author_id: user.id,
-          title: title.trim(),
-          description: description.trim(),
+      const res = await fetch("/api/builds", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          description,
           class: selectedClass,
           tags,
           equipment: cleanEquipment,
           perks,
           skills,
           spells,
-        })
-        .select("id")
-        .single();
+        }),
+      });
 
-      if (dbError) {
-        console.error("Build creation failed:", dbError);
-        setError(`Failed to create build: ${dbError.message} (code: ${dbError.code})`);
+      const json = await res.json();
+
+      if (!res.ok) {
+        setError(json.error ?? "Failed to create build.");
         return;
       }
 
-      if (!data) {
-        setError("Build was created but no ID was returned. Check your Supabase RLS policies.");
-        return;
-      }
-
-      router.push(`/builds/${data.id}`);
+      showToast("Build published successfully!");
+      router.push(`/builds/${json.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
@@ -139,7 +148,7 @@ export default function CreateBuildClient() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -246,22 +255,83 @@ export default function CreateBuildClient() {
         {/* Equipment */}
         <div className="bg-bg-secondary border border-border-subtle rounded-sm p-6">
           <span className={sectionLabel}>Gear Slots</span>
-          <p className="text-xs text-text-secondary mb-4">
-            Select items from the Armory, then customize stat rolls.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {GEAR_SLOTS.map(({ key, label, slot_type }) => (
-              <GearSlotEditor
-                key={key}
-                slotLabel={label}
-                slotType={slot_type}
-                selectedClass={selectedClass}
-                value={equipment[key as GearSlotKey] ?? null}
-                onChange={(item) =>
-                  setEquipment((prev) => ({ ...prev, [key]: item }))
-                }
-              />
-            ))}
+          <div className="flex flex-col lg:flex-row gap-6 items-start mt-2">
+            {/* Stat panel — left of gear grid on desktop, above on mobile */}
+            <div className="w-full lg:w-64 xl:w-72 shrink-0">
+              <CharacterStatPanel equipment={equipment} selectedClass={selectedClass} />
+            </div>
+            {/* Gear grid */}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-text-secondary mb-4">
+                Select items, set rarity, then customize stat rolls.
+              </p>
+              {/* Armor slots */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {GEAR_SLOTS.filter(({ key }) => key !== "primary" && key !== "secondary" && key !== "weapon2" && key !== "weapon2_offhand").map(({ key, label, slot_type }) => (
+                  <GearSlotEditor
+                    key={key}
+                    slotLabel={label}
+                    slotType={slot_type}
+                    selectedClass={selectedClass}
+                    value={equipment[key as GearSlotKey] ?? null}
+                    onChange={(item) =>
+                      setEquipment((prev) => ({ ...prev, [key]: item }))
+                    }
+                  />
+                ))}
+              </div>
+              {/* Weapon slots */}
+              <div className="mt-4 space-y-4">
+                {/* Weapon 1 */}
+                <div>
+                  <span className={sectionLabel}>Weapon 1</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <GearSlotEditor
+                      slotLabel="Main Hand"
+                      slotType="Primary"
+                      selectedClass={selectedClass}
+                      value={equipment.primary ?? null}
+                      onChange={(item) =>
+                        setEquipment((prev) => ({ ...prev, primary: item }))
+                      }
+                    />
+                    <GearSlotEditor
+                      slotLabel="Off-hand"
+                      slotType="Secondary"
+                      selectedClass={selectedClass}
+                      value={equipment.secondary ?? null}
+                      onChange={(item) =>
+                        setEquipment((prev) => ({ ...prev, secondary: item }))
+                      }
+                    />
+                  </div>
+                </div>
+                {/* Weapon 2 */}
+                <div>
+                  <span className={sectionLabel}>Weapon 2</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <GearSlotEditor
+                      slotLabel="Main Hand"
+                      slotType="Primary"
+                      selectedClass={selectedClass}
+                      value={equipment.weapon2 ?? null}
+                      onChange={(item) =>
+                        setEquipment((prev) => ({ ...prev, weapon2: item }))
+                      }
+                    />
+                    <GearSlotEditor
+                      slotLabel="Off-hand"
+                      slotType="Secondary"
+                      selectedClass={selectedClass}
+                      value={equipment.weapon2_offhand ?? null}
+                      onChange={(item) =>
+                        setEquipment((prev) => ({ ...prev, weapon2_offhand: item }))
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -357,6 +427,13 @@ export default function CreateBuildClient() {
           </div>
         )}
         <div className="flex items-center justify-end gap-4">
+          <button
+            type="button"
+            onClick={clearAll}
+            className="text-sm text-text-secondary hover:text-accent-red transition-colors"
+          >
+            Clear All
+          </button>
           <button
             type="button"
             onClick={() => router.back()}

@@ -64,10 +64,17 @@ export default function PerkSkillSelector({
 
         return (
           <div key={item.name}>
-            <button
-              type="button"
+            <div
+              role="button"
+              tabIndex={isDisabled ? -1 : 0}
               onClick={() => !isDisabled && toggle(item.name)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-sm border text-left transition-all ${
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  if (!isDisabled) toggle(item.name);
+                }
+              }}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-sm border transition-all select-none ${
                 isSelected
                   ? "border-gold-primary/50 bg-gold-primary/10"
                   : isDisabled
@@ -100,7 +107,7 @@ export default function PerkSkillSelector({
                   <Check className="w-4 h-4 text-gold-primary" />
                 )}
               </div>
-            </button>
+            </div>
 
             {/* Expanded description */}
             {expandedInfo === item.name && (

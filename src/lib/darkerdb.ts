@@ -239,13 +239,36 @@ export const RARITY_COLORS: Record<string, { text: string; border: string; bg: s
   Uncommon: { text: "text-green-400", border: "border-green-400/40", bg: "bg-green-400/10" },
   Rare: { text: "text-blue-400", border: "border-blue-400/40", bg: "bg-blue-400/10" },
   Epic: { text: "text-purple-400", border: "border-purple-400/40", bg: "bg-purple-400/10" },
-  Legendary: { text: "text-gold-primary", border: "border-gold-primary/40", bg: "bg-gold-primary/10" },
-  Unique: { text: "text-orange-400", border: "border-orange-400/40", bg: "bg-orange-400/10" },
+  Legendary: { text: "text-orange-400", border: "border-orange-400/40", bg: "bg-orange-400/10" },
+  Unique: { text: "text-gold-primary", border: "border-gold-primary/40", bg: "bg-gold-primary/10" },
   Artifact: { text: "text-red-400", border: "border-red-400/40", bg: "bg-red-400/10" },
 };
 
 export function getRarityStyle(rarity: string) {
   return RARITY_COLORS[rarity] ?? RARITY_COLORS["Common"];
+}
+
+const CLASS_BITMASK: Record<string, number> = {
+  Fighter: 1,
+  Barbarian: 2,
+  Rogue: 4,
+  Ranger: 8,
+  Wizard: 16,
+  Cleric: 32,
+  Bard: 64,
+  Warlock: 128,
+  Druid: 256,
+};
+
+/** Decodes required_class bitmask → list of class names, or "All" if unrestricted. */
+export function getItemClasses(requiredClass: string | number | null | undefined): string[] | "All" {
+  if (requiredClass == null) return "All";
+  const mask = typeof requiredClass === "number" ? requiredClass : parseInt(String(requiredClass), 10);
+  if (isNaN(mask) || mask === 0) return "All";
+  const classes = Object.entries(CLASS_BITMASK)
+    .filter(([, bit]) => (mask & bit) !== 0)
+    .map(([name]) => name);
+  return classes.length === Object.keys(CLASS_BITMASK).length ? "All" : classes;
 }
 
 export async function fetchItems(params: {

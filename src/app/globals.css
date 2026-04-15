@@ -39,6 +39,14 @@ body {
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-body, sans-serif);
+  user-select: none;
+  cursor: default;
+}
+
+/* Restore text selection and cursor for editable/readable elements */
+input, textarea, [contenteditable] {
+  user-select: text;
+  cursor: text;
 }
 
 /* Scrollbar styling */

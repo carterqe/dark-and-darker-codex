@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Search, X, ChevronDown } from "lucide-react";
-import { getRarityStyle, type DarkerDBItem } from "@/lib/darkerdb";
+import { type DarkerDBItem } from "@/lib/darkerdb";
 import type { BuildGearItem } from "@/lib/build-types";
 
 // DarkerDB uses a bitmask for required_class
@@ -85,6 +85,20 @@ export default function ItemSearchDropdown({
       items = items.filter((item) => item.name.toLowerCase().includes(q));
     }
 
+    // Deduplicate by name — keep the highest rarity entry so secondary stat
+    // ranges are always fully populated (rarity is chosen separately via dropdown)
+    const RARITY_RANK: Record<string, number> = {
+      Poor: 0, Common: 1, Uncommon: 2, Rare: 3, Epic: 4, Legendary: 5, Unique: 6, Artifact: 7,
+    };
+    const best = new Map<string, typeof items[number]>();
+    for (const item of items) {
+      const existing = best.get(item.name);
+      if (!existing || (RARITY_RANK[item.rarity] ?? 0) > (RARITY_RANK[existing.rarity] ?? 0)) {
+        best.set(item.name, item);
+      }
+    }
+    items = Array.from(best.values());
+
     // Sort alphabetically
     items.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -92,8 +106,9 @@ export default function ItemSearchDropdown({
     setFilteredResults(query.trim() ? items : items.slice(0, 100));
   }, [allItems, selectedClass, query]);
 
-  // Close on outside click
+  // Close on outside click — only active while open
   useEffect(() => {
+    if (!open) return;
     const handler = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
@@ -101,13 +116,13 @@ export default function ItemSearchDropdown({
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  }, [open]);
 
   const select = (item: DarkerDBItem) => {
     onChange({
       item_id: item.id,
       item_name: item.name,
-      rarity: item.rarity,
+      rarity: "Common",
       gear_score: item.gear_score,
     });
     setOpen(false);
@@ -118,8 +133,6 @@ export default function ItemSearchDropdown({
     e.stopPropagation();
     onChange(null);
   };
-
-  const rs = value ? getRarityStyle(value.rarity) : null;
 
   return (
     <div ref={containerRef} className="relative">
@@ -137,9 +150,8 @@ export default function ItemSearchDropdown({
         className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-bg-primary border border-border-subtle rounded-sm text-xs transition-all hover:border-gold-primary/40 text-left"
       >
         {value ? (
-          <span className={`font-medium truncate ${rs?.text}`}>
+          <span className="font-medium truncate text-text-primary">
             {value.item_name}
-            <span className="ml-1.5 opacity-50 font-normal">{value.rarity}</span>
           </span>
         ) : (
           <span className="text-text-secondary/50">Empty</span>
@@ -181,31 +193,18 @@ export default function ItemSearchDropdown({
                 No items found
               </div>
             ) : (
-              filteredResults.map((item) => {
-                const style = getRarityStyle(item.rarity);
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => select(item)}
-                    className="w-full flex items-center justify-between px-3 py-2 hover:bg-bg-tertiary text-left transition-colors"
-                  >
-                    <span className={`text-xs font-medium truncate ${style.text}`}>
-                      {item.name}
-                    </span>
-                    <div className="flex items-center gap-2 shrink-0 ml-2">
-                      <span className={`text-[10px] ${style.text} opacity-60`}>
-                        {item.rarity}
-                      </span>
-                      {item.gear_score > 0 && (
-                        <span className="text-[10px] text-text-secondary/50">
-                          GS {item.gear_score}
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                );
-              })
+              filteredResults.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => select(item)}
+                  className="w-full flex items-center justify-between px-3 py-2 hover:bg-bg-tertiary text-left transition-colors"
+                >
+                  <span className="text-xs font-medium truncate text-text-primary">
+                    {item.name}
+                  </span>
+                </button>
+              ))
             )}
           </div>
         </div>

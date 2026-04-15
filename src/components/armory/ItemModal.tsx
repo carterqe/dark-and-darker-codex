@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Shield, Coins, Sword, Sparkles } from "lucide-react";
-import { DarkerDBItem, getRarityStyle } from "@/lib/darkerdb";
+import { DarkerDBItem, getRarityStyle, getItemClasses } from "@/lib/darkerdb";
 import { formatNumber } from "@/lib/utils";
 
 interface ItemModalProps {
@@ -73,6 +73,7 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
 
   const rarity = getRarityStyle(item.rarity);
   const statGroups = extractStatGroups(item);
+  const classes = getItemClasses(item.required_class);
   const name = item.name || item.archetype;
   const imgSrcs = [getItemImageUrl(name), getItemImageFallback(name)];
 
@@ -195,6 +196,27 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
                       <span className="text-sm text-text-primary">
                         Value: <strong className="text-gold-primary">{formatNumber(item.vendor_price)} Gold</strong>
                       </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Classes */}
+                <div className="mb-4 pb-4 border-b border-border-subtle">
+                  <h3 className="font-cinzel font-bold text-xs text-gold-dark uppercase tracking-wider mb-2">
+                    Classes
+                  </h3>
+                  {classes === "All" ? (
+                    <span className="text-sm text-text-secondary">All</span>
+                  ) : (
+                    <div className="flex flex-wrap gap-1.5">
+                      {classes.map((cls) => (
+                        <span
+                          key={cls}
+                          className="text-[11px] px-2 py-0.5 bg-bg-primary/50 border border-border-subtle rounded-sm text-text-secondary"
+                        >
+                          {cls}
+                        </span>
+                      ))}
                     </div>
                   )}
                 </div>

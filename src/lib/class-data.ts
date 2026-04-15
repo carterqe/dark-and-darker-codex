@@ -23,16 +23,49 @@ export interface ClassPerksSkills {
 
 const WIKI = "https://darkanddarker.wiki.spellsandguns.com/Special:FilePath";
 
+// Overrides for icons whose wiki filenames differ from our display names.
+// Value format: "<WikiPrefix>_<WikiSlug>" — the function appends ".png".
+const ICON_OVERRIDES: Record<string, string> = {
+  // Perks
+  "Two-Handed Weapon Expert": "Perk_Two_Handed_Weapon_Expert", // hyphen removed on wiki
+  "Blood Exchange":           "Skill_Blood_Exchange",           // filed under Skill on wiki
+  "Wanderer's Luck":          "Perk_Wanderers_Luck",            // no apostrophe on wiki
+  // Druid perks — wiki uses camelCase filenames
+  "Force of Nature":          "Perk_ForceOfNature",
+  "Sun and Moon":             "Perk_SunAndMoon",
+  "Lifebloom Aura":           "Perk_LifebloomAura",
+  "Thorn Coat":               "Perk_ThornCoat",
+  "Herbal Sensing":           "Perk_HerbalSensing",
+  "Enhanced Wildness":        "Perk_EnhancedWildness",
+  "Spirit Bond":              "Perk_SpiritBond",
+  "Natural Healing":          "Perk_NaturalHealing",
+  "Spirit Magic Mastery":     "Perk_SpiritMagicMastery",
+  // Skills — "Memory 2" variants share the base Memory icon
+  "Spell Memory 2":           "Skill_Spell_Memory",
+  "Music Memory 2":           "Skill_Music_Memory",
+  "Shapeshift Memory 2":      "Skill_Shapeshift_Memory",
+  // Skills — miscategorised or camelCase on wiki
+  "Zap":                      "Spell_Zap",                      // filed under Spell on wiki
+  "Party Maker":              "Skill_Partymaker",               // camelCase, no space on wiki
+};
+
+function iconUrl(defaultPrefix: string, name: string): string {
+  if (ICON_OVERRIDES[name]) {
+    return `${WIKI}/${ICON_OVERRIDES[name]}.png`;
+  }
+  return `${WIKI}/${defaultPrefix}_${encodeURIComponent(name.replace(/ /g, "_"))}.png`;
+}
+
 export function getPerkIconUrl(name: string): string {
-  return `${WIKI}/Perk_${encodeURIComponent(name.replace(/ /g, "_"))}.png`;
+  return iconUrl("Perk", name);
 }
 
 export function getSkillIconUrl(name: string): string {
-  return `${WIKI}/Skill_${encodeURIComponent(name.replace(/ /g, "_"))}.png`;
+  return iconUrl("Skill", name);
 }
 
 export function getSpellIconUrl(name: string): string {
-  return `${WIKI}/Spell_${encodeURIComponent(name.replace(/ /g, "_"))}.png`;
+  return iconUrl("Spell", name);
 }
 
 // Returns the memory type label and available items based on selected skills

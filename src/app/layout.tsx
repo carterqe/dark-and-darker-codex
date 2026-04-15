@@ -31,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${cinzel.variable} ${inter.variable}`}>
-      <body className="min-h-screen flex flex-col bg-bg-primary text-text-primary bg-noise antialiased">
+      <body suppressHydrationWarning className="min-h-screen flex flex-col bg-bg-primary text-text-primary bg-noise antialiased">
         <AuthProvider>
           <ParticleBackground />
           <Navbar />
