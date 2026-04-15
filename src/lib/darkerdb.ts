@@ -85,7 +85,8 @@ export type CharacterClass =
   | "Cleric"
   | "Bard"
   | "Warlock"
-  | "Druid";
+  | "Druid"
+  | "Sorcerer";
 
 export const CHARACTER_CLASSES: { value: CharacterClass; label: string }[] = [
   { value: "all", label: "All Classes" },
@@ -98,6 +99,7 @@ export const CHARACTER_CLASSES: { value: CharacterClass; label: string }[] = [
   { value: "Bard", label: "Bard" },
   { value: "Warlock", label: "Warlock" },
   { value: "Druid", label: "Druid" },
+  { value: "Sorcerer", label: "Sorcerer" },
 ];
 
 // Rank ordering from lowest (0) to highest (18)
@@ -258,6 +260,7 @@ const CLASS_BITMASK: Record<string, number> = {
   Bard: 64,
   Warlock: 128,
   Druid: 256,
+  Sorcerer: 512,
 };
 
 /** Decodes required_class bitmask → list of class names, or "All" if unrestricted. */

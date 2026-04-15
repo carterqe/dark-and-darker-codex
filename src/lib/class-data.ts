@@ -385,6 +385,41 @@ export const CLASS_DATA: Record<string, ClassPerksSkills> = {
   },
 };
 
+  Sorcerer: {
+    perks: [
+      { name: "Arcane Mastery", description: "Increase arcane spell damage by 5%." },
+      { name: "Chaos Magic", description: "Chaos spells deal 10% bonus damage." },
+      { name: "Crystal Charge", description: "Each arcane crystal held increases spell damage by 2%." },
+      { name: "Empower", description: "Consecutive spell casts of the same type deal 5% more damage (stacks up to 3)." },
+      { name: "Magic Absorption", description: "Absorbing nearby spells restores arcane power." },
+      { name: "Quick Chant", description: "Increase spell casting speed by 15%." },
+      { name: "Reactive Shield", description: "Automatically cast a shield when health drops below 15%." },
+      { name: "Sage", description: "Increase knowledge by 10%." },
+      { name: "Spell Overload", description: "Spells deal 2% more damage per remaining spell count." },
+      { name: "Wild Magic", description: "Spells occasionally trigger wild magic surges dealing bonus damage." },
+    ],
+    skills: [
+      { name: "Arcane Shield", description: "Create a protective barrier absorbing damage." },
+      { name: "Crystal Synthesis", description: "Generate arcane crystals to amplify your next spell." },
+      { name: "Intense Focus", description: "Increase magical damage by 15% for 8s." },
+      { name: "Spell Memory", description: "Memorize spells to cast in the dungeon." },
+      { name: "Spell Memory 2", description: "Memorize additional spells to cast in the dungeon." },
+    ],
+    spells: [
+      { name: "Zap", tier: 1 },
+      { name: "Chaos Bolt", tier: 1 },
+      { name: "Magic Lock", tier: 2 },
+      { name: "Ice Bolt", tier: 2 },
+      { name: "Magic Missile", tier: 3 },
+      { name: "Haste", tier: 3 },
+      { name: "Lightning Strike", tier: 4 },
+      { name: "Fireball", tier: 4 },
+      { name: "Explosion", tier: 5 },
+      { name: "Chain Lightning", tier: 6 },
+    ],
+  },
+};
+
 export function getClassData(className: string): ClassPerksSkills | null {
   return CLASS_DATA[className] ?? null;
 }

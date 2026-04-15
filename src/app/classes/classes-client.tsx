@@ -30,7 +30,7 @@ const TIER_COLORS = {
   C: { text: "text-bronze", bg: "bg-bronze/20", border: "border-bronze/40" },
 };
 
-const CLASSES = ["Fighter", "Barbarian", "Rogue", "Ranger", "Wizard", "Cleric", "Bard", "Warlock", "Druid"];
+const CLASSES = ["Fighter", "Barbarian", "Rogue", "Ranger", "Wizard", "Cleric", "Bard", "Warlock", "Druid", "Sorcerer"];
 
 function computeTier(pct: number): "S" | "A" | "B" | "C" {
   if (pct >= 15) return "S";
