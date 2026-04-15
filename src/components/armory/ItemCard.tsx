@@ -2,7 +2,7 @@
 
 import { DarkerDBItem, getRarityStyle, getItemClasses } from "@/lib/darkerdb";
 import { formatNumber } from "@/lib/utils";
-import { Coins, Shield } from "lucide-react";
+import { Coins, Shield, Vault } from "lucide-react";
 
 interface ItemCardProps {
   item: DarkerDBItem;
@@ -51,6 +51,14 @@ export default function ItemCard({ item, index, onClick }: ItemCardProps) {
           <span className="text-text-secondary/40">Classes: </span>
           {classes === "All" ? "All" : classes.join(", ")}
         </p>
+
+        {/* Gold storage */}
+        {(item.container_size as number) > 0 && (
+          <div className="flex items-center gap-1 text-xs text-gold-primary mb-2">
+            <Vault className="w-3 h-3" />
+            Gold Storage: <strong>{item.container_size as number}</strong>
+          </div>
+        )}
 
         {/* Bottom stats */}
         <div className="flex items-center justify-between mt-auto pt-2 border-t border-border-subtle">

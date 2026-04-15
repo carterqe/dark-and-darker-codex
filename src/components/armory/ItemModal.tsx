@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Shield, Coins, Sword, Sparkles } from "lucide-react";
+import { X, Shield, Coins, Sword, Sparkles, Vault } from "lucide-react";
 import { DarkerDBItem, getRarityStyle, getItemClasses } from "@/lib/darkerdb";
 import { formatNumber } from "@/lib/utils";
 
@@ -195,6 +195,14 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
                       <Coins className="w-4 h-4 text-gold-dark" />
                       <span className="text-sm text-text-primary">
                         Value: <strong className="text-gold-primary">{formatNumber(item.vendor_price)} Gold</strong>
+                      </span>
+                    </div>
+                  )}
+                  {(item.container_size as number) > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <Vault className="w-4 h-4 text-gold-dark" />
+                      <span className="text-sm text-text-primary">
+                        Gold Storage: <strong className="text-gold-primary">{item.container_size as number}</strong>
                       </span>
                     </div>
                   )}
