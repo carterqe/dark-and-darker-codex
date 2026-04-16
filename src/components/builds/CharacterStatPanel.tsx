@@ -16,6 +16,7 @@ const BASE_STATS: Record<string, Record<string, number>> = {
   Bard:      { strength: 13, agility: 13, will: 11, knowledge: 20, resourcefulness: 15, health: 96,    move_speed: 303.5 },
   Warlock:   { strength: 11, agility: 14, will: 22, knowledge: 15, resourcefulness: 14, health: 96.5,  move_speed: 305.5 },
   Druid:     { strength: 12, agility: 12, will: 18, knowledge: 20, resourcefulness: 18, health: 95.5,  move_speed: 301.5 },
+  Sorcerer:  { strength: 10, agility: 10, will: 25, knowledge: 20, resourcefulness: 12, health: 90,    move_speed: 295   },
 };
 
 // primary_min_<field> → internal key

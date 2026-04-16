@@ -22,6 +22,7 @@ const CLASS_COLORS: Record<string, string> = {
   Bard: "text-pink-400",
   Warlock: "text-purple-400",
   Druid: "text-emerald-400",
+  Sorcerer: "text-cyan-400",
 };
 
 export default function BuildsClient() {

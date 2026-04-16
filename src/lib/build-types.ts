@@ -65,6 +65,7 @@ export const BUILD_CLASSES = [
   "Bard",
   "Warlock",
   "Druid",
+  "Sorcerer",
 ] as const;
 
 export type BuildClass = (typeof BUILD_CLASSES)[number];

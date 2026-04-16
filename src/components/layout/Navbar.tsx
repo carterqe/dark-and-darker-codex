@@ -13,6 +13,7 @@ import {
   Swords,
   Hammer,
   ScrollText,
+  Map,
   LogOut,
   LogIn,
   Menu,
@@ -31,6 +32,7 @@ const navLinks = [
   { href: "/realm", label: "Realm", icon: Globe },
   { href: "/builds", label: "Builds", icon: Hammer },
   { href: "/quests", label: "Quests", icon: ScrollText },
+  { href: "/maps", label: "Maps", icon: Map },
 ];
 
 export default function Navbar() {

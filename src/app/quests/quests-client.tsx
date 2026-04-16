@@ -12,6 +12,10 @@ import {
   Footprints,
   ShieldAlert,
   X,
+  MapPin,
+  Hand,
+  Hammer,
+  Zap,
 } from "lucide-react";
 import { TRADERS, getQuestItems, type Trader, type Quest, type QuestRequirement } from "@/lib/quest-data";
 import { getRarityStyle } from "@/lib/darkerdb";
@@ -21,19 +25,27 @@ import ShimmerText from "@/components/ui/ShimmerText";
 
 function reqIcon(type: QuestRequirement["type"]) {
   switch (type) {
-    case "item":    return <Package className="w-3.5 h-3.5 shrink-0" />;
-    case "kill":    return <Skull className="w-3.5 h-3.5 shrink-0" />;
-    case "extract": return <Footprints className="w-3.5 h-3.5 shrink-0" />;
-    case "survive": return <ShieldAlert className="w-3.5 h-3.5 shrink-0" />;
+    case "item":     return <Package className="w-3.5 h-3.5 shrink-0" />;
+    case "kill":     return <Skull className="w-3.5 h-3.5 shrink-0" />;
+    case "extract":  return <Footprints className="w-3.5 h-3.5 shrink-0" />;
+    case "survive":  return <ShieldAlert className="w-3.5 h-3.5 shrink-0" />;
+    case "explore":  return <MapPin className="w-3.5 h-3.5 shrink-0" />;
+    case "interact": return <Hand className="w-3.5 h-3.5 shrink-0" />;
+    case "destroy":  return <Hammer className="w-3.5 h-3.5 shrink-0" />;
+    case "use":      return <Zap className="w-3.5 h-3.5 shrink-0" />;
   }
 }
 
 function reqColor(type: QuestRequirement["type"]) {
   switch (type) {
-    case "item":    return "text-gold-dark";
-    case "kill":    return "text-accent-red";
-    case "extract": return "text-accent-emerald";
-    case "survive": return "text-blue-400";
+    case "item":     return "text-gold-dark";
+    case "kill":     return "text-accent-red";
+    case "extract":  return "text-accent-emerald";
+    case "survive":  return "text-blue-400";
+    case "explore":  return "text-cyan-400";
+    case "interact": return "text-violet-400";
+    case "destroy":  return "text-orange-400";
+    case "use":      return "text-teal-400";
   }
 }
 
