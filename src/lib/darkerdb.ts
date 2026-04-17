@@ -282,7 +282,6 @@ export async function fetchItems(params: {
   slot_type?: string;
   armor_type?: string;
   hand_type?: string;
-  utility_type?: string;
   name?: string;
   fetchAll?: string;
 }): Promise<DarkerDBResponse<DarkerDBItem[]>> {
@@ -294,7 +293,6 @@ export async function fetchItems(params: {
   if (params.slot_type) searchParams.set("slot_type", params.slot_type);
   if (params.armor_type) searchParams.set("armor_type", params.armor_type);
   if (params.hand_type) searchParams.set("hand_type", params.hand_type);
-  if (params.utility_type) searchParams.set("utility_type", params.utility_type);
   if (params.name) searchParams.set("name", params.name);
   if (params.fetchAll) searchParams.set("fetchAll", params.fetchAll);
 
