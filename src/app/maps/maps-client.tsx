@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { TransformWrapper, TransformComponent, useControls } from "react-zoom-pan-pinch";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -21,6 +22,8 @@ import {
   ChevronLeft,
   Info,
   Clock,
+  X,
+  Target,
 } from "lucide-react";
 import {
   MAPS,
@@ -30,6 +33,7 @@ import {
   type MapFeature,
   type FeatureType,
 } from "@/lib/map-data";
+import { MONSTERS, MONSTER_SPAWNS } from "@/lib/monster-data";
 import ShimmerText from "@/components/ui/ShimmerText";
 
 // ─── Feature icon map ────────────────────────────────────────────────────────
@@ -45,6 +49,7 @@ const FEATURE_ICONS: Record<FeatureType, React.ComponentType<{ className?: strin
   boss:              Skull,
   campfire:          Flame,
   treasure:          Gem,
+  monster_spawn:     Target,
 };
 
 // ─── Theme styles per dungeon ────────────────────────────────────────────────
@@ -99,6 +104,31 @@ function FeatureMarker({ feature, isHovered, onHover }: MarkerProps) {
             opacity: 0.5,
           }}
         />
+      )}
+
+      {/* Stronger pulse ring on monster_spawn highlight markers */}
+      {feature.type === "monster_spawn" && (
+        <>
+          <div
+            style={{
+              position: "absolute",
+              inset: -14,
+              borderRadius: 999,
+              border: `3px solid ${meta.borderColor}`,
+              animation: "ping 1.4s cubic-bezier(0,0,0.2,1) infinite",
+              opacity: 0.75,
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              inset: -6,
+              borderRadius: 999,
+              border: `2px solid ${meta.color}`,
+              opacity: 0.9,
+            }}
+          />
+        </>
       )}
 
       {/* Marker body */}
@@ -189,12 +219,13 @@ function ZoomControls() {
 
 interface MapCanvasProps {
   map: DungeonMap;
+  features: MapFeature[];
   enabledTypes: Set<FeatureType>;
   hoveredId: string | null;
   onHover: (id: string | null) => void;
 }
 
-function MapCanvas({ map, enabledTypes, hoveredId, onHover }: MapCanvasProps) {
+function MapCanvas({ map, features, enabledTypes, hoveredId, onHover }: MapCanvasProps) {
   const themeGradient = getThemeAccent(map.theme);
 
   const bgImage = map.imageUrl
@@ -232,7 +263,7 @@ function MapCanvas({ map, enabledTypes, hoveredId, onHover }: MapCanvasProps) {
 
       {/* Feature markers */}
       <div style={{ position: "absolute", inset: 0, zIndex: 3 }}>
-        {map.features.map((f) =>
+        {features.map((f) =>
           enabledTypes.has(f.type) ? (
             <FeatureMarker
               key={f.id}
@@ -308,12 +339,26 @@ function ComingSoonView({ map }: { map: DungeonMap }) {
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
-export default function MapsClient() {
+function MapsClientInner() {
+  const searchParams = useSearchParams();
   const [selectedMap, setSelectedMap] = useState<DungeonMap>(MAPS[0]);
-  const [enabledTypes, setEnabledTypes] = useState<Set<FeatureType>>(new Set(FEATURE_TYPES));
+  const [enabledTypes, setEnabledTypes] = useState<Set<FeatureType>>(
+    () => new Set([...FEATURE_TYPES, "monster_spawn" as FeatureType])
+  );
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
+  const [highlightedMonsterId, setHighlightedMonsterId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const mapParam = searchParams.get("map");
+    const highlightParam = searchParams.get("highlight");
+    if (mapParam) {
+      const found = MAPS.find((m) => m.id === mapParam);
+      if (found) setSelectedMap(found);
+    }
+    setHighlightedMonsterId(highlightParam);
+  }, [searchParams]);
 
   const toggleType = useCallback((type: FeatureType) => {
     setEnabledTypes((prev) => {
@@ -330,8 +375,39 @@ export default function MapsClient() {
     );
   }, []);
 
-  // Count visible features
-  const visibleCount = selectedMap.features.filter((f) => enabledTypes.has(f.type)).length;
+  const highlightedMonster = useMemo(
+    () => (highlightedMonsterId ? MONSTERS.find((m) => m.id === highlightedMonsterId) ?? null : null),
+    [highlightedMonsterId],
+  );
+
+  const renderedFeatures = useMemo<MapFeature[]>(() => {
+    const base = selectedMap.features;
+    if (!highlightedMonsterId) return base;
+    const spawns = MONSTER_SPAWNS.filter(
+      (s) => s.monsterId === highlightedMonsterId && s.mapId === selectedMap.id,
+    );
+    const monsterName = highlightedMonster?.name ?? highlightedMonsterId;
+    const synthetic: MapFeature[] = spawns.map((s, i) => ({
+      id: `highlight_${highlightedMonsterId}_${selectedMap.id}_${i}`,
+      type: "monster_spawn" as FeatureType,
+      label: monsterName,
+      x: s.x ?? 50,
+      y: s.y ?? 50,
+      description: s.module ? `${monsterName} spawn — ${s.module}` : `${monsterName} spawn location`,
+    }));
+    return [...base, ...synthetic];
+  }, [selectedMap, highlightedMonsterId, highlightedMonster]);
+
+  const clearHighlight = useCallback(() => {
+    setHighlightedMonsterId(null);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("highlight");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, []);
+
+  const visibleCount = renderedFeatures.filter((f) => enabledTypes.has(f.type)).length;
 
   return (
     <div className="flex flex-col" style={{ height: "calc(100vh - 56px)" }}>
@@ -485,7 +561,7 @@ export default function MapsClient() {
                     {selectedMap.description}
                   </p>
                   <p className="text-[10px] text-text-secondary/40 mt-2">
-                    {visibleCount} of {selectedMap.features.length} features visible
+                    {visibleCount} of {renderedFeatures.length} features visible
                   </p>
                 </div>
               </div>
@@ -519,6 +595,7 @@ export default function MapsClient() {
                 >
                   <MapCanvas
                     map={selectedMap}
+                    features={renderedFeatures}
                     enabledTypes={enabledTypes}
                     hoveredId={hoveredId}
                     onHover={setHoveredId}
@@ -532,9 +609,9 @@ export default function MapsClient() {
           </TransformWrapper>}
 
           {/* Map name badge (floating over viewport) */}
-          {!selectedMap.comingSoon && <div className="absolute top-3 left-3 z-20 pointer-events-none">
+          {!selectedMap.comingSoon && <div className="absolute top-3 left-3 z-20 flex items-center gap-2">
             <div
-              className="px-2.5 py-1 border border-border-subtle rounded-sm"
+              className="px-2.5 py-1 border border-border-subtle rounded-sm pointer-events-none"
               style={{ backgroundColor: "rgba(10,9,15,0.85)", backdropFilter: "blur(6px)" }}
             >
               <p className="font-cinzel font-bold text-xs" style={{ color: selectedMap.accentColor }}>
@@ -542,6 +619,21 @@ export default function MapsClient() {
               </p>
               <p className="text-[10px] text-text-secondary/60">{selectedMap.subtitle}</p>
             </div>
+            {highlightedMonsterId && (
+              <button
+                onClick={clearHighlight}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm border text-[11px] font-medium transition-all"
+                style={{
+                  backgroundColor: FEATURE_META.monster_spawn.bgColor,
+                  borderColor: FEATURE_META.monster_spawn.borderColor,
+                  color: FEATURE_META.monster_spawn.color,
+                }}
+              >
+                <Target className="w-3 h-3" />
+                Highlighting: {highlightedMonster?.name ?? highlightedMonsterId}
+                <X className="w-3 h-3 opacity-70" />
+              </button>
+            )}
           </div>}
 
           {/* Legend chips (floating bottom-left) */}
@@ -571,5 +663,13 @@ export default function MapsClient() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function MapsClient() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-full text-text-secondary/60 text-sm">Loading maps…</div>}>
+      <MapsClientInner />
+    </Suspense>
   );
 }

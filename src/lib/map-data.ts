@@ -8,7 +8,8 @@ export type FeatureType =
   | "altar"
   | "boss"
   | "campfire"
-  | "treasure";
+  | "treasure"
+  | "monster_spawn";
 
 export interface MapFeature {
   id: string;
@@ -58,6 +59,7 @@ export const FEATURE_META: Record<FeatureType, FeatureMeta> = {
   boss:             { label: "Boss",                 color: "#ff4444", bgColor: "rgba(90,8,8,0.95)",      borderColor: "rgba(255,68,68,0.95)"   },
   campfire:         { label: "Campfire",             color: "#fb923c", bgColor: "rgba(70,30,5,0.92)",     borderColor: "rgba(251,146,60,0.9)"   },
   treasure:         { label: "Treasure Room",        color: "#fde047", bgColor: "rgba(70,55,5,0.92)",     borderColor: "rgba(253,224,71,0.9)"   },
+  monster_spawn:    { label: "Monster Spawn",         color: "#f472b6", bgColor: "rgba(80,15,55,0.92)",    borderColor: "rgba(244,114,182,0.95)" },
 };
 
 // Ordered list of all feature types (used for toggle panel)
@@ -182,7 +184,6 @@ export const MAPS: DungeonMap[] = [
       { id: "gc_boss1", type: "boss", label: "Giant Centipede", x: 30, y: 60, description: "Sub-boss: Giant Centipede" },
       { id: "gc_boss2", type: "boss", label: "Cave Troll",      x: 48, y: 74, description: "Sub-boss: Cave Troll" },
       { id: "gc_boss3", type: "boss", label: "Cyclops",         x: 64, y: 44, description: "Boss: Cyclops. Drops Cyclops Precious Mirror." },
-      { id: "gc_boss4", type: "boss", label: "Lava Golem",      x: 78, y: 58, description: "Boss: Lava Golem" },
       { id: "gc_cf1", type: "campfire", label: "Campfire", x: 22, y: 48 },
       { id: "gc_cf2", type: "campfire", label: "Campfire", x: 76, y: 30 },
       { id: "gc_tr1", type: "treasure", label: "Lion's Head Chest Room", x: 88, y: 76, description: "High-value Lion's Head chests" },
@@ -361,6 +362,7 @@ export const MAPS: DungeonMap[] = [
       { id: "fd_boss1", type: "boss", label: "Magma Golem",       x: 50, y: 42, description: "Boss: Magma Golem — volcanic tank enemy" },
       { id: "fd_boss2", type: "boss", label: "Fire Giant",        x: 33, y: 60, description: "Elite: Fire Giant" },
       { id: "fd_boss3", type: "boss", label: "Flame Elemental",   x: 68, y: 68, description: "Elite: Flame Elemental" },
+      { id: "fd_boss4", type: "boss", label: "Lava Golem",        x: 55, y: 78, description: "Boss: Lava Golem" },
       { id: "fd_cf1", type: "campfire", label: "Campfire", x: 24, y: 50 },
       { id: "fd_cf2", type: "campfire", label: "Campfire", x: 76, y: 64 },
       { id: "fd_tr1", type: "treasure", label: "Molten Vault",  x: 86, y: 82, description: "Molten Vault — fire-tier loot" },

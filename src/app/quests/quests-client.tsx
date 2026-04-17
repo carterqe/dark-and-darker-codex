@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Search,
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 import { TRADERS, getQuestItems, type Trader, type Quest, type QuestRequirement } from "@/lib/quest-data";
 import { getRarityStyle } from "@/lib/darkerdb";
+import { getDropsFor } from "@/lib/monster-data";
 import ShimmerText from "@/components/ui/ShimmerText";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -238,39 +240,72 @@ function QuestItemsTab() {
 
       {/* Item grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-        {filtered.map((entry) => (
-          <motion.div
-            key={entry.item}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="bg-bg-secondary border border-border-subtle rounded-sm p-4"
-          >
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <div className="flex items-center gap-2 min-w-0">
-                <Package className="w-4 h-4 text-gold-dark shrink-0" />
-                <span className="text-sm font-medium text-text-primary truncate">{entry.item}</span>
-                <span className={`text-[10px] font-medium shrink-0 ${getRarityStyle(entry.rarity).text}`}>
-                  ({entry.rarity})
+        {filtered.map((entry) => {
+          const drops = getDropsFor(entry.item);
+          return (
+            <motion.div
+              key={entry.item}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-bg-secondary border border-border-subtle rounded-sm p-4"
+            >
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Package className="w-4 h-4 text-gold-dark shrink-0" />
+                  <span className="text-sm font-medium text-text-primary truncate">{entry.item}</span>
+                  <span className={`text-[10px] font-medium shrink-0 ${getRarityStyle(entry.rarity).text}`}>
+                    ({entry.rarity})
+                  </span>
+                </div>
+                <span className="text-[10px] px-1.5 py-0.5 bg-gold-primary/10 border border-gold-primary/20 rounded-sm text-gold-dark font-medium shrink-0">
+                  ×{entry.totalQuantity} total
                 </span>
               </div>
-              <span className="text-[10px] px-1.5 py-0.5 bg-gold-primary/10 border border-gold-primary/20 rounded-sm text-gold-dark font-medium shrink-0">
-                ×{entry.totalQuantity} total
-              </span>
-            </div>
-            <div className="space-y-1">
-              {entry.appearances.map((a, i) => (
-                <div key={i} className="flex items-center justify-between text-[11px]">
-                  <span className="text-text-secondary truncate">
-                    <span className="text-gold-dark">{a.traderName}</span>
-                    {" — "}
-                    {a.questName}
-                  </span>
-                  <span className="text-text-secondary/60 shrink-0 ml-2">×{a.quantity}</span>
+              <div className="space-y-1">
+                {entry.appearances.map((a, i) => (
+                  <div key={i} className="flex items-center justify-between text-[11px]">
+                    <span className="text-text-secondary truncate">
+                      <span className="text-gold-dark">{a.traderName}</span>
+                      {" — "}
+                      {a.questName}
+                    </span>
+                    <span className="text-text-secondary/60 shrink-0 ml-2">×{a.quantity}</span>
+                  </div>
+                ))}
+              </div>
+              {drops.length > 0 && (
+                <div className="mt-3 pt-2 border-t border-border-subtle space-y-1">
+                  {drops.map(({ monster, spawns }) => {
+                    const mapIds = Array.from(new Set(spawns.map((s) => s.mapId)));
+                    const firstMapId = mapIds[0];
+                    const locationLabel = mapIds.length === 0
+                      ? "Any map"
+                      : mapIds.length === 1
+                        ? firstMapId.replace(/_/g, " ")
+                        : `${mapIds.length} maps`;
+                    return (
+                      <div key={monster.id} className="flex items-center justify-between gap-2 text-[11px]">
+                        <span className="text-text-secondary truncate">
+                          <Skull className="inline w-3 h-3 mr-1 text-accent-red" />
+                          Dropped by: <span className="text-text-primary">{monster.name}</span>
+                          <span className="text-text-secondary/60"> ({locationLabel})</span>
+                        </span>
+                        {firstMapId && (
+                          <Link
+                            href={`/maps?highlight=${monster.id}&map=${firstMapId}`}
+                            className="shrink-0 text-[10px] px-1.5 py-0.5 rounded-sm border border-gold-primary/30 text-gold-primary hover:bg-gold-primary/10 transition-colors"
+                          >
+                            Show on map
+                          </Link>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
-          </motion.div>
-        ))}
+              )}
+            </motion.div>
+          );
+        })}
       </div>
 
       {filtered.length === 0 && (

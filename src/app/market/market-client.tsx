@@ -5,7 +5,7 @@ import {
   Store, Search, ChevronDown, Coins, Clock, TrendingDown, TrendingUp,
   BarChart3, Package,
 } from "lucide-react";
-import { DarkerDBMarketListing, fetchMarket, getRarityStyle } from "@/lib/darkerdb";
+import { DarkerDBMarketListing, fetchMarket, fetchItems, getRarityStyle } from "@/lib/darkerdb";
 import { formatNumber, timeAgo } from "@/lib/utils";
 import ShimmerText from "@/components/ui/ShimmerText";
 import MedievalButton from "@/components/ui/MedievalButton";
@@ -22,31 +22,54 @@ const SORT_OPTIONS = [
   { value: "price_desc", label: "Price: High to Low" },
 ];
 
-// Maps each slot dropdown value to keywords that actually appear in DarkerDB item/archetype names.
-// Slot labels like "Chest" or "Legs" never appear in item names themselves — items are named
-// "Gambeson", "Hauberk", "Leggings", "Hosen", etc.
-const SLOT_SEARCH_TERMS: Record<string, string[]> = {
-  Boots:    ["boots", "shoe", "sabaton"],
-  Chest:    ["gambeson", "armor", "robe", "mail", "brigandine", "hauberk", "cuirass",
-             "doublet", "surcoat", "regalia", "vestment", "cassock", "harness", "breastplate", "tunic"],
-  Gloves:   ["gloves", "gauntlet", "mitten"],
-  Helmet:   ["helm", "hood", "hat", "cap", "coif", "barbute", "armet", "kettle", "skull", "crown"],
-  Legs:     ["leggings", "hosen", "pants", "breeches", "chaps", "tights", "kilt"],
-  Cape:     ["cloak", "cape", "mantle"],
-  Necklace: ["necklace", "pendant", "amulet", "collar", "talisman"],
-  Ring:     ["ring", "band", "signet"],
-  Sword:    ["sword", "rapier", "falchion", "saber"],
-  Axe:      ["axe", "hatchet"],
-  Mace:     ["mace", "flail", "morningstar", "club", "warhammer", "hammer"],
-  Dagger:   ["dagger", "knife", "stiletto", "kris"],
-  Staff:    ["staff", "scepter", "crystal ball", "spellbook"],
-  Bow:      ["bow"],
-  Crossbow: ["crossbow", "arbalest"],
-  Shield:   ["shield", "buckler", "pavise"],
-  Potion:   ["potion", "flask", "elixir", "tonic", "draught"],
-  Lantern:  ["lantern"],
-  Torch:    ["torch"],
-};
+type SlotFilterKind = "slot" | "util" | "hand";
+interface SlotOption {
+  value: string;
+  label: string;
+  kind: SlotFilterKind;
+  param: string;
+}
+const SLOT_OPTIONS: { group: string; items: SlotOption[] }[] = [
+  {
+    group: "Armor",
+    items: [
+      { value: "slot:Head",  label: "Head",  kind: "slot", param: "Head"  },
+      { value: "slot:Chest", label: "Chest", kind: "slot", param: "Chest" },
+      { value: "slot:Legs",  label: "Legs",  kind: "slot", param: "Legs"  },
+      { value: "slot:Hands", label: "Hands", kind: "slot", param: "Hands" },
+      { value: "slot:Foot",  label: "Foot",  kind: "slot", param: "Foot"  },
+      { value: "slot:Back",  label: "Back",  kind: "slot", param: "Back"  },
+      { value: "slot:Sash",  label: "Sash",  kind: "slot", param: "Sash"  },
+    ],
+  },
+  {
+    group: "Accessories",
+    items: [
+      { value: "slot:Necklace", label: "Necklace", kind: "slot", param: "Necklace" },
+      { value: "slot:Ring",     label: "Ring",     kind: "slot", param: "Ring"     },
+    ],
+  },
+  {
+    group: "Weapons",
+    items: [
+      { value: "slot:Primary",    label: "Primary Weapon",      kind: "slot", param: "Primary"    },
+      { value: "slot:Secondary",  label: "Secondary / Off-hand", kind: "slot", param: "Secondary"  },
+      { value: "hand:One Handed", label: "One Handed",          kind: "hand", param: "One Handed" },
+      { value: "hand:Two Handed", label: "Two Handed",          kind: "hand", param: "Two Handed" },
+    ],
+  },
+  {
+    group: "Utility",
+    items: [
+      { value: "util:Drink",        label: "Potion / Drink", kind: "util", param: "Drink"        },
+      { value: "util:Light Source", label: "Light Source",   kind: "util", param: "Light Source" },
+      { value: "util:Consumable",   label: "Consumable",     kind: "util", param: "Consumable"   },
+    ],
+  },
+];
+const SLOT_OPTION_MAP = new Map<string, SlotOption>(
+  SLOT_OPTIONS.flatMap((g) => g.items).map((o) => [o.value, o])
+);
 
 const ALL_MARKET_STATS = [
   "armor_rating", "magic_resistance", "strength", "dexterity", "agility", "vigor",
@@ -104,6 +127,9 @@ export default function MarketClient() {
   const [sortBy, setSortBy] = useState("newest");
   const [stats, setStats] = useState<string[]>([]);
   const [slot, setSlot] = useState("");
+  const [slotArchetypes, setSlotArchetypes] = useState<Set<string> | null>(null);
+  const [slotLoading, setSlotLoading] = useState(false);
+  const slotCache = useRef<Map<string, Set<string>>>(new Map());
 
   // Price summary for searched item
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
@@ -125,8 +151,6 @@ export default function MarketClient() {
       if (cursorVal) params.cursor = cursorVal;
     }
 
-    // Only send archetype for text search — all other filters applied client-side
-    // to avoid broken/empty results from uncertain DarkerDB filter param formats
     if (search.trim()) {
       params.archetype = search.trim();
     }
@@ -164,6 +188,36 @@ export default function MarketClient() {
     debounceRef.current = setTimeout(() => load(), search || minPrice || maxPrice ? 500 : 0);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [search, rarity, soldFilter, minPrice, maxPrice, slot, stats]);
+
+  useEffect(() => {
+    if (!slot) { setSlotArchetypes(null); setSlotLoading(false); return; }
+    const option = SLOT_OPTION_MAP.get(slot);
+    if (!option) { setSlotArchetypes(new Set()); return; }
+
+    const cached = slotCache.current.get(slot);
+    if (cached) { setSlotArchetypes(cached); return; }
+
+    setSlotLoading(true);
+    setSlotArchetypes(null);
+
+    const params: Parameters<typeof fetchItems>[0] = { fetchAll: "true" };
+    if (option.kind === "slot") params.slot_type = option.param;
+    else if (option.kind === "hand") params.hand_type = option.param;
+    else if (option.kind === "util") params.utility_type = option.param;
+
+    let cancelled = false;
+    fetchItems(params)
+      .then((res) => {
+        if (cancelled) return;
+        const archs = new Set<string>((res.body ?? []).map((i) => i.archetype));
+        slotCache.current.set(slot, archs);
+        setSlotArchetypes(archs);
+      })
+      .catch(() => { if (!cancelled) setSlotArchetypes(new Set()); })
+      .finally(() => { if (!cancelled) setSlotLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [slot]);
 
   // Compute available stats from loaded listings
   const availableStats = useMemo(() => {
@@ -219,15 +273,10 @@ export default function MarketClient() {
       });
     }
 
-    // Slot filter: use keyword map to match slot categories to actual item/archetype names
-    // e.g. "Chest" → ["gambeson", "armor", "robe", ...] since items are never named "Chest"
-    if (slot) {
-      const terms = SLOT_SEARCH_TERMS[slot] ?? [slot.toLowerCase()];
-      filtered = filtered.filter((l) => {
-        const name = (l.item || l.archetype || "").toLowerCase();
-        const archetype = (l.archetype || "").toLowerCase();
-        return terms.some((term) => name.includes(term) || archetype.includes(term));
-      });
+    if (slot && slotArchetypes) {
+      filtered = filtered.filter((l) => slotArchetypes.has(l.archetype));
+    } else if (slot && !slotArchetypes) {
+      filtered = [];
     }
 
     // Multi-stat filter: listing must have ALL selected stats
@@ -245,7 +294,7 @@ export default function MarketClient() {
     if (sortBy === "price_asc") copy.sort((a, b) => a.price - b.price);
     else if (sortBy === "price_desc") copy.sort((a, b) => b.price - a.price);
     return copy;
-  }, [listings, sortBy, stats, slot, rarity, soldFilter, minPrice, maxPrice]);
+  }, [listings, sortBy, stats, slot, slotArchetypes, rarity, soldFilter, minPrice, maxPrice]);
 
   // Price analytics when searching a specific item
   const priceAnalytics = useMemo(() => {
@@ -330,39 +379,20 @@ export default function MarketClient() {
               </div>
             </div>
 
-            {/* Gear Slot */}
             <div>
-              <span className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">Gear Slot</span>
+              <span className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">
+                Gear Slot{slotLoading && " (loading...)"}
+              </span>
               <div className="relative">
                 <select value={slot} onChange={(e) => setSlot(e.target.value)} className={selectClass}>
                   <option value="">All Slots</option>
-                  <optgroup label="Armor">
-                    <option value="Boots">Boots</option>
-                    <option value="Chest">Chest</option>
-                    <option value="Gloves">Gloves</option>
-                    <option value="Helmet">Helmet</option>
-                    <option value="Legs">Legs</option>
-                    <option value="Cape">Cape</option>
-                  </optgroup>
-                  <optgroup label="Accessories">
-                    <option value="Necklace">Necklace</option>
-                    <option value="Ring">Ring</option>
-                  </optgroup>
-                  <optgroup label="Weapons">
-                    <option value="Sword">Sword</option>
-                    <option value="Axe">Axe</option>
-                    <option value="Mace">Mace</option>
-                    <option value="Dagger">Dagger</option>
-                    <option value="Staff">Staff</option>
-                    <option value="Bow">Bow</option>
-                    <option value="Crossbow">Crossbow</option>
-                    <option value="Shield">Shield</option>
-                  </optgroup>
-                  <optgroup label="Utility">
-                    <option value="Potion">Potion</option>
-                    <option value="Lantern">Lantern</option>
-                    <option value="Torch">Torch</option>
-                  </optgroup>
+                  {SLOT_OPTIONS.map((g) => (
+                    <optgroup key={g.group} label={g.group}>
+                      {g.items.map((o) => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
+                    </optgroup>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-text-secondary pointer-events-none" />
               </div>
@@ -521,7 +551,7 @@ export default function MarketClient() {
               <span> with <span className="text-gold-primary font-medium">{stats.map(formatStatLabel).join(" + ")}</span></span>
             )}
             {slot && (
-              <span> in <span className="text-gold-primary font-medium">{slot}</span></span>
+              <span> in <span className="text-gold-primary font-medium">{SLOT_OPTION_MAP.get(slot)?.label ?? slot}</span></span>
             )}
           </p>
 
