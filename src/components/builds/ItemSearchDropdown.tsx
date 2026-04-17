@@ -29,7 +29,7 @@ function canClassEquip(requiredClass: unknown, className: string): boolean {
 
 interface ItemSearchDropdownProps {
   slotLabel: string;
-  slotType: string;
+  slotType: string | string[];
   selectedClass?: string;
   value: BuildGearItem | null;
   onChange: (item: BuildGearItem | null) => void;
@@ -50,25 +50,35 @@ export default function ItemSearchDropdown({
   const [loaded, setLoaded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Normalise slotType to a stable string key for effect/callback deps
+  const slotTypeKey = Array.isArray(slotType) ? slotType.join(",") : slotType;
+
   // Fetch ALL items for this slot once when dropdown opens
   const fetchSlotItems = useCallback(async () => {
     if (loaded) return;
     setFetching(true);
-    const params = new URLSearchParams({ slot_type: slotType, fetchAll: "true" });
-    const res = await fetch(`/api/items?${params.toString()}`);
-    if (res.ok) {
-      const data = await res.json();
-      setAllItems(data.body ?? []);
-      setLoaded(true);
-    }
+    const types = slotTypeKey.split(",");
+    const results = await Promise.all(
+      types.map(async (type) => {
+        const params = new URLSearchParams({ slot_type: type, fetchAll: "true" });
+        const res = await fetch(`/api/items?${params.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          return (data.body ?? []) as DarkerDBItem[];
+        }
+        return [] as DarkerDBItem[];
+      })
+    );
+    setAllItems(results.flat());
+    setLoaded(true);
     setFetching(false);
-  }, [slotType, loaded]);
+  }, [slotTypeKey, loaded]);
 
   // Re-fetch when slot type changes
   useEffect(() => {
     setLoaded(false);
     setAllItems([]);
-  }, [slotType]);
+  }, [slotTypeKey]);
 
   // Filter items by class and search query
   useEffect(() => {

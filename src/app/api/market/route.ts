@@ -1,19 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const API_BASE = "https://api.darkerdb.com/v1";
+const FETCH_TIMEOUT_MS = 8000;
+const MAX_PAGES = 5; // was 10 — 250 listings is plenty, sequential so keep this tight
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const fetchAll = params.get("fetchAll") === "true";
 
   if (!fetchAll) {
-    const qs = params.toString();
-    const res = await fetch(`${API_BASE}/market${qs ? `?${qs}` : ""}`);
-    const data = await res.json();
-    return NextResponse.json(data);
+    try {
+      const qs = params.toString();
+      const res = await fetch(`${API_BASE}/market${qs ? `?${qs}` : ""}`, {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+        next: { revalidate: 60 },
+      });
+      const data = await res.json();
+      const response = NextResponse.json(data);
+      response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=20");
+      return response;
+    } catch {
+      return NextResponse.json({ error: "Failed to fetch market" }, { status: 503 });
+    }
   }
 
-  // Fetch all pages via cursor pagination (capped at 500 listings)
+  // Cursor-paginated fetch, capped at MAX_PAGES * 50 = 250 listings
   const filterParams = new URLSearchParams();
   for (const [key, val] of params.entries()) {
     if (key !== "fetchAll" && key !== "cursor") {
@@ -24,38 +35,39 @@ export async function GET(request: NextRequest) {
 
   const allItems: unknown[] = [];
   let cursor: string | null = null;
-  const maxPages = 10; // 50 * 10 = 500 max
   let page = 0;
 
-  while (page < maxPages) {
-    if (cursor) filterParams.set("cursor", cursor);
-    const res = await fetch(`${API_BASE}/market?${filterParams.toString()}`);
-    const data = await res.json();
+  try {
+    while (page < MAX_PAGES) {
+      if (cursor) filterParams.set("cursor", cursor);
+      const res = await fetch(`${API_BASE}/market?${filterParams.toString()}`, {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+        next: { revalidate: 60 },
+      });
+      const data = await res.json();
 
-    if (!data.body || data.body.length === 0) break;
-    allItems.push(...data.body);
+      if (!data.body || data.body.length === 0) break;
+      allItems.push(...data.body);
 
-    // Get next cursor
-    if (data.pagination?.next) {
-      try {
-        const nextUrl = new URL(data.pagination.next);
-        cursor = nextUrl.searchParams.get("cursor");
+      if (data.pagination?.next) {
+        try {
+          const nextUrl = new URL(data.pagination.next);
+          cursor = nextUrl.searchParams.get("cursor");
+          if (!cursor) break;
+        } catch { break; }
+      } else if (data.body.length >= 50) {
+        const last = data.body[data.body.length - 1];
+        cursor = last?.cursor ? String(last.cursor) : null;
         if (!cursor) break;
-      } catch {
+      } else {
         break;
       }
-    } else if (data.body.length >= 50) {
-      const last = data.body[data.body.length - 1];
-      cursor = last?.cursor ? String(last.cursor) : null;
-      if (!cursor) break;
-    } else {
-      break;
+
+      page++;
     }
+  } catch { /* timeout or network error — return what we have */ }
 
-    page++;
-  }
-
-  return NextResponse.json({
+  const response = NextResponse.json({
     version: "1.0.7",
     status: "OK",
     code: 200,
@@ -75,4 +87,6 @@ export async function GET(request: NextRequest) {
     },
     body: allItems,
   });
+  response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=20");
+  return response;
 }

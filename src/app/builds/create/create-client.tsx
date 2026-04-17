@@ -302,7 +302,7 @@ export default function CreateBuildClient() {
                     />
                     <GearSlotEditor
                       slotLabel="Off-hand"
-                      slotType="Secondary"
+                      slotType={["Secondary", "Shield"]}
                       selectedClass={selectedClass}
                       value={equipment.secondary ?? null}
                       onChange={(item) =>
@@ -326,7 +326,7 @@ export default function CreateBuildClient() {
                     />
                     <GearSlotEditor
                       slotLabel="Off-hand"
-                      slotType="Secondary"
+                      slotType={["Secondary", "Shield"]}
                       selectedClass={selectedClass}
                       value={equipment.weapon2_offhand ?? null}
                       onChange={(item) =>

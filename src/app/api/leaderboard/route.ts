@@ -5,13 +5,21 @@ const API_BASE = "https://api.darkerdb.com/v1";
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const category = params.get("category") || "EA7_HR";
-  const limit = params.get("limit") || "250";
+  const limit = Math.min(parseInt(params.get("limit") || "250", 10), 500);
 
   const qs = new URLSearchParams();
-  qs.set("limit", limit);
+  qs.set("limit", String(limit));
 
-  const res = await fetch(`${API_BASE}/leaderboards/${category}?${qs.toString()}`);
-  const data = await res.json();
-
-  return NextResponse.json(data);
+  try {
+    const res = await fetch(`${API_BASE}/leaderboards/${category}?${qs.toString()}`, {
+      signal: AbortSignal.timeout(8000),
+      next: { revalidate: 300 },
+    });
+    const data = await res.json();
+    const response = NextResponse.json(data);
+    response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=60");
+    return response;
+  } catch {
+    return NextResponse.json({ error: "Failed to fetch leaderboard" }, { status: 503 });
+  }
 }

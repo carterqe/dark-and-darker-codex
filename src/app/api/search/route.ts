@@ -27,7 +27,8 @@ const RANKS = [
 async function fetchRankPage(rank: string, page: number) {
   try {
     const res = await fetch(
-      `${API_BASE}/characters?rank=${encodeURIComponent(rank)}&sort=level&order=desc&limit=50&page=${page}`
+      `${API_BASE}/characters?rank=${encodeURIComponent(rank)}&sort=level&order=desc&limit=50&page=${page}`,
+      { signal: AbortSignal.timeout(8000) }
     );
     const data = await res.json();
     return data.body || [];
@@ -43,7 +44,7 @@ async function buildCache() {
 
   const allChars: typeof cachedCharacters = [];
 
-  // Fetch sequentially in small batches to avoid overwhelming the API
+  // Fetch in batches of 3 ranks to avoid overwhelming the upstream API
   for (let i = 0; i < RANKS.length; i += 3) {
     const batch = RANKS.slice(i, i + 3);
     const results = await Promise.all(
@@ -76,7 +77,10 @@ export async function GET(request: NextRequest) {
 
   // Try exact match from API first (covers all 918k players)
   try {
-    const res = await fetch(`${API_BASE}/characters?name=${encodeURIComponent(request.nextUrl.searchParams.get("q")!.trim())}&limit=1`);
+    const res = await fetch(
+      `${API_BASE}/characters?name=${encodeURIComponent(request.nextUrl.searchParams.get("q")!.trim())}&limit=1`,
+      { signal: AbortSignal.timeout(5000) }
+    );
     const data = await res.json();
     if (data.body && data.body.length > 0) {
       const c = data.body[0];
@@ -93,7 +97,7 @@ export async function GET(request: NextRequest) {
         }],
       });
     }
-  } catch {}
+  } catch { /* fall through to cache */ }
 
   // Fall back to cached partial search
   await buildCache();

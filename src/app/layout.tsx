@@ -5,6 +5,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ParticleBackground from "@/components/layout/ParticleBackground";
 import { AuthProvider } from "@/context/AuthContext";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const cinzel = Cinzel({
   subsets: ["latin"],
@@ -37,6 +38,7 @@ export default function RootLayout({
           <Navbar />
           <main className="flex-1 pt-14 sm:pt-16 relative z-10">{children}</main>
           <Footer />
+          <SpeedInsights />
         </AuthProvider>
       </body>
     </html>

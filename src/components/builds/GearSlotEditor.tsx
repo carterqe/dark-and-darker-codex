@@ -8,7 +8,7 @@ import ItemSearchDropdown from "./ItemSearchDropdown";
 
 interface GearSlotEditorProps {
   slotLabel: string;
-  slotType: string;
+  slotType: string | string[];
   selectedClass?: string;
   value: BuildGearItem | null;
   onChange: (item: BuildGearItem | null) => void;
@@ -279,15 +279,21 @@ export default function GearSlotEditor({
                 </div>
               )}
               {secondaryStats.length > 0 && (
-                <StatGroup
-                  label={`Secondary (Socketable) — ${enabledSecondaryCount}/${maxRolls} rolls`}
-                  labelColor="text-blue-400"
-                  stats={secondaryStats}
-                  enabled={enabledStats}
-                  atLimit={enabledSecondaryCount >= maxRolls}
-                  onToggle={toggleStat}
-                  onValueChange={updateStatValue}
-                />
+                maxRolls === 0 ? (
+                  <p className="text-[10px] text-text-secondary/50 italic">
+                    Set rarity to Uncommon or higher to enable stat rolls.
+                  </p>
+                ) : (
+                  <StatGroup
+                    label={`Secondary (Socketable) — ${enabledSecondaryCount}/${maxRolls} rolls`}
+                    labelColor="text-blue-400"
+                    stats={secondaryStats}
+                    enabled={enabledStats}
+                    atLimit={enabledSecondaryCount >= maxRolls}
+                    onToggle={toggleStat}
+                    onValueChange={updateStatValue}
+                  />
+                )
               )}
             </div>
           )}
