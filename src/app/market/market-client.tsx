@@ -22,6 +22,32 @@ const SORT_OPTIONS = [
   { value: "price_desc", label: "Price: High to Low" },
 ];
 
+// Maps each slot dropdown value to keywords that actually appear in DarkerDB item/archetype names.
+// Slot labels like "Chest" or "Legs" never appear in item names themselves — items are named
+// "Gambeson", "Hauberk", "Leggings", "Hosen", etc.
+const SLOT_SEARCH_TERMS: Record<string, string[]> = {
+  Boots:    ["boots", "shoe", "sabaton"],
+  Chest:    ["gambeson", "armor", "robe", "mail", "brigandine", "hauberk", "cuirass",
+             "doublet", "surcoat", "regalia", "vestment", "cassock", "harness", "breastplate", "tunic"],
+  Gloves:   ["gloves", "gauntlet", "mitten"],
+  Helmet:   ["helm", "hood", "hat", "cap", "coif", "barbute", "armet", "kettle", "skull", "crown"],
+  Legs:     ["leggings", "hosen", "pants", "breeches", "chaps", "tights", "kilt"],
+  Cape:     ["cloak", "cape", "mantle"],
+  Necklace: ["necklace", "pendant", "amulet", "collar", "talisman"],
+  Ring:     ["ring", "band", "signet"],
+  Sword:    ["sword", "rapier", "falchion", "saber"],
+  Axe:      ["axe", "hatchet"],
+  Mace:     ["mace", "flail", "morningstar", "club", "warhammer", "hammer"],
+  Dagger:   ["dagger", "knife", "stiletto", "kris"],
+  Staff:    ["staff", "scepter", "crystal ball", "spellbook"],
+  Bow:      ["bow"],
+  Crossbow: ["crossbow", "arbalest"],
+  Shield:   ["shield", "buckler", "pavise"],
+  Potion:   ["potion", "flask", "elixir", "tonic", "draught"],
+  Lantern:  ["lantern"],
+  Torch:    ["torch"],
+};
+
 const ALL_MARKET_STATS = [
   "armor_rating", "magic_resistance", "strength", "dexterity", "agility", "vigor",
   "knowledge", "will", "max_health", "move_speed", "action_speed",
@@ -99,19 +125,10 @@ export default function MarketClient() {
       if (cursorVal) params.cursor = cursorVal;
     }
 
+    // Only send archetype for text search — all other filters applied client-side
+    // to avoid broken/empty results from uncertain DarkerDB filter param formats
     if (search.trim()) {
       params.archetype = search.trim();
-    }
-    if (rarity) params.rarity = rarity;
-    if (soldFilter) params.has_sold = soldFilter;
-
-    // Price range
-    if (minPrice && maxPrice) {
-      params.price = `${minPrice}:${maxPrice}`;
-    } else if (minPrice) {
-      params.price = `>=${minPrice}`;
-    } else if (maxPrice) {
-      params.price = `<=${maxPrice}`;
     }
 
     fetchMarket(params)
@@ -165,25 +182,51 @@ export default function MarketClient() {
     return ALL_MARKET_STATS.filter((s) => found.has(s));
   }, [listings]);
 
-  // Reset stats if no longer available
+  // Reset stats if no longer available — use ref to avoid triggering the load useEffect
+  const statsRef = useRef(stats);
+  statsRef.current = stats;
   useEffect(() => {
-    if (stats.length > 0) {
-      const valid = stats.filter((s) => availableStats.includes(s));
-      if (valid.length !== stats.length) setStats(valid);
+    if (statsRef.current.length > 0) {
+      const valid = statsRef.current.filter((s) => availableStats.includes(s));
+      if (valid.length !== statsRef.current.length) setStats(valid);
     }
-  }, [availableStats, stats]);
+  }, [availableStats]); // intentionally excludes stats to avoid double-load cascade
 
-  // Client-side stat + slot filter + sort
+  // All filtering is done client-side for reliability
   const sortedListings = useMemo(() => {
     let filtered = listings;
 
-    // Slot filter: match against item name / archetype
+    // Rarity filter
+    if (rarity) {
+      filtered = filtered.filter((l) => l.rarity === rarity);
+    }
+
+    // Status filter
+    if (soldFilter === "true") {
+      filtered = filtered.filter((l) => l.has_sold);
+    } else if (soldFilter === "false") {
+      filtered = filtered.filter((l) => !l.has_sold && !l.has_expired);
+    }
+
+    // Price range filter
+    const minP = minPrice ? parseFloat(minPrice) : null;
+    const maxP = maxPrice ? parseFloat(maxPrice) : null;
+    if (minP !== null || maxP !== null) {
+      filtered = filtered.filter((l) => {
+        if (minP !== null && l.price < minP) return false;
+        if (maxP !== null && l.price > maxP) return false;
+        return true;
+      });
+    }
+
+    // Slot filter: use keyword map to match slot categories to actual item/archetype names
+    // e.g. "Chest" → ["gambeson", "armor", "robe", ...] since items are never named "Chest"
     if (slot) {
-      const slotLower = slot.toLowerCase();
+      const terms = SLOT_SEARCH_TERMS[slot] ?? [slot.toLowerCase()];
       filtered = filtered.filter((l) => {
         const name = (l.item || l.archetype || "").toLowerCase();
         const archetype = (l.archetype || "").toLowerCase();
-        return name.includes(slotLower) || archetype.includes(slotLower);
+        return terms.some((term) => name.includes(term) || archetype.includes(term));
       });
     }
 
@@ -202,7 +245,7 @@ export default function MarketClient() {
     if (sortBy === "price_asc") copy.sort((a, b) => a.price - b.price);
     else if (sortBy === "price_desc") copy.sort((a, b) => b.price - a.price);
     return copy;
-  }, [listings, sortBy, stats, slot]);
+  }, [listings, sortBy, stats, slot, rarity, soldFilter, minPrice, maxPrice]);
 
   // Price analytics when searching a specific item
   const priceAnalytics = useMemo(() => {

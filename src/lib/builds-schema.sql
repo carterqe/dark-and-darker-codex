@@ -131,3 +131,22 @@ create trigger builds_updated_at
 -- Migration: Add spells column (run if table already exists)
 -- ============================================================
 -- alter table builds add column if not exists spells text[] default '{}';
+
+-- ============================================================
+-- Length constraints (defense-in-depth)
+-- ============================================================
+
+-- Builds
+alter table builds add constraint builds_title_length check (char_length(title) <= 100);
+alter table builds add constraint builds_description_length check (char_length(description) <= 2000);
+alter table builds add constraint builds_class_length check (char_length(class) <= 20);
+alter table builds add constraint builds_tags_size check (array_length(tags, 1) is null or array_length(tags, 1) <= 5);
+alter table builds add constraint builds_perks_size check (array_length(perks, 1) is null or array_length(perks, 1) <= 4);
+alter table builds add constraint builds_skills_size check (array_length(skills, 1) is null or array_length(skills, 1) <= 4);
+alter table builds add constraint builds_spells_size check (array_length(spells, 1) is null or array_length(spells, 1) <= 20);
+
+-- Comments
+alter table build_comments add constraint comments_content_length check (char_length(content) <= 500);
+
+-- Profiles
+alter table profiles add constraint profiles_username_length check (char_length(username) between 3 and 20);
