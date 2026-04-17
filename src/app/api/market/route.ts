@@ -149,8 +149,7 @@ export async function GET(request: NextRequest) {
   }
   filterParams.set("limit", "50");
 
-  const seen = new Set<unknown>();
-  const allItems: Record<string, unknown>[] = [];
+  const allItems: unknown[] = [];
   let cursor: string | null = null;
   let page = 0;
 
@@ -163,20 +162,8 @@ export async function GET(request: NextRequest) {
       });
       const data = await res.json();
 
-      const body: Record<string, unknown>[] = Array.isArray(data.body) ? data.body : [];
-      if (body.length === 0) break;
-
-      let addedThisPage = 0;
-      for (const item of body) {
-        const id = item?.id;
-        if (id != null) {
-          if (seen.has(id)) continue;
-          seen.add(id);
-        }
-        allItems.push(item);
-        addedThisPage++;
-      }
-      if (addedThisPage === 0) break;
+      if (!data.body || data.body.length === 0) break;
+      allItems.push(...data.body);
 
       if (data.pagination?.next) {
         try {
@@ -184,8 +171,8 @@ export async function GET(request: NextRequest) {
           cursor = nextUrl.searchParams.get("cursor");
           if (!cursor) break;
         } catch { break; }
-      } else if (body.length >= 50) {
-        const last = body[body.length - 1];
+      } else if (data.body.length >= 50) {
+        const last = data.body[data.body.length - 1];
         cursor = last?.cursor ? String(last.cursor) : null;
         if (!cursor) break;
       } else {

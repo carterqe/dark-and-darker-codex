@@ -159,9 +159,6 @@ export default function MarketClient() {
       params.archetype = search.trim();
     }
 
-    if (rarity) params.rarity = rarity;
-    if (soldFilter === "true") params.has_sold = "true";
-
     fetchMarket(params)
       .then((res) => {
         const items = res.body || [];
