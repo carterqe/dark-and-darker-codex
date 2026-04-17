@@ -101,9 +101,6 @@ export default function MarketClient() {
 
     if (search.trim()) {
       params.archetype = search.trim();
-    } else if (slot) {
-      // No text search — push slot filtering to the server via archetype param
-      params.archetype = slot;
     }
     if (rarity) params.rarity = rarity;
     if (soldFilter) params.has_sold = soldFilter;
