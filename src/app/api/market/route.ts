@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 const API_BASE = "https://api.darkerdb.com/v1";
 const FETCH_TIMEOUT_MS = 8000;
 const MAX_PAGES = 5; // was 10 — 250 listings is plenty, sequential so keep this tight
-const MAX_ARCHETYPES = 100;
+const MAX_ARCHETYPES = 40;
 const ARCHETYPE_MAX_PAGES = 3;
 
 function aggregatedEnvelope(body: unknown[]) {
