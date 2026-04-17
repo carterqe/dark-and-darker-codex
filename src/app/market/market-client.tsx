@@ -139,23 +139,19 @@ export default function MarketClient() {
   const hasActiveFilter = !!(search.trim() || rarity || soldFilter || minPrice || maxPrice || slot || stats.length > 0);
 
   const load = (append: boolean = false, cursorVal?: string) => {
-    if (slot && !slotArchetypes) return;
-
     if (!append) { setLoading(true); setError(false); }
     else setLoadingMore(true);
 
     const params: Record<string, string | number> = {};
 
-    if (slot && slotArchetypes && slotArchetypes.size > 0) {
-      params.archetypes = Array.from(slotArchetypes).join(",");
-    } else if (hasActiveFilter) {
+    if (hasActiveFilter) {
       params.fetchAll = "true";
     } else {
       params.limit = 50;
       if (cursorVal) params.cursor = cursorVal;
     }
 
-    if (search.trim() && !slot) {
+    if (search.trim()) {
       params.archetype = search.trim();
     }
 
@@ -191,7 +187,7 @@ export default function MarketClient() {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => load(), search || minPrice || maxPrice ? 500 : 0);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [search, rarity, soldFilter, minPrice, maxPrice, slot, slotArchetypes, stats]);
+  }, [search, rarity, soldFilter, minPrice, maxPrice, slot, stats]);
 
   useEffect(() => {
     if (!slot) { setSlotArchetypes(null); setSlotLoading(false); return; }
@@ -283,15 +279,6 @@ export default function MarketClient() {
       filtered = [];
     }
 
-    if (slot && search.trim()) {
-      const q = search.trim().toLowerCase();
-      filtered = filtered.filter(
-        (l) =>
-          (l.item && l.item.toLowerCase().includes(q)) ||
-          (l.archetype && l.archetype.toLowerCase().includes(q))
-      );
-    }
-
     // Multi-stat filter: listing must have ALL selected stats
     if (stats.length > 0) {
       filtered = filtered.filter((l) =>
@@ -307,7 +294,7 @@ export default function MarketClient() {
     if (sortBy === "price_asc") copy.sort((a, b) => a.price - b.price);
     else if (sortBy === "price_desc") copy.sort((a, b) => b.price - a.price);
     return copy;
-  }, [listings, sortBy, stats, slot, slotArchetypes, rarity, soldFilter, minPrice, maxPrice, search]);
+  }, [listings, sortBy, stats, slot, slotArchetypes, rarity, soldFilter, minPrice, maxPrice]);
 
   // Price analytics when searching a specific item
   const priceAnalytics = useMemo(() => {

@@ -338,27 +338,19 @@ export async function fetchMarket(params: {
   limit?: number;
   cursor?: string;
   archetype?: string;
-  archetypes?: string;
   rarity?: string;
   has_sold?: string;
   price?: string;
   fetchAll?: string;
 }): Promise<DarkerDBResponse<DarkerDBMarketListing[]>> {
   const searchParams = new URLSearchParams();
-  if (params.archetypes) {
-    searchParams.set("archetypes", params.archetypes);
-    if (params.rarity) searchParams.set("rarity", params.rarity);
-    if (params.has_sold) searchParams.set("has_sold", params.has_sold);
-    if (params.price) searchParams.set("price", params.price);
-  } else {
-    if (params.limit) searchParams.set("limit", String(params.limit));
-    if (params.cursor) searchParams.set("cursor", params.cursor);
-    if (params.archetype) searchParams.set("archetype", params.archetype);
-    if (params.rarity) searchParams.set("rarity", params.rarity);
-    if (params.has_sold) searchParams.set("has_sold", params.has_sold);
-    if (params.price) searchParams.set("price", params.price);
-    if (params.fetchAll) searchParams.set("fetchAll", params.fetchAll);
-  }
+  if (params.limit) searchParams.set("limit", String(params.limit));
+  if (params.cursor) searchParams.set("cursor", params.cursor);
+  if (params.archetype) searchParams.set("archetype", params.archetype);
+  if (params.rarity) searchParams.set("rarity", params.rarity);
+  if (params.has_sold) searchParams.set("has_sold", params.has_sold);
+  if (params.price) searchParams.set("price", params.price);
+  if (params.fetchAll) searchParams.set("fetchAll", params.fetchAll);
 
   const qs = searchParams.toString();
   const res = await fetch(`${API_BASE}/market${qs ? `?${qs}` : ""}`);
