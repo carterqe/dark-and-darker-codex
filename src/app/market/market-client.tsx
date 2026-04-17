@@ -525,7 +525,7 @@ export default function MarketClient() {
       )}
 
       {/* Table */}
-      {loading ? (
+      {loading || (slot && !slotArchetypes) ? (
         <div className="space-y-2">
           {Array.from({ length: 10 }).map((_, i) => (
             <div key={i} className="h-14 bg-bg-secondary/50 rounded-sm animate-pulse" style={{ animationDelay: `${i * 40}ms` }} />
