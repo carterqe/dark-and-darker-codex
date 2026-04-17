@@ -4,8 +4,7 @@ const API_BASE = "https://api.darkerdb.com/v1";
 const FETCH_TIMEOUT_MS = 8000;
 const MAX_PAGES = 5; // was 10 — 250 listings is plenty, sequential so keep this tight
 const MAX_ARCHETYPES = 100;
-const ARCHETYPE_MAX_PAGES = 1;
-const ARCHETYPE_CONCURRENCY = 20;
+const ARCHETYPE_MAX_PAGES = 3;
 
 function aggregatedEnvelope(body: unknown[]) {
   return {
@@ -68,49 +67,44 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const fetchOne = async (arch: string): Promise<Record<string, unknown>[]> => {
-      const collected: Record<string, unknown>[] = [];
-      let cursor: string | null = null;
-      try {
-        for (let page = 0; page < ARCHETYPE_MAX_PAGES; page++) {
-          const qp = new URLSearchParams(passthrough);
-          qp.set("archetype", arch);
-          qp.set("limit", "50");
-          if (cursor) qp.set("cursor", cursor);
+    const results = await Promise.all(
+      archetypes.map(async (arch) => {
+        const collected: Record<string, unknown>[] = [];
+        let cursor: string | null = null;
+        try {
+          for (let page = 0; page < ARCHETYPE_MAX_PAGES; page++) {
+            const qp = new URLSearchParams(passthrough);
+            qp.set("archetype", arch);
+            qp.set("limit", "50");
+            if (cursor) qp.set("cursor", cursor);
 
-          const res = await fetch(`${API_BASE}/market?${qp.toString()}`, {
-            signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-            next: { revalidate: 60 },
-          });
-          const data = await res.json();
-          const body = Array.isArray(data.body) ? data.body : [];
-          if (body.length === 0) break;
-          collected.push(...body);
+            const res = await fetch(`${API_BASE}/market?${qp.toString()}`, {
+              signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+              next: { revalidate: 60 },
+            });
+            const data = await res.json();
+            const body = Array.isArray(data.body) ? data.body : [];
+            if (body.length === 0) break;
+            collected.push(...body);
 
-          if (data.pagination?.next) {
-            try {
-              const nextUrl = new URL(data.pagination.next);
-              cursor = nextUrl.searchParams.get("cursor");
+            if (data.pagination?.next) {
+              try {
+                const nextUrl = new URL(data.pagination.next);
+                cursor = nextUrl.searchParams.get("cursor");
+                if (!cursor) break;
+              } catch { break; }
+            } else if (body.length >= 50) {
+              const last = body[body.length - 1];
+              cursor = last?.cursor ? String(last.cursor) : null;
               if (!cursor) break;
-            } catch { break; }
-          } else if (body.length >= 50) {
-            const last = body[body.length - 1];
-            cursor = last?.cursor ? String(last.cursor) : null;
-            if (!cursor) break;
-          } else {
-            break;
+            } else {
+              break;
+            }
           }
-        }
-      } catch { /* per-archetype failure — return partial */ }
-      return collected;
-    };
-
-    const results: Record<string, unknown>[][] = [];
-    for (let i = 0; i < archetypes.length; i += ARCHETYPE_CONCURRENCY) {
-      const batch = archetypes.slice(i, i + ARCHETYPE_CONCURRENCY);
-      const batchResults = await Promise.all(batch.map(fetchOne));
-      results.push(...batchResults);
-    }
+        } catch { /* per-archetype failure — return partial */ }
+        return collected;
+      })
+    );
 
     const seen = new Set<unknown>();
     const merged: Record<string, unknown>[] = [];
