@@ -83,7 +83,7 @@ export const MAPS: DungeonMap[] = [
     name: "Ruins of Forgotten Castle",
     subtitle: "The First Floor",
     description:
-      "The crumbling surface ruins of an ancient castle. Bandits, skeletons, and spectral enemies roam the overgrown halls. Connects downward to the Crypts.",
+      "The crumbling surface ruins of an ancient castle. Skeletons, wraiths, and ancient horrors roam the overgrown halls. Connects downward to the Crypts.",
     theme: "ruins",
     width: 773,
     height: 774,
@@ -104,8 +104,8 @@ export const MAPS: DungeonMap[] = [
       { id: "ru_sh4", type: "shrine_power",      label: "Shrine of Power",      x: 36, y: 74 },
       { id: "ru_sp1", type: "fountain_speed",    label: "Fountain of Speed",    x: 62, y: 22 },
       { id: "ru_alt1", type: "altar",            label: "Altar of Sacrifice",   x: 84, y: 42, description: "One-time resurrection shrine" },
-      { id: "ru_boss1", type: "boss", label: "Skeleton Warlord",  x: 40, y: 58, description: "Boss: Skeleton Warlord" },
-      { id: "ru_boss2", type: "boss", label: "Bandit Leader",     x: 65, y: 44, description: "Sub-boss: Bandit Leader" },
+      { id: "ru_boss1", type: "boss", label: "Spectral Knight",   x: 40, y: 58, description: "Boss: Spectral Knight" },
+      { id: "ru_boss2", type: "boss", label: "Banshee",           x: 65, y: 44, description: "Boss: Banshee" },
       { id: "ru_cf1", type: "campfire", label: "Campfire", x: 24, y: 48 },
       { id: "ru_cf2", type: "campfire", label: "Campfire", x: 78, y: 28 },
       { id: "ru_tr1", type: "treasure", label: "Armory",         x: 88, y: 74, description: "Ruins Armory module with weapon racks" },
@@ -119,7 +119,7 @@ export const MAPS: DungeonMap[] = [
     name: "Crypts",
     subtitle: "The Second Floor",
     description:
-      "The haunted underground crypts below the Ruins. Packed with undead and demonic forces. Bosses include the Ghost King, Skeleton Warlord, and the Lich. Connects to the Inferno.",
+      "The haunted underground crypts below the Ruins. Packed with undead and demonic forces. Bosses include the Skeleton Warlord and the Lich. Connects to the Inferno.",
     theme: "crypt",
     width: 886,
     height: 887,
@@ -143,9 +143,7 @@ export const MAPS: DungeonMap[] = [
       { id: "cr_alt1", type: "altar",            label: "Altar of Sacrifice",    x: 14, y: 82, description: "One-time resurrection shrine" },
       { id: "cr_alt2", type: "altar",            label: "Altar of Sacrifice",    x: 86, y: 14, description: "One-time resurrection shrine" },
       { id: "cr_boss1", type: "boss", label: "Skeleton Warlord", x: 38, y: 58, description: "Boss: Skeleton Warlord. Drops Warlord's Broken Sword Blade." },
-      { id: "cr_boss2", type: "boss", label: "Ghost King",       x: 62, y: 42, description: "Boss: Ghost King. Extremely dangerous." },
-      { id: "cr_boss3", type: "boss", label: "Lich",             x: 50, y: 26, description: "Boss: Lich. Commands dark magic and undead." },
-      { id: "cr_boss4", type: "boss", label: "Spectral Knight",  x: 80, y: 78, description: "Sub-boss: Spectral Knight" },
+      { id: "cr_boss2", type: "boss", label: "Lich",             x: 50, y: 26, description: "Boss: Lich. Commands dark magic and undead." },
       { id: "cr_cf1", type: "campfire", label: "Campfire", x: 18, y: 52 },
       { id: "cr_cf2", type: "campfire", label: "Campfire", x: 72, y: 18 },
       { id: "cr_tr1", type: "treasure", label: "Pyramid",        x: 88, y: 88, description: "Pyramid module with high-value loot" },
@@ -287,9 +285,7 @@ export const MAPS: DungeonMap[] = [
       { id: "ia_sh3", type: "shrine_power",      label: "Shrine of Power",      x: 45, y: 72 },
       { id: "ia_sp1", type: "fountain_speed",    label: "Fountain of Speed",    x: 72, y: 28 },
       { id: "ia_alt1", type: "altar",            label: "Altar of Sacrifice",   x: 18, y: 78, description: "One-time resurrection shrine" },
-      { id: "ia_boss1", type: "boss", label: "Ice Wyvern",           x: 50, y: 40, description: "Boss: Ice Wyvern — Abyss apex predator" },
-      { id: "ia_boss2", type: "boss", label: "Frost Giant Warlord",  x: 35, y: 58, description: "Elite: Frost Giant Warlord" },
-      { id: "ia_boss3", type: "boss", label: "Crystal Golem",        x: 68, y: 52, description: "Elite: Crystal Golem" },
+      { id: "ia_boss1", type: "boss", label: "Frost Wyvern",         x: 50, y: 40, description: "Boss: Frost Wyvern — Abyss apex predator" },
       { id: "ia_cf1", type: "campfire", label: "Campfire", x: 22, y: 62 },
       { id: "ia_tr1", type: "treasure", label: "Frozen Vault",  x: 82, y: 80, description: "Frozen Vault — highest-tier ice loot" },
       { id: "ia_tr2", type: "treasure", label: "Ice Hoard",     x: 14, y: 22, description: "Ancient Ice Hoard module" },
@@ -333,7 +329,7 @@ export const MAPS: DungeonMap[] = [
     ],
   },
 
-  // ─── FIREDEEP ──────────────────────────────────────────────────────────────
+  // ─── FIREDEEP (PLACEHOLDER — not yet a canonical wiki dungeon) ─────────────
   {
     id: "firedeep",
     name: "Firedeep",
@@ -370,3 +366,71 @@ export const MAPS: DungeonMap[] = [
     ],
   },
 ];
+
+// ─── CANONICAL NAME VALIDATION ──────────────────────────────────────────────
+// Sources (Dark & Darker wiki):
+//   https://darkanddarker.wiki.spellsandguns.com/Dungeon
+//   https://darkanddarker.wiki.spellsandguns.com/Bosses
+//   https://darkanddarker.wiki.spellsandguns.com/Subbosses
+// Add to these sets (with a wiki-sourced justification in a comment) when the
+// game adds a new map or boss. Module-load validation at the bottom throws on
+// drift, so `next build` fails rather than shipping inaccurate names.
+
+export const KNOWN_MAPS: ReadonlySet<string> = new Set([
+  "Ruins of Forgotten Castle", // wiki parent dungeon; floor 1 is "The Ruins"
+  "Crypts",                    // wiki: "The Howling Crypts" (floor 2)
+  "Goblin Cave",               // wiki: "The Goblin Caves"
+  "Inferno",                   // wiki: floor 3 of Ruins of Forgotten Castle
+  "Frost Mountain",            // wiki parent dungeon; floor 1 is "Ice Cavern"
+  "Ice Abyss",                 // wiki: floor 2 of Frost Mountain
+  "Ship Graveyard",            // placeholder — not yet a canonical wiki dungeon
+  "Firedeep",                  // placeholder — not yet a canonical wiki dungeon
+]);
+
+// Canonical boss + subboss labels per map id. Entries are required for every
+// non-`comingSoon` map. `comingSoon` maps are exempt (placeholder data allowed).
+export const CANONICAL_BOSSES_BY_MAP: Readonly<Record<string, readonly string[]>> = {
+  // Ruins bosses: Spectral Knight, Banshee. Subbosses: Giant Worm, Golem, Cockatrice, Skeleton Champion, Wraith.
+  ruins:          ["Spectral Knight", "Banshee", "Giant Worm", "Golem", "Cockatrice", "Skeleton Champion", "Wraith"],
+  // Howling Crypts bosses: Skeleton Warlord, Lich. (Wiki does not enumerate Crypts subbosses.)
+  crypts:         ["Skeleton Warlord", "Lich"],
+  // Goblin Caves bosses: Cyclops, Cave Troll. Subboss: Giant Centipede.
+  goblin_cave:    ["Cyclops", "Cave Troll", "Giant Centipede"],
+  // Inferno boss: Ghost King. Subbosses: Demon Berserker, Demon Centaur, Skeleton Champion, Wraith.
+  // Fire Colossus and Abomination are canonical names in the wiki boss/subboss lists; their
+  // spawn map is not explicitly documented on the wiki, retained here from prior data.
+  inferno:        ["Ghost King", "Fire Colossus", "Demon Berserker", "Demon Centaur", "Abomination", "Skeleton Champion", "Wraith"],
+  // Ice Cavern subbosses: Frost Giant Berserker, Frost Giant Shielder, Skeleton Champion, Yeti.
+  // Wendigo is a canonical subboss; specific Ice Cavern listing not confirmed but retained.
+  frost_mountain: ["Frost Giant Berserker", "Frost Giant Shielder", "Skeleton Champion", "Yeti", "Wendigo"],
+  // Ice Abyss boss: Frost Wyvern.
+  ice_abyss:      ["Frost Wyvern"],
+};
+
+(function validateMapData() {
+  for (const map of MAPS) {
+    if (!KNOWN_MAPS.has(map.name)) {
+      throw new Error(
+        `map-data: map name "${map.name}" (id=${map.id}) is not in KNOWN_MAPS. ` +
+        `Fix the typo or add the canonical name with a wiki-sourced comment.`,
+      );
+    }
+    if (map.comingSoon) continue;
+    const allowed = CANONICAL_BOSSES_BY_MAP[map.id];
+    if (!allowed) {
+      throw new Error(
+        `map-data: map id "${map.id}" (${map.name}) has no CANONICAL_BOSSES_BY_MAP entry. ` +
+        `Add it (with a wiki source) or mark the map comingSoon: true.`,
+      );
+    }
+    for (const feature of map.features) {
+      if (feature.type !== "boss") continue;
+      if (!allowed.includes(feature.label)) {
+        throw new Error(
+          `map-data: boss "${feature.label}" (id=${feature.id}) is not canonical for ${map.name}. ` +
+          `Allowed: [${allowed.join(", ")}]. Fix the label or update CANONICAL_BOSSES_BY_MAP with a wiki source.`,
+        );
+      }
+    }
+  }
+})();
