@@ -218,7 +218,7 @@ function BuildCard({ build, index }: { build: Build; index: number }) {
 
           {/* Description preview */}
           {build.description && (
-            <p className="text-xs text-text-secondary/70 line-clamp-2 mb-3">
+            <p className="text-xs text-text-secondary/70 line-clamp-2 break-words mb-3">
               {build.description}
             </p>
           )}

@@ -39,6 +39,7 @@ export default function CreateBuildClient() {
   const [perks, setPerks] = useState<string[]>([]);
   const [skills, setSkills] = useState<string[]>([]);
   const [spells, setSpells] = useState<string[]>([]);
+  const [gearMemoryBonus, setGearMemoryBonus] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -258,7 +259,11 @@ export default function CreateBuildClient() {
           <div className="flex flex-col lg:flex-row gap-6 items-start mt-2">
             {/* Stat panel — left of gear grid on desktop, above on mobile */}
             <div className="w-full lg:w-64 xl:w-72 shrink-0">
-              <CharacterStatPanel equipment={equipment} selectedClass={selectedClass} />
+              <CharacterStatPanel
+                equipment={equipment}
+                selectedClass={selectedClass}
+                onMemoryCapacity={setGearMemoryBonus}
+              />
             </div>
             {/* Gear grid */}
             <div className="flex-1 min-w-0">
@@ -412,6 +417,7 @@ export default function CreateBuildClient() {
                   label={group.label}
                   items={group.items}
                   selected={spells}
+                  maxMemory={group.capacity + gearMemoryBonus}
                   onChange={setSpells}
                 />
               ))}

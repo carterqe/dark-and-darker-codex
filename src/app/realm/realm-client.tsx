@@ -160,10 +160,10 @@ export default function RealmClient() {
             <h3 className="font-cinzel font-bold text-sm text-gold-primary">Fresh Wares</h3>
           </div>
           <div className="space-y-2 max-h-80 overflow-y-auto">
-            {recentListings.map((l) => {
+            {recentListings.map((l, i) => {
               const rs = getRarityStyle(l.rarity);
               return (
-                <div key={l.id} className="flex items-center justify-between py-2 px-3 bg-bg-primary/30 rounded-sm">
+                <div key={`${l.id}-${i}`} className="flex items-center justify-between py-2 px-3 bg-bg-primary/30 rounded-sm">
                   <div>
                     <p className={`text-xs font-medium ${rs.text}`}>{l.item || l.archetype}</p>
                     <p className="text-[10px] text-text-secondary">{timeAgo(l.created_at)}</p>
@@ -183,10 +183,10 @@ export default function RealmClient() {
             <h3 className="font-cinzel font-bold text-sm text-accent-emerald">Coin Exchanged</h3>
           </div>
           <div className="space-y-2 max-h-80 overflow-y-auto">
-            {recentSold.map((l) => {
+            {recentSold.map((l, i) => {
               const rs = getRarityStyle(l.rarity);
               return (
-                <div key={l.id} className="flex items-center justify-between py-2 px-3 bg-bg-primary/30 rounded-sm">
+                <div key={`${l.id}-${i}`} className="flex items-center justify-between py-2 px-3 bg-bg-primary/30 rounded-sm">
                   <div>
                     <p className={`text-xs font-medium ${rs.text}`}>{l.item || l.archetype}</p>
                     <p className="text-[10px] text-text-secondary">{l.sold_at ? timeAgo(l.sold_at) : "—"}</p>

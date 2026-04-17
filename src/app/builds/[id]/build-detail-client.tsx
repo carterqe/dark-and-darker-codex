@@ -291,7 +291,7 @@ export default function BuildDetailClient({ id }: { id: string }) {
 
         {build.description && (
           <div className="mt-5 pt-5 border-t border-border-subtle">
-            <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
+            <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap break-words">
               {build.description}
             </p>
           </div>
@@ -349,7 +349,7 @@ export default function BuildDetailClient({ id }: { id: string }) {
                             key={stat}
                             className="text-[10px] px-1.5 py-0.5 bg-accent-emerald/10 text-accent-emerald rounded-sm"
                           >
-                            {stat.replace(/_/g, " ")} +{val}
+                            {stat.replace(/^secondary_/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())} +{val}
                           </span>
                         ))}
                       </div>

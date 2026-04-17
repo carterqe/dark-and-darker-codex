@@ -19,6 +19,26 @@ export interface ClassPerksSkills {
   spells?: SpellEntry[];
   songs?: SpellEntry[];
   shapeshiftForms?: string[];
+  /**
+   * Inherent memory capacity the class has without any Memory skill selected.
+   * Classes with a value > 0 always show the spell/song/form selector.
+   */
+  baseMemory?: {
+    spell?:      number;
+    music?:      number;
+    shapeshift?: number;
+    sorcery?:    number;
+  };
+  /**
+   * Additional capacity granted by Memory skills: [skill 1 only, skill 1 + skill 2]
+   * Spell costs = spell tier. Form costs = 1 per form.
+   */
+  memoryCapacity?: {
+    spell?:      [number, number];
+    music?:      [number, number];
+    shapeshift?: [number, number];
+    sorcery?:    [number, number];
+  };
 }
 
 const WIKI = "https://darkanddarker.wiki.spellsandguns.com/Special:FilePath";
@@ -68,29 +88,53 @@ export function getSpellIconUrl(name: string): string {
   return iconUrl("Spell", name);
 }
 
-// Returns the memory type label and available items based on selected skills
+// Returns the memory type label, available items, and memory capacity based on selected skills
 export function getMemoryItems(className: string, selectedSkills: string[]): {
   type: "spells" | "songs" | "forms";
   label: string;
   items: { name: string; tier?: number }[];
+  capacity: number;
 }[] {
   const data = CLASS_DATA[className];
   if (!data) return [];
 
-  const results: { type: "spells" | "songs" | "forms"; label: string; items: { name: string; tier?: number }[] }[] = [];
+  const cap  = data.memoryCapacity ?? {};
+  const base = data.baseMemory     ?? {};
 
-  const hasSpellMemory = selectedSkills.some((s) => s.startsWith("Spell Memory"));
-  const hasMusicMemory = selectedSkills.some((s) => s.startsWith("Music Memory"));
-  const hasShapeshiftMemory = selectedSkills.some((s) => s.startsWith("Shapeshift Memory"));
+  /** Additional capacity granted by Memory skills on top of any base memory. */
+  function skillSlots(
+    prefix: string,
+    pair: [number, number] | undefined,
+    defaultPair: [number, number] = [4, 8]
+  ): number {
+    const [s1, s1s2] = pair ?? defaultPair;
+    const hasBase = selectedSkills.includes(prefix);
+    const hasT2   = selectedSkills.includes(`${prefix} 2`);
+    if (hasBase && hasT2) return s1s2;
+    if (hasBase)           return s1;
+    return 0;
+  }
 
-  if (hasSpellMemory && data.spells) {
-    results.push({ type: "spells", label: "Spells", items: data.spells });
+  const results: { type: "spells" | "songs" | "forms"; label: string; items: { name: string; tier?: number }[]; capacity: number }[] = [];
+
+  const hasSpellMemorySkill = selectedSkills.some((s) => s.startsWith("Spell Memory"));
+  if ((hasSpellMemorySkill || base.spell !== undefined) && data.spells) {
+    results.push({ type: "spells",  label: "Spells",           items: data.spells, capacity: (base.spell ?? 0) + skillSlots("Spell Memory", cap.spell) });
   }
-  if (hasMusicMemory && data.songs) {
-    results.push({ type: "songs", label: "Songs", items: data.songs });
+
+  const hasMusicMemorySkill = selectedSkills.some((s) => s.startsWith("Music Memory"));
+  if ((hasMusicMemorySkill || (base.music ?? 0) > 0) && data.songs) {
+    results.push({ type: "songs",   label: "Songs",            items: data.songs,  capacity: (base.music ?? 0) + skillSlots("Music Memory", cap.music) });
   }
-  if (hasShapeshiftMemory && data.shapeshiftForms) {
-    results.push({ type: "forms", label: "Shapeshift Forms", items: data.shapeshiftForms.map((f) => ({ name: f })) });
+
+  const hasShapeshiftMemorySkill = selectedSkills.some((s) => s.startsWith("Shapeshift Memory"));
+  if ((hasShapeshiftMemorySkill || (base.shapeshift ?? 0) > 0) && data.shapeshiftForms) {
+    results.push({ type: "forms",   label: "Shapeshift Forms", items: data.shapeshiftForms.map((f) => ({ name: f })), capacity: (base.shapeshift ?? 0) + skillSlots("Shapeshift Memory", cap.shapeshift, [2, 4]) });
+  }
+
+  const hasSorceryMemorySkill = selectedSkills.some((s) => s.startsWith("Sorcery Memory"));
+  if ((hasSorceryMemorySkill || (base.sorcery ?? 0) > 0) && data.spells) {
+    results.push({ type: "spells",  label: "Sorcery",          items: data.spells, capacity: (base.sorcery ?? 0) + skillSlots("Sorcery Memory", cap.sorcery) });
   }
 
   return results;
@@ -207,6 +251,7 @@ export const CLASS_DATA: Record<string, ClassPerksSkills> = {
       { name: "Spell Memory", description: "Memorize spells to cast in the dungeon." },
       { name: "Spell Memory 2", description: "Memorize additional spells to cast in the dungeon." },
     ],
+    memoryCapacity: { spell: [5, 5] },
     spells: [
       { name: "Zap", tier: 1 },
       { name: "Light Orb", tier: 1 },
@@ -246,6 +291,7 @@ export const CLASS_DATA: Record<string, ClassPerksSkills> = {
       { name: "Spell Memory", description: "Memorize spells to cast in the dungeon." },
       { name: "Spell Memory 2", description: "Memorize additional spells to cast in the dungeon." },
     ],
+    memoryCapacity: { spell: [5, 5] },
     spells: [
       { name: "Protection", tier: 1 },
       { name: "Bless", tier: 1 },
@@ -283,6 +329,7 @@ export const CLASS_DATA: Record<string, ClassPerksSkills> = {
       { name: "Music Memory", description: "Memorize songs to play in the dungeon." },
       { name: "Music Memory 2", description: "Memorize additional songs to play in the dungeon." },
     ],
+    memoryCapacity: { music: [5, 5] },
     songs: [
       { name: "Aria of Alacrity", tier: 1 },
       { name: "Ballad of Courage", tier: 1 },
@@ -328,6 +375,8 @@ export const CLASS_DATA: Record<string, ClassPerksSkills> = {
       { name: "Spell Memory", description: "Memorize spells to cast in the dungeon." },
       { name: "Spell Memory 2", description: "Memorize additional spells to cast in the dungeon." },
     ],
+    baseMemory:     { spell: 0 },
+    memoryCapacity: { spell: [2, 2] },
     spells: [
       { name: "Power of Sacrifice", tier: 1 },
       { name: "Curse of Weakness", tier: 1 },
@@ -363,6 +412,7 @@ export const CLASS_DATA: Record<string, ClassPerksSkills> = {
       { name: "Shapeshift Memory 2", description: "Memorize additional animal forms." },
       { name: "Spell Memory", description: "Memorize spells to cast in the dungeon." },
     ],
+    memoryCapacity: { spell: [5, 5], shapeshift: [5, 5] },
     spells: [
       { name: "Nature's Touch", tier: 1 },
       { name: "Barkskin Armor", tier: 2 },
@@ -402,6 +452,7 @@ export const CLASS_DATA: Record<string, ClassPerksSkills> = {
       { name: "Sorcery Memory 2", description: "Gain the ability to use additional sorcery in the dungeon." },
       { name: "Sorcery Combat", description: "Gain the ability to wield magical casting weapons in melee combat." },
     ],
+    memoryCapacity: { sorcery: [5, 5] },
     spells: [
       { name: "Fire Arrow", tier: 1 },
       { name: "Stone Skin", tier: 1 },

@@ -32,6 +32,8 @@ export interface DungeonMap {
   height: number;
   /** Path to a static map image in /public, e.g. "/maps/goblin-cave.png". Falls back to CSS grid. */
   imageUrl?: string;
+  /** If true, the map viewer shows a "Coming soon" placeholder instead of the canvas. */
+  comingSoon?: boolean;
   bgColor: string;
   gridColor: string;
   accentColor: string;
@@ -304,6 +306,7 @@ export const MAPS: DungeonMap[] = [
     width: 1584,
     height: 1093,
     imageUrl: "/maps/shipgraveyard.png",
+    comingSoon: true,
     bgColor: "#050c12",
     gridColor: "rgba(28,95,120,0.11)",
     accentColor: "#2a6aad",
@@ -340,6 +343,7 @@ export const MAPS: DungeonMap[] = [
     width: 1584,
     height: 1093,
     imageUrl: "/maps/firedeep.png",
+    comingSoon: true,
     bgColor: "#140805",
     gridColor: "rgba(180,60,10,0.11)",
     accentColor: "#e05c1a",

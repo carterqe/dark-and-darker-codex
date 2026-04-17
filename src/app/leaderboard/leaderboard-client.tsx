@@ -17,7 +17,7 @@ export default function LeaderboardClient() {
           Leaderboard
         </ShimmerText>
         <p className="text-text-secondary">
-          Dark and Darker &mdash; champions ranked by level
+          Dark and Darker &mdash; champions ranked by AP.
         </p>
       </motion.div>
 

@@ -27,7 +27,7 @@ const navLinks = [
   { href: "/", label: "Hall", icon: Shield },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/armory", label: "Armory", icon: Sword },
-  { href: "/bazaar", label: "Bazaar", icon: Store },
+  { href: "/market", label: "Market", icon: Store },
   { href: "/classes", label: "Classes", icon: Users },
   { href: "/realm", label: "Realm", icon: Globe },
   { href: "/builds", label: "Builds", icon: Hammer },

@@ -6,17 +6,18 @@ import type { BuildEquipment } from "@/lib/build-types";
 import type { DarkerDBItem } from "@/lib/darkerdb";
 
 // Base stats per class (no gear). Source: darkanddarker.wiki.spellsandguns.com
+// memory_capacity = knowledge × 0.6 (rounded). Source: in-game character sheet.
 const BASE_STATS: Record<string, Record<string, number>> = {
-  Fighter:   { strength: 15, agility: 15, will: 15, knowledge: 15, resourcefulness: 15, health: 100,   move_speed: 307.5 },
-  Barbarian: { strength: 20, agility: 13, will: 18, knowledge: 5,  resourcefulness: 12, health: 114.6, move_speed: 303.5 },
-  Rogue:     { strength: 9,  agility: 25, will: 10, knowledge: 10, resourcefulness: 25, health: 83.5,  move_speed: 325   },
-  Ranger:    { strength: 12, agility: 20, will: 10, knowledge: 12, resourcefulness: 23, health: 91,    move_speed: 317.5 },
-  Wizard:    { strength: 6,  agility: 15, will: 20, knowledge: 25, resourcefulness: 15, health: 83.5,  move_speed: 307.5 },
-  Cleric:    { strength: 11, agility: 12, will: 23, knowledge: 20, resourcefulness: 12, health: 95,    move_speed: 301.5 },
-  Bard:      { strength: 13, agility: 13, will: 11, knowledge: 20, resourcefulness: 15, health: 96,    move_speed: 303.5 },
-  Warlock:   { strength: 11, agility: 14, will: 22, knowledge: 15, resourcefulness: 14, health: 96.5,  move_speed: 305.5 },
-  Druid:     { strength: 12, agility: 12, will: 18, knowledge: 20, resourcefulness: 18, health: 95.5,  move_speed: 301.5 },
-  Sorcerer:  { strength: 10, agility: 10, will: 25, knowledge: 20, resourcefulness: 12, health: 90,    move_speed: 295   },
+  Fighter:   { strength: 15, agility: 15, will: 15, knowledge: 15, resourcefulness: 15, health: 100,   move_speed: 307.5, memory_capacity: 9  },
+  Barbarian: { strength: 20, agility: 13, will: 18, knowledge: 5,  resourcefulness: 12, health: 114.6, move_speed: 303.5, memory_capacity: 3  },
+  Rogue:     { strength: 9,  agility: 25, will: 10, knowledge: 10, resourcefulness: 25, health: 83.5,  move_speed: 325,   memory_capacity: 6  },
+  Ranger:    { strength: 12, agility: 20, will: 10, knowledge: 12, resourcefulness: 23, health: 91,    move_speed: 317.5, memory_capacity: 7  },
+  Wizard:    { strength: 6,  agility: 15, will: 20, knowledge: 25, resourcefulness: 15, health: 83.5,  move_speed: 307.5, memory_capacity: 14 },
+  Cleric:    { strength: 11, agility: 12, will: 23, knowledge: 20, resourcefulness: 12, health: 95,    move_speed: 301.5, memory_capacity: 12 },
+  Bard:      { strength: 13, agility: 13, will: 11, knowledge: 20, resourcefulness: 15, health: 96,    move_speed: 303.5, memory_capacity: 12 },
+  Warlock:   { strength: 11, agility: 14, will: 22, knowledge: 15, resourcefulness: 14, health: 96.5,  move_speed: 305.5, memory_capacity: 9  },
+  Druid:     { strength: 12, agility: 12, will: 18, knowledge: 20, resourcefulness: 18, health: 95.5,  move_speed: 301.5, memory_capacity: 12 },
+  Sorcerer:  { strength: 10, agility: 10, will: 25, knowledge: 20, resourcefulness: 12, health: 90,    move_speed: 295,   memory_capacity: 12 },
 };
 
 // primary_min_<field> → internal key
@@ -223,9 +224,11 @@ function renderValue(stat: StatDef, value: number): string {
 interface Props {
   equipment: BuildEquipment;
   selectedClass?: string;
+  /** Called whenever the computed memory_capacity stat changes (base + gear). */
+  onMemoryCapacity?: (capacity: number) => void;
 }
 
-export default function CharacterStatPanel({ equipment, selectedClass = "" }: Props) {
+export default function CharacterStatPanel({ equipment, selectedClass = "", onMemoryCapacity }: Props) {
   const [itemData, setItemData] = useState<Record<number, DarkerDBItem>>({});
   const fetchedIds = useRef(new Set<number>());
   const [showWeapon, setShowWeapon] = useState(false);
@@ -269,6 +272,13 @@ export default function CharacterStatPanel({ equipment, selectedClass = "" }: Pr
   })();
 
   const stats = hasClass ? aggregateStats(selectedClass, activeEquipment, itemData) : {};
+
+  const memCap = stats.memory_capacity ?? 0;
+  const prevMemCapRef = useRef<number | null>(null);
+  if (onMemoryCapacity && prevMemCapRef.current !== memCap) {
+    prevMemCapRef.current = memCap;
+    onMemoryCapacity(memCap);
+  }
 
   if (!hasClass) {
     return (

@@ -61,7 +61,7 @@ function extractStats(listing: DarkerDBMarketListing): { name: string; value: st
   return stats;
 }
 
-export default function BazaarClient() {
+export default function MarketClient() {
   const [listings, setListings] = useState<DarkerDBMarketListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -232,7 +232,7 @@ export default function BazaarClient() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="text-center mb-10 animate-fade-in-up">
         <ShimmerText as="h1" className="text-4xl sm:text-5xl mb-3">
-          The Bazaar
+          The Market
         </ShimmerText>
         <p className="text-text-secondary">
           Real-time marketplace &mdash; monitor prices, find deals, track sales
@@ -509,7 +509,7 @@ export default function BazaarClient() {
 
                   return (
                     <tr
-                      key={listing.id}
+                      key={`${listing.id}-${i}`}
                       className="border-b border-border-subtle hover:bg-bg-tertiary/50 transition-all cursor-pointer animate-fade-in-up"
                       style={{ animationDelay: `${Math.min(i * 15, 300)}ms` }}
                       onClick={() => setExpandedRow(isExpanded ? null : listing.id)}

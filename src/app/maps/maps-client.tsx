@@ -20,6 +20,7 @@ import {
   Layers,
   ChevronLeft,
   Info,
+  Clock,
 } from "lucide-react";
 import {
   MAPS,
@@ -246,6 +247,65 @@ function MapCanvas({ map, enabledTypes, hoveredId, onHover }: MapCanvasProps) {
   );
 }
 
+// ─── Coming soon placeholder ─────────────────────────────────────────────────
+
+function ComingSoonView({ map }: { map: DungeonMap }) {
+  return (
+    <div
+      className="flex-1 flex flex-col items-center justify-center gap-6 select-none"
+      style={{ background: `radial-gradient(ellipse at center, ${map.bgColor.replace("#", "").length === 6 ? map.bgColor : "#0a090f"} 0%, #060508 100%)` }}
+    >
+      {/* Decorative ring */}
+      <div
+        className="relative flex items-center justify-center"
+        style={{ width: 96, height: 96 }}
+      >
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{
+            border: `2px solid ${map.accentColor}33`,
+            boxShadow: `0 0 32px ${map.accentColor}22`,
+          }}
+        />
+        <div
+          className="absolute inset-3 rounded-full"
+          style={{ border: `1px solid ${map.accentColor}55` }}
+        />
+        <Clock
+          style={{ width: 36, height: 36, color: map.accentColor, opacity: 0.85 }}
+        />
+      </div>
+
+      {/* Text block */}
+      <div className="text-center space-y-2 max-w-xs px-4">
+        <p
+          className="font-cinzel font-bold text-xl tracking-wide"
+          style={{ color: map.accentColor }}
+        >
+          {map.name}
+        </p>
+        <p className="text-xs text-text-secondary/60 uppercase tracking-widest">
+          {map.subtitle}
+        </p>
+        <div
+          className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-sm border text-xs font-bold uppercase tracking-widest"
+          style={{
+            color: map.accentColor,
+            borderColor: `${map.accentColor}55`,
+            backgroundColor: `${map.accentColor}0f`,
+          }}
+        >
+          <Clock className="w-3 h-3" />
+          Coming Soon
+        </div>
+        <p className="text-[11px] text-text-secondary/50 leading-relaxed pt-2">
+          {map.description}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main component ──────────────────────────────────────────────────────────
 
 export default function MapsClient() {
@@ -358,7 +418,11 @@ export default function MapsClient() {
                           <span className={`text-xs font-cinzel font-bold block ${active ? "text-gold-primary" : "text-text-primary"}`}>
                             {m.name}
                           </span>
-                          <span className="text-[10px] text-text-secondary/60">{m.subtitle}</span>
+                          <span className="text-[10px] text-text-secondary/60">
+                            {m.comingSoon ? (
+                              <span style={{ color: m.accentColor, opacity: 0.75 }}>Coming soon</span>
+                            ) : m.subtitle}
+                          </span>
                         </button>
                       );
                     })}
@@ -430,8 +494,11 @@ export default function MapsClient() {
         </AnimatePresence>
 
         {/* ── Map viewport ── */}
-        <div className="flex-1 min-w-0 relative bg-bg-primary overflow-hidden">
-          <TransformWrapper
+        <div className="flex-1 min-w-0 relative bg-bg-primary overflow-hidden flex flex-col">
+          {selectedMap.comingSoon ? (
+            <ComingSoonView map={selectedMap} />
+          ) : null}
+          {!selectedMap.comingSoon && <TransformWrapper
             key={selectedMap.id}
             initialScale={0.85}
             minScale={0.15}
@@ -462,10 +529,10 @@ export default function MapsClient() {
                 <ZoomControls />
               </>
             )}
-          </TransformWrapper>
+          </TransformWrapper>}
 
           {/* Map name badge (floating over viewport) */}
-          <div className="absolute top-3 left-3 z-20 pointer-events-none">
+          {!selectedMap.comingSoon && <div className="absolute top-3 left-3 z-20 pointer-events-none">
             <div
               className="px-2.5 py-1 border border-border-subtle rounded-sm"
               style={{ backgroundColor: "rgba(10,9,15,0.85)", backdropFilter: "blur(6px)" }}
@@ -475,30 +542,32 @@ export default function MapsClient() {
               </p>
               <p className="text-[10px] text-text-secondary/60">{selectedMap.subtitle}</p>
             </div>
-          </div>
+          </div>}
 
           {/* Legend chips (floating bottom-left) */}
-          <div className="absolute bottom-4 left-3 z-20 flex flex-wrap gap-1 max-w-xs pointer-events-none">
-            {FEATURE_TYPES.filter((t) => enabledTypes.has(t) && selectedMap.features.some((f) => f.type === t)).map((type) => {
-              const meta = FEATURE_META[type];
-              const Icon = FEATURE_ICONS[type];
-              return (
-                <div
-                  key={type}
-                  className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium"
-                  style={{
-                    backgroundColor: "rgba(10,9,15,0.8)",
-                    border: `1px solid ${meta.borderColor}`,
-                    backdropFilter: "blur(4px)",
-                    color: meta.color,
-                  }}
-                >
-                  <Icon className="w-2.5 h-2.5" />
-                  {meta.label}
-                </div>
-              );
-            })}
-          </div>
+          {!selectedMap.comingSoon && (
+            <div className="absolute bottom-4 left-3 z-20 flex flex-wrap gap-1 max-w-xs pointer-events-none">
+              {FEATURE_TYPES.filter((t) => enabledTypes.has(t) && selectedMap.features.some((f) => f.type === t)).map((type) => {
+                const meta = FEATURE_META[type];
+                const Icon = FEATURE_ICONS[type];
+                return (
+                  <div
+                    key={type}
+                    className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium"
+                    style={{
+                      backgroundColor: "rgba(10,9,15,0.8)",
+                      border: `1px solid ${meta.borderColor}`,
+                      backdropFilter: "blur(4px)",
+                      color: meta.color,
+                    }}
+                  >
+                    <Icon className="w-2.5 h-2.5" />
+                    {meta.label}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

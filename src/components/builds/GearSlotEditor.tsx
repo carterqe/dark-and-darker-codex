@@ -83,7 +83,7 @@ export default function GearSlotEditor({
   // Only tracks stats the user has explicitly enabled
   const [enabledStats, setEnabledStats] = useState<Record<string, number>>({});
   const initialStatsRef = useRef(value?.stats);
-  initialStatsRef.current = value?.stats;
+  useEffect(() => { initialStatsRef.current = value?.stats; });
   const statPanelRef = useRef<HTMLDivElement>(null);
   const rarityPanelRef = useRef<HTMLDivElement>(null);
 
@@ -127,7 +127,8 @@ export default function GearSlotEditor({
 
   useEffect(() => {
     if (value?.item_id) {
-      fetchItemStats(value.item_id);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      void fetchItemStats(value.item_id);
     } else {
       setStatRanges([]);
       setEnabledStats({});

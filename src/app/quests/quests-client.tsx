@@ -329,7 +329,7 @@ export default function QuestsClient() {
           Quests
         </ShimmerText>
         <p className="text-text-secondary">
-          Browse trader quests and search for required items across all of Tarkov.
+          Browse trader quests and search for required items across all of Dark and Darker.
         </p>
       </motion.div>
 
