@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local tooling
+.claude/
+.mcp.json
+.playwright-mcp/
+/scratch/
+/metadata.json

@@ -961,7 +961,7 @@ export const TRADERS: Trader[] = [
         chapter: "The Broken Remains",
         description: "The Lava Golem serves the fire itself. Nothing will change down there until it's destroyed.",
         requirements: [
-          { type: "kill", monster: "Lava Golem", location: "Goblin Cave", quantity: 1, description: "Kill the Lava Golem in the Goblin Cave" },
+          { type: "kill", monster: "Lava Golem", location: "The Firedeep", quantity: 1, description: "Kill the Lava Golem in the Firedeep" },
         ],
         reward: { gold: 125, xp: 500, description: "125 Gold, 2× Random Rare Armor, Random Rare Weapon, +500 XP" },
       },
@@ -982,8 +982,8 @@ export const TRADERS: Trader[] = [
         chapter: "The Fire That Will Not End",
         description: "Fire Spirits and Fire Elementals are the lifeblood of the blaze. Extinguish them.",
         requirements: [
-          { type: "kill", monster: "Fire Spirit", location: "Goblin Cave", quantity: 15, description: "Kill 15 Fire Spirits in the Goblin Cave" },
-          { type: "kill", monster: "Fire Elemental", location: "Goblin Cave", quantity: 15, description: "Kill 15 Fire Elementals in the Goblin Cave" },
+          { type: "kill", monster: "Fire Spirit", location: "The Firedeep", quantity: 15, description: "Kill 15 Fire Spirits in the Firedeep" },
+          { type: "kill", monster: "Fire Elemental", location: "The Firedeep", quantity: 15, description: "Kill 15 Fire Elementals in the Firedeep" },
         ],
         reward: { gold: 150, xp: 350, description: "150 Gold, Random Epic Weapon, Random Epic Armor, +350 XP" },
       },
@@ -993,7 +993,7 @@ export const TRADERS: Trader[] = [
         chapter: "The Fire That Will Not End",
         description: "The Fire Colossus stands as a monument to our failure. Tear it down.",
         requirements: [
-          { type: "kill", monster: "Fire Colossus", location: "Goblin Cave", quantity: 1, description: "Kill the Fire Colossus in the Goblin Cave" },
+          { type: "kill", monster: "Fire Colossus", location: "The Firedeep", quantity: 1, description: "Kill the Fire Colossus in the Firedeep" },
         ],
         reward: { gold: 200, xp: 1000, description: "200 Gold, Random Epic Weapon, Random Epic Armor, 2× Epic Arcane Essence, +1000 XP" },
       },
