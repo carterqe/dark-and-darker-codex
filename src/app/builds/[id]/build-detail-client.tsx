@@ -349,7 +349,8 @@ export default function BuildDetailClient({ id }: { id: string }) {
                             key={stat}
                             className="text-[10px] px-1.5 py-0.5 bg-accent-emerald/10 text-accent-emerald rounded-sm"
                           >
-                            {stat.replace(/^secondary_/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())} +{val}
+                            {stat.replace(/^secondary_/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                            {val != null ? ` +${val}` : ""}
                           </span>
                         ))}
                       </div>

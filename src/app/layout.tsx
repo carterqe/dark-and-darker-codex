@@ -3,7 +3,9 @@ import { Cinzel, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import BetaBanner from "@/components/layout/BetaBanner";
 import ParticleBackground from "@/components/layout/ParticleBackground";
+import FeedbackButton from "@/components/feedback/FeedbackButton";
 import { AuthProvider } from "@/context/AuthContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
@@ -36,9 +38,11 @@ export default function RootLayout({
       <body suppressHydrationWarning className="min-h-screen flex flex-col bg-bg-primary text-text-primary bg-noise antialiased">
         <AuthProvider>
           <ParticleBackground />
+          <BetaBanner />
           <Navbar />
-          <main className="flex-1 pt-14 sm:pt-16 relative z-10">{children}</main>
+          <main className="flex-1 pt-[84px] sm:pt-[92px] relative z-10">{children}</main>
           <Footer />
+          <FeedbackButton />
           <SpeedInsights />
           <Analytics />
         </AuthProvider>

@@ -13,11 +13,11 @@ export async function GET(request: NextRequest) {
   try {
     const res = await fetch(`${API_BASE}/leaderboards/${category}?${qs.toString()}`, {
       signal: AbortSignal.timeout(8000),
-      next: { revalidate: 300 },
+      next: { revalidate: 60 },
     });
     const data = await res.json();
     const response = NextResponse.json(data);
-    response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=60");
+    response.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=30");
     return response;
   } catch {
     return NextResponse.json({ error: "Failed to fetch leaderboard" }, { status: 503 });

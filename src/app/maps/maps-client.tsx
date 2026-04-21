@@ -576,7 +576,7 @@ function MapsClientInner() {
           ) : null}
           {!selectedMap.comingSoon && <TransformWrapper
             key={selectedMap.id}
-            initialScale={0.85}
+            initialScale={0.45}
             minScale={0.15}
             maxScale={6}
             centerOnInit

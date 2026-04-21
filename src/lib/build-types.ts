@@ -21,7 +21,7 @@ export interface BuildGearItem {
   item_name: string;
   rarity: string;
   gear_score: number;
-  stats?: Record<string, number>; // Custom stat roll values, e.g. { "strength": 2.1 }
+  stats?: Record<string, number | null>; // Selected rolls; null = selected without a numeric value
   hand?: ("main" | "off")[]; // Weapon hand usage tags (weapon slots only)
 }
 

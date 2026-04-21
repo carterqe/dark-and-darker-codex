@@ -17,6 +17,7 @@ import {
   LogIn,
   Menu,
   X,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/auth/AuthModal";
@@ -33,14 +34,17 @@ const navLinks = [
   { href: "/maps", label: "Maps", icon: Map },
 ];
 
+const adminLink = { href: "/admin/feedback", label: "Admin", icon: ShieldCheck };
+
 export default function Navbar() {
   const pathname = usePathname();
-  const { user, profile, loading, openAuthModal, signOut, toast, clearToast } = useAuth();
+  const { user, profile, isAdmin, loading, openAuthModal, signOut, toast, clearToast } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const links = isAdmin ? [...navLinks, adminLink] : navLinks;
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border-subtle bg-bg-primary/80 backdrop-blur-md">
+      <nav className="fixed top-7 left-0 right-0 z-50 border-b border-border-subtle bg-bg-primary/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
@@ -53,7 +57,7 @@ export default function Navbar() {
 
             {/* Desktop nav links */}
             <div className="hidden md:flex items-center gap-1">
-              {navLinks.map((link) => {
+              {links.map((link) => {
                 const isActive =
                   pathname === link.href ||
                   (link.href !== "/" && pathname.startsWith(link.href));
@@ -118,7 +122,7 @@ export default function Navbar() {
         {mobileOpen && (
           <div className="md:hidden border-t border-border-subtle bg-bg-primary/95 backdrop-blur-md">
             <div className="px-4 py-3 space-y-1">
-              {navLinks.map((link) => {
+              {links.map((link) => {
                 const isActive =
                   pathname === link.href ||
                   (link.href !== "/" && pathname.startsWith(link.href));

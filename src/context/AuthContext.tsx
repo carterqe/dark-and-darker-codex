@@ -22,6 +22,7 @@ interface AuthContextType {
   supabase: SupabaseClient;
   user: User | null;
   profile: Profile | null;
+  isAdmin: boolean;
   loading: boolean;
   authModalOpen: boolean;
   authModalTab: "login" | "signup";
@@ -40,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [supabase] = useState(() => createClient());
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<"login" | "signup">("login");
@@ -57,10 +59,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [supabase]
   );
 
+  const fetchAdminStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/check", { cache: "no-store" });
+      if (!res.ok) {
+        setIsAdmin(false);
+        return;
+      }
+      const json = (await res.json()) as { admin?: boolean };
+      setIsAdmin(Boolean(json.admin));
+    } catch {
+      setIsAdmin(false);
+    }
+  }, []);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (session?.user) fetchProfile(session.user.id);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+        fetchAdminStatus();
+      }
       setLoading(false);
     });
 
@@ -70,8 +89,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       if (session?.user) {
         await fetchProfile(session.user.id);
+        await fetchAdminStatus();
       } else {
         setProfile(null);
+        setIsAdmin(false);
       }
       if (event === "SIGNED_IN") {
         setAuthModalOpen(false);
@@ -80,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase, fetchProfile]);
+  }, [supabase, fetchProfile, fetchAdminStatus]);
 
   const openAuthModal = (tab: "login" | "signup" = "login") => {
     setAuthModalTab(tab);
@@ -95,6 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
+    setIsAdmin(false);
     router.push("/logout");
   };
 
@@ -104,6 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         supabase,
         user,
         profile,
+        isAdmin,
         loading,
         authModalOpen,
         authModalTab,

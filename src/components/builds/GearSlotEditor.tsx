@@ -80,8 +80,8 @@ export default function GearSlotEditor({
   const [statRanges, setStatRanges] = useState<StatRange[]>([]);
   const [statsOpen, setStatsOpen] = useState(false);
   const [rarityOpen, setRarityOpen] = useState(false);
-  // Only tracks stats the user has explicitly enabled
-  const [enabledStats, setEnabledStats] = useState<Record<string, number>>({});
+  // Only tracks stats the user has explicitly enabled. null = selected, no numeric value.
+  const [enabledStats, setEnabledStats] = useState<Record<string, number | null>>({});
   const initialStatsRef = useRef(value?.stats);
   useEffect(() => { initialStatsRef.current = value?.stats; });
   const statPanelRef = useRef<HTMLDivElement>(null);
@@ -165,17 +165,14 @@ export default function GearSlotEditor({
     } else {
       // Enforce rarity roll limit
       if (enabledSecondaryCount >= maxRolls) return;
-      next[key] = range.min;
+      next[key] = null;
     }
     setEnabledStats(next);
     if (value) onChange({ ...value, stats: next });
   };
 
-  const updateStatValue = (key: string, val: number) => {
-    const range = statRanges.find((r) => r.key === key);
-    if (!range) return;
-    const clamped = Math.min(range.max, Math.max(range.min, val));
-    const next = { ...enabledStats, [key]: clamped };
+  const updateStatValue = (key: string, val: number | null) => {
+    const next = { ...enabledStats, [key]: val };
     setEnabledStats(next);
     if (value) onChange({ ...value, stats: next });
   };
@@ -246,7 +243,8 @@ export default function GearSlotEditor({
                 <span className="flex flex-wrap gap-1">
                   {enabledEntries.map(([key, val]) => (
                     <span key={key} className="text-[9px] px-1 py-0.5 bg-accent-emerald/10 text-accent-emerald rounded-sm">
-                      {formatStatLabel(key)} +{val}
+                      {formatStatLabel(key)}
+                      {val != null ? ` +${val}` : ""}
                     </span>
                   ))}
                 </span>
@@ -315,10 +313,10 @@ function StatGroup({
   label: string;
   labelColor: string;
   stats: StatRange[];
-  enabled: Record<string, number>;
+  enabled: Record<string, number | null>;
   atLimit?: boolean;
   onToggle: (key: string) => void;
-  onValueChange: (key: string, val: number) => void;
+  onValueChange: (key: string, val: number | null) => void;
 }) {
   return (
     <div>
@@ -329,6 +327,7 @@ function StatGroup({
         {stats.map((stat) => {
           const isEnabled = stat.key in enabled;
           const isDisabled = !isEnabled && atLimit;
+          const val = enabled[stat.key];
           return (
             <div key={stat.key} className="flex items-center gap-2 select-none">
               {/* Toggle checkbox */}
@@ -348,7 +347,7 @@ function StatGroup({
               </button>
 
               <span
-                className={`text-[10px] capitalize w-24 shrink-0 truncate cursor-pointer ${
+                className={`text-[10px] capitalize flex-1 min-w-0 truncate cursor-pointer ${
                   isEnabled ? "text-text-primary" : isDisabled ? "text-text-secondary/25" : "text-text-secondary/50"
                 }`}
                 title={formatStatLabel(stat.key)}
@@ -357,25 +356,23 @@ function StatGroup({
                 {formatStatLabel(stat.key)}
               </span>
 
-              {isEnabled ? (
-                <>
-                  <input
-                    type="number"
-                    step="any"
-                    min={stat.min}
-                    max={stat.max}
-                    value={enabled[stat.key]}
-                    onChange={(e) => onValueChange(stat.key, parseFloat(e.target.value) || stat.min)}
-                    className="w-16 px-1.5 py-0.5 bg-bg-secondary border border-border-subtle rounded-sm text-[10px] text-text-primary text-center focus:outline-none focus:border-gold-primary/50"
-                  />
-                  <span className="text-[9px] text-text-secondary/50 shrink-0">
-                    {stat.min}–{stat.max}
-                  </span>
-                </>
-              ) : (
-                <span className={`text-[9px] ${isDisabled ? "text-text-secondary/15" : "text-text-secondary/30"}`}>
-                  {stat.min}–{stat.max}
-                </span>
+              {isEnabled && (
+                <input
+                  type="number"
+                  step="any"
+                  value={val ?? ""}
+                  placeholder="—"
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    if (raw === "") {
+                      onValueChange(stat.key, null);
+                      return;
+                    }
+                    const parsed = parseFloat(raw);
+                    onValueChange(stat.key, Number.isFinite(parsed) ? parsed : null);
+                  }}
+                  className="w-16 px-1.5 py-0.5 bg-bg-secondary border border-border-subtle rounded-sm text-[10px] text-text-primary text-center placeholder:text-text-secondary/30 focus:outline-none focus:border-gold-primary/50"
+                />
               )}
             </div>
           );
