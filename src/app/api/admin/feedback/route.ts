@@ -1,26 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { checkOrigin } from "@/lib/origin-check";
 
 const ALLOWED_STATUSES = ["new", "reviewed", "resolved"] as const;
 type Status = (typeof ALLOWED_STATUSES)[number];
 const STATUS_FILTERS = [...ALLOWED_STATUSES, "all"] as const;
 type StatusFilter = (typeof STATUS_FILTERS)[number];
-
-function checkOrigin(request: NextRequest): boolean {
-  const origin = request.headers.get("origin");
-  if (!origin) return true;
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (siteUrl) {
-    return origin === new URL(siteUrl).origin;
-  }
-
-  const host = request.headers.get("host");
-  if (!host) return false;
-  const proto = request.headers.get("x-forwarded-proto") ?? "https";
-  return origin === `${proto}://${host}`;
-}
 
 export async function GET(request: NextRequest) {
   const admin = await requireAdmin();

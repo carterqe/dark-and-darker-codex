@@ -1,27 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 import { rateLimit } from "@/lib/rate-limit";
+import { checkOrigin } from "@/lib/origin-check";
 
 const ALLOWED_TARGET_TYPES = [
   "map", "quest", "item", "boss", "shrine", "campfire", "other",
 ] as const;
 type TargetType = (typeof ALLOWED_TARGET_TYPES)[number];
-
-function checkOrigin(request: NextRequest): boolean {
-  const origin = request.headers.get("origin");
-  if (!origin) return true; // same-origin or older browser — allow
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (siteUrl) {
-    return origin === new URL(siteUrl).origin;
-  }
-
-  // Fall back to Host header
-  const host = request.headers.get("host");
-  if (!host) return false;
-  const proto = request.headers.get("x-forwarded-proto") ?? "https";
-  return origin === `${proto}://${host}`;
-}
 
 export async function POST(request: NextRequest) {
   const ip =
