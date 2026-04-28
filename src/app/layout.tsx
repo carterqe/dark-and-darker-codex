@@ -79,6 +79,9 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
   },
   manifest: "/manifest.webmanifest",
+  verification: {
+    google: "8kYKEEviBpggtgQ7Z-Ie-iBiIvwp4jRP6JW6UVpd1U0",
+  },
 };
 
 export const viewport: Viewport = {
