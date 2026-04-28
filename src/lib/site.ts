@@ -2,7 +2,7 @@ const rawUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
   (process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : "https://www.dadcodex.com");
+    : "https://www.darkandarkercodex.com");
 
 export const SITE = {
   name: "DaD Codex",
@@ -14,7 +14,6 @@ export const SITE = {
     "Leaderboards, builds, market, and maps for Dark and Darker.",
   locale: "en_US",
   themeColor: "#0a0a0f",
-  twitter: "@dadcodex",
 } as const;
 
 export function absoluteUrl(path = "/"): string {

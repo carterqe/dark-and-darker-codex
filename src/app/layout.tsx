@@ -63,8 +63,6 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${SITE.fullName} — Leaderboards, Builds & Market`,
     description: SITE.shortDescription,
-    creator: SITE.twitter,
-    site: SITE.twitter,
   },
   robots: {
     index: true,
