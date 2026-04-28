@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cinzel, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
@@ -9,6 +9,7 @@ import FeedbackButton from "@/components/feedback/FeedbackButton";
 import { AuthProvider } from "@/context/AuthContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
+import { SITE } from "@/lib/site";
 
 const cinzel = Cinzel({
   subsets: ["latin"],
@@ -23,9 +24,97 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Dark and Darker Codex — Leaderboards, Builds & Market",
-  description:
-    "Dark and Darker leaderboard — track the top champions, character levels, and live server population.",
+  metadataBase: new URL(SITE.url),
+  title: {
+    default: `${SITE.fullName} — Leaderboards, Builds & Market`,
+    template: `%s · ${SITE.name}`,
+  },
+  description: SITE.description,
+  applicationName: SITE.name,
+  keywords: [
+    "Dark and Darker",
+    "Dark and Darker leaderboard",
+    "Dark and Darker builds",
+    "Dark and Darker market",
+    "Dark and Darker maps",
+    "Dark and Darker classes",
+    "Dark and Darker quests",
+    "DaD",
+    "DaD Codex",
+    "Ironmace",
+    "extraction shooter",
+    "dungeon crawler",
+  ],
+  category: "games",
+  authors: [{ name: SITE.name }],
+  creator: SITE.name,
+  publisher: SITE.name,
+  formatDetection: { email: false, address: false, telephone: false },
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: SITE.fullName,
+    title: `${SITE.fullName} — Leaderboards, Builds & Market`,
+    description: SITE.description,
+    url: SITE.url,
+    locale: SITE.locale,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE.fullName} — Leaderboards, Builds & Market`,
+    description: SITE.shortDescription,
+    creator: SITE.twitter,
+    site: SITE.twitter,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
+  manifest: "/manifest.webmanifest",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: SITE.themeColor,
+  colorScheme: "dark",
+};
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE.fullName,
+  alternateName: SITE.name,
+  url: SITE.url,
+  description: SITE.description,
+  inLanguage: "en-US",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: `${SITE.url}/leaderboard?search={search_term_string}`,
+    },
+    "query-input": "required name=search_term_string",
+  },
+};
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: SITE.fullName,
+  alternateName: SITE.name,
+  url: SITE.url,
+  logo: `${SITE.url}/favicon.ico`,
 };
 
 export default function RootLayout({
@@ -36,6 +125,18 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cinzel.variable} ${inter.variable}`}>
       <body suppressHydrationWarning className="min-h-screen flex flex-col bg-bg-primary text-text-primary bg-noise antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(websiteJsonLd).replace(/</g, "\\u003c"),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd).replace(/</g, "\\u003c"),
+          }}
+        />
         <AuthProvider>
           <ParticleBackground />
           <BetaBanner />

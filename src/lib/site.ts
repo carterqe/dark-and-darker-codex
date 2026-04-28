@@ -1,0 +1,23 @@
+const rawUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "https://www.dadcodex.com");
+
+export const SITE = {
+  name: "DaD Codex",
+  fullName: "Dark and Darker Codex",
+  url: rawUrl.replace(/\/$/, ""),
+  description:
+    "Dark and Darker companion site — leaderboards, builds, market prices, dungeon maps, classes, and quests for the worthy champion.",
+  shortDescription:
+    "Leaderboards, builds, market, and maps for Dark and Darker.",
+  locale: "en_US",
+  themeColor: "#0a0a0f",
+  twitter: "@dadcodex",
+} as const;
+
+export function absoluteUrl(path = "/"): string {
+  if (!path.startsWith("/")) path = `/${path}`;
+  return `${SITE.url}${path}`;
+}
