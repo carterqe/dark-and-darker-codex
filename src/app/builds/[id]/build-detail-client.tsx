@@ -19,7 +19,7 @@ import {
   type BuildComment,
 } from "@/lib/build-types";
 import { getClassPortrait, getRarityStyle } from "@/lib/darkerdb";
-import { getClassData, getPerkIconUrl, getSkillIconUrl } from "@/lib/class-data";
+import { getClassData, getMemoryItems, getPerkIconUrl, getSkillIconUrl, getSpellIconUrl } from "@/lib/class-data";
 import { timeAgo } from "@/lib/utils";
 import CharacterStatPanel from "@/components/builds/CharacterStatPanel";
 
@@ -363,7 +363,7 @@ export default function BuildDetailClient({ id }: { id: string }) {
         )}
 
         {/* Perks + Skills */}
-        {(build.perks.length > 0 || build.skills.length > 0) && (
+        {(build.perks.length > 0 || build.skills.length > 0 || (build.spells?.length ?? 0) > 0) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -385,19 +385,11 @@ export default function BuildDetailClient({ id }: { id: string }) {
               />
             )}
             {build.spells && build.spells.length > 0 && (
-              <div>
-                <h2 className="font-cinzel font-bold text-sm text-purple-400 mb-3">Memorized Spells</h2>
-                <div className="flex flex-wrap gap-1.5">
-                  {build.spells.map((spell) => (
-                    <span
-                      key={spell}
-                      className="text-[11px] px-2 py-1 bg-purple-400/10 text-purple-300 border border-purple-400/20 rounded-sm"
-                    >
-                      {spell}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              <MemoryDisplay
+                className={build.class}
+                skills={build.skills}
+                selected={build.spells}
+              />
             )}
           </motion.div>
         )}
@@ -552,6 +544,98 @@ function PerkSkillSection({
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function SpellChipIcon({ name }: { name: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <div className="w-5 h-5 rounded-sm bg-bg-tertiary border border-border-subtle flex items-center justify-center shrink-0">
+        <span className="text-[9px] font-cinzel font-bold text-purple-400">{name.charAt(0)}</span>
+      </div>
+    );
+  }
+  return (
+    <img
+      src={getSpellIconUrl(name)}
+      alt={name}
+      className="w-5 h-5 rounded-sm object-cover bg-bg-tertiary border border-border-subtle shrink-0"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+function MemoryDisplay({
+  className,
+  skills,
+  selected,
+}: {
+  className: string;
+  skills: string[];
+  selected: string[];
+}) {
+  const groups = getMemoryItems(className, skills);
+  const selectedSet = new Set(selected);
+
+  // Group selected items by their memory type, preserving the order of `selected`.
+  const sections = groups
+    .map((g) => {
+      const groupNames = new Set(g.items.map((i) => i.name));
+      const items = selected
+        .filter((name) => groupNames.has(name))
+        .map((name) => ({ name, tier: g.items.find((i) => i.name === name)?.tier }));
+      return { type: g.type, label: g.label, items };
+    })
+    .filter((s) => s.items.length > 0);
+
+  // Any items in `selected` that don't match a current memory group (e.g. orphans
+  // from a class change). Show them under a fallback header so data isn't lost.
+  const claimed = new Set(sections.flatMap((s) => s.items.map((i) => i.name)));
+  const orphans = selected.filter((s) => selectedSet.has(s) && !claimed.has(s));
+
+  if (sections.length === 0 && orphans.length === 0) return null;
+
+  return (
+    <div className="space-y-4">
+      {sections.map((section) => (
+        <div key={`${section.type}-${section.label}`}>
+          <h2 className="font-cinzel font-bold text-sm text-purple-400 mb-3">
+            Memorized {section.label}
+          </h2>
+          <div className="flex flex-wrap gap-1.5">
+            {section.items.map(({ name, tier }) => (
+              <span
+                key={name}
+                className="flex items-center gap-1.5 text-[11px] px-2 py-1 bg-purple-400/10 text-purple-300 border border-purple-400/20 rounded-sm"
+              >
+                <SpellChipIcon name={name} />
+                {name}
+                {tier != null && tier > 0 && (
+                  <span className="text-[9px] text-purple-400/60 tabular-nums">T{tier}</span>
+                )}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))}
+      {orphans.length > 0 && (
+        <div>
+          <h2 className="font-cinzel font-bold text-sm text-purple-400 mb-3">Memorized</h2>
+          <div className="flex flex-wrap gap-1.5">
+            {orphans.map((name) => (
+              <span
+                key={name}
+                className="flex items-center gap-1.5 text-[11px] px-2 py-1 bg-purple-400/10 text-purple-300 border border-purple-400/20 rounded-sm"
+              >
+                <SpellChipIcon name={name} />
+                {name}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
