@@ -36,11 +36,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   const path = `/player/${character.id}`;
   const title = `${character.name} — Level ${character.level} ${character.class}`;
-  const description = `${character.name}, a level ${character.level} ${character.class} on the Dark and Darker leaderboard${character.rank ? ` ranked ${character.rank}` : ""}${character.adventure_points != null ? ` with ${character.adventure_points.toLocaleString()} adventure points` : ""}.`;
+  const description = `${character.name}, a level ${character.level} ${character.class} from Early Access Season 7 (historical).`;
   return {
     title,
     description,
     alternates: { canonical: path },
+    robots: { index: false, follow: true },
     openGraph: {
       title,
       description,

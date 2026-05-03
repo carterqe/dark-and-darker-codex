@@ -13,11 +13,15 @@ export default function LeaderboardClient() {
         transition={{ duration: 0.5 }}
         className="text-center mb-10"
       >
+        <div className="inline-block mb-4 px-3 py-1 border border-gold-primary/40 rounded-sm text-[11px] font-cinzel font-bold tracking-[0.2em] uppercase text-gold-dark bg-gold-primary/5">
+          EA Season 7 &mdash; Historical
+        </div>
         <ShimmerText as="h1" className="text-4xl sm:text-5xl mb-3">
           Leaderboard
         </ShimmerText>
-        <p className="text-text-secondary">
-          Dark and Darker &mdash; champions ranked by AP.
+        <p className="text-text-secondary max-w-2xl mx-auto">
+          Preserved rankings from Early Access Season 7. This board is no longer
+          updated — current standings live in-game.
         </p>
       </motion.div>
 

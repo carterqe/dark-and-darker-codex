@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Shield,
-  Trophy,
   Sword,
   Store,
   Users,
@@ -25,13 +24,12 @@ import Toast from "@/components/ui/Toast";
 
 const navLinks = [
   { href: "/", label: "Hall", icon: Shield },
-  { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
+  { href: "/builds", label: "Builds", icon: Hammer },
+  { href: "/classes", label: "Classes", icon: Users },
   { href: "/armory", label: "Armory", icon: Sword },
   { href: "/market", label: "Market", icon: Store },
-  { href: "/classes", label: "Classes", icon: Users },
-  { href: "/builds", label: "Builds", icon: Hammer },
-  { href: "/quests", label: "Quests", icon: ScrollText },
   { href: "/maps", label: "Maps", icon: Map },
+  { href: "/quests", label: "Quests", icon: ScrollText },
 ];
 
 const adminLink = { href: "/admin/feedback", label: "Admin", icon: ShieldCheck };

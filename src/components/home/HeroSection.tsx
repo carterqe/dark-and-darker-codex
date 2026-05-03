@@ -27,8 +27,8 @@ export default function HeroSection() {
         </ShimmerText>
 
         <p className="text-text-secondary text-lg sm:text-xl max-w-xl mx-auto leading-relaxed">
-          Where legends are forged and the worthy ascend. Step forth, champion,
-          and claim your place among the elite.
+          Where legends share their craft. Forge your loadout, study the meta,
+          and stand alongside fellow adventurers.
         </p>
       </motion.div>
 
