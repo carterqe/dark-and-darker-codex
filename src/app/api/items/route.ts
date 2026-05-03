@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 const API_BASE = "https://api.darkerdb.com/v1";
 const FETCH_TIMEOUT_MS = 8000;
 const MAX_PAGES = 10; // was 30 — items are cached anyway so 1000 items is plenty
