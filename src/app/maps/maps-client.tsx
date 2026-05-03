@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect, useMemo, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { TransformWrapper, TransformComponent, useControls } from "react-zoom-pan-pinch";
+import { useState, useCallback, useMemo, Suspense } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   DoorOpen,
@@ -13,30 +12,23 @@ import {
   Wind,
   Plus,
   Skull,
-  Flame,
   Gem,
-  ZoomIn,
-  ZoomOut,
-  RotateCcw,
-  Layers,
   ChevronLeft,
-  Info,
   Clock,
   X,
   Target,
+  Layers,
 } from "lucide-react";
 import {
   MAPS,
   FEATURE_META,
-  FEATURE_TYPES,
   type DungeonMap,
-  type MapFeature,
   type FeatureType,
 } from "@/lib/map-data";
 import { MONSTERS, MONSTER_SPAWNS } from "@/lib/monster-data";
 import ShimmerText from "@/components/ui/ShimmerText";
 
-// ─── Feature icon map ────────────────────────────────────────────────────────
+// ─── Feature icons (used as list bullets, not positional markers) ────────────
 
 const FEATURE_ICONS: Record<FeatureType, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
   extract:           DoorOpen,
@@ -47,277 +39,86 @@ const FEATURE_ICONS: Record<FeatureType, React.ComponentType<{ className?: strin
   fountain_speed:    Wind,
   altar:             Plus,
   boss:              Skull,
-  campfire:          Flame,
+  campfire:          ChevronLeft, // unused — campfires are player-placed
   treasure:          Gem,
   monster_spawn:     Target,
 };
 
-// ─── Theme styles per dungeon ────────────────────────────────────────────────
+const FEATURE_DISPLAY_ORDER: FeatureType[] = [
+  "extract",
+  "portal_red",
+  "shrine_health",
+  "shrine_protection",
+  "shrine_power",
+  "fountain_speed",
+  "altar",
+];
 
-function getThemeAccent(theme: DungeonMap["theme"]): string {
-  switch (theme) {
-    case "cave":      return "from-amber-950/60 to-transparent";
-    case "ruins":     return "from-stone-950/60 to-transparent";
-    case "crypt":     return "from-indigo-950/60 to-transparent";
-    case "inferno":   return "from-red-950/60 to-transparent";
-    case "ice":       return "from-sky-950/60 to-transparent";
-    case "abyss":     return "from-blue-950/60 to-transparent";
-    case "sea":       return "from-teal-950/60 to-transparent";
-    case "firedeep":  return "from-orange-950/60 to-transparent";
+// ─── Data helpers ────────────────────────────────────────────────────────────
+
+function uniqueBosses(map: DungeonMap) {
+  const main: Array<{ label: string; description?: string }> = [];
+  const sub: Array<{ label: string; description?: string }> = [];
+  const seen = new Set<string>();
+  for (const f of map.features) {
+    if (f.type !== "boss" || seen.has(f.label)) continue;
+    seen.add(f.label);
+    const isMainBoss = f.description?.toLowerCase().startsWith("boss:") ?? false;
+    (isMainBoss ? main : sub).push({ label: f.label, description: f.description });
   }
+  return { main, sub };
 }
 
-// ─── Marker tooltip ──────────────────────────────────────────────────────────
-
-interface MarkerProps {
-  feature: MapFeature;
-  isHovered: boolean;
-  onHover: (id: string | null) => void;
+function featureCounts(map: DungeonMap): Partial<Record<FeatureType, number>> {
+  const counts: Partial<Record<FeatureType, number>> = {};
+  for (const f of map.features) {
+    if (f.type === "boss" || f.type === "treasure") continue;
+    counts[f.type] = (counts[f.type] ?? 0) + 1;
+  }
+  return counts;
 }
 
-function FeatureMarker({ feature, isHovered, onHover }: MarkerProps) {
-  const meta = FEATURE_META[feature.type];
-  const Icon = FEATURE_ICONS[feature.type];
+function notableModules(map: DungeonMap) {
+  return map.features.filter((f) => f.type === "treasure" && f.description);
+}
 
-  return (
-    <div
-      style={{
-        position: "absolute",
-        left: `${feature.x}%`,
-        top: `${feature.y}%`,
-        transform: "translate(-50%, -50%)",
-        zIndex: isHovered ? 20 : 5,
-        pointerEvents: "all",
-      }}
-      onMouseEnter={() => onHover(feature.id)}
-      onMouseLeave={() => onHover(null)}
-    >
-      {/* Pulse ring on boss markers */}
-      {feature.type === "boss" && (
-        <div
-          style={{
-            position: "absolute",
-            inset: -8,
-            borderRadius: 8,
-            border: `2px solid ${meta.borderColor}`,
-            animation: "ping 2s cubic-bezier(0,0,0.2,1) infinite",
-            opacity: 0.5,
-          }}
-        />
-      )}
+function mobsForMap(mapId: string) {
+  const ids = Array.from(
+    new Set(MONSTER_SPAWNS.filter((s) => s.mapId === mapId).map((s) => s.monsterId)),
+  );
+  return ids
+    .map((id) => MONSTERS.find((m) => m.id === id))
+    .filter((m): m is (typeof MONSTERS)[number] => Boolean(m));
+}
 
-      {/* Stronger pulse ring on monster_spawn highlight markers */}
-      {feature.type === "monster_spawn" && (
-        <>
-          <div
-            style={{
-              position: "absolute",
-              inset: -14,
-              borderRadius: 999,
-              border: `3px solid ${meta.borderColor}`,
-              animation: "ping 1.4s cubic-bezier(0,0,0.2,1) infinite",
-              opacity: 0.75,
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              inset: -6,
-              borderRadius: 999,
-              border: `2px solid ${meta.color}`,
-              opacity: 0.9,
-            }}
-          />
-        </>
-      )}
-
-      {/* Marker body */}
-      <div
-        style={{
-          width: 38,
-          height: 38,
-          backgroundColor: meta.bgColor,
-          border: `2px solid ${meta.borderColor}`,
-          borderRadius: 7,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          transition: "transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease",
-          transform: isHovered ? "scale(1.25)" : "scale(1)",
-          filter: isHovered ? "brightness(1.25)" : "brightness(1)",
-          boxShadow: isHovered
-            ? `0 0 14px ${meta.color}99, 0 3px 10px rgba(0,0,0,0.9), 0 0 0 1px rgba(0,0,0,0.6)`
-            : `0 3px 8px rgba(0,0,0,0.85), 0 0 0 1px rgba(0,0,0,0.5)`,
-        }}
-      >
-        <Icon className="w-5 h-5" style={{ color: meta.color, flexShrink: 0 }} />
-      </div>
-
-      {/* Tooltip */}
-      <AnimatePresence>
-        {isHovered && (
-          <motion.div
-            initial={{ opacity: 0, y: 4, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 4, scale: 0.95 }}
-            transition={{ duration: 0.1 }}
-            style={{
-              position: "absolute",
-              bottom: "calc(100% + 8px)",
-              left: "50%",
-              transform: "translateX(-50%)",
-              backgroundColor: "#12121a",
-              border: `1px solid ${meta.borderColor}`,
-              borderRadius: 4,
-              padding: "6px 10px",
-              whiteSpace: "nowrap",
-              pointerEvents: "none",
-              minWidth: 140,
-              boxShadow: `0 4px 16px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,0,0,0.3)`,
-            }}
-          >
-            <p style={{ color: meta.color, fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 2 }}>
-              {meta.label}
-            </p>
-            <p style={{ color: "#e8e6e1", fontSize: 12, fontWeight: 600, marginBottom: feature.description ? 3 : 0 }}>
-              {feature.label}
-            </p>
-            {feature.description && (
-              <p style={{ color: "#8a8693", fontSize: 11, maxWidth: 220, whiteSpace: "normal", lineHeight: 1.4 }}>
-                {feature.description}
-              </p>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+function dungeonsForMonster(monsterId: string) {
+  return Array.from(
+    new Set(MONSTER_SPAWNS.filter((s) => s.monsterId === monsterId).map((s) => s.mapId)),
   );
 }
 
-// ─── Zoom controls ───────────────────────────────────────────────────────────
-
-function ZoomControls() {
-  const { zoomIn, zoomOut, resetTransform } = useControls();
-  const btnCls = "w-8 h-8 flex items-center justify-center bg-bg-secondary border border-border-subtle rounded-sm text-text-secondary hover:text-gold-primary hover:border-gold-primary/40 transition-all";
-  return (
-    <div className="absolute bottom-4 right-4 flex flex-col gap-1 z-30">
-      <button onClick={() => zoomIn(0.3, 200, "easeOut")} className={btnCls} title="Zoom in">
-        <ZoomIn className="w-4 h-4" />
-      </button>
-      <button onClick={() => resetTransform(300, "easeOut")} className={btnCls} title="Reset view">
-        <RotateCcw className="w-3.5 h-3.5" />
-      </button>
-      <button onClick={() => zoomOut(0.3, 200, "easeOut")} className={btnCls} title="Zoom out">
-        <ZoomOut className="w-4 h-4" />
-      </button>
-    </div>
-  );
-}
-
-// ─── Map canvas ──────────────────────────────────────────────────────────────
-
-interface MapCanvasProps {
-  map: DungeonMap;
-  features: MapFeature[];
-  enabledTypes: Set<FeatureType>;
-  hoveredId: string | null;
-  onHover: (id: string | null) => void;
-}
-
-function MapCanvas({ map, features, enabledTypes, hoveredId, onHover }: MapCanvasProps) {
-  const themeGradient = getThemeAccent(map.theme);
-
-  const bgImage = map.imageUrl
-    ? `url("${map.imageUrl}")`
-    : [
-        `repeating-linear-gradient(0deg, ${map.gridColor} 0px, transparent 1px, transparent 80px, ${map.gridColor} 80px)`,
-        `repeating-linear-gradient(90deg, ${map.gridColor} 0px, transparent 1px, transparent 80px, ${map.gridColor} 80px)`,
-        `repeating-linear-gradient(0deg, ${map.gridColor.replace("0.11", "0.06")} 0px, transparent 1px, transparent 320px, ${map.gridColor.replace("0.11", "0.06")} 320px)`,
-        `repeating-linear-gradient(90deg, ${map.gridColor.replace("0.11", "0.06")} 0px, transparent 1px, transparent 320px, ${map.gridColor.replace("0.11", "0.06")} 320px)`,
-      ].join(", ");
-
-  return (
-    <div
-      style={{
-        position: "relative",
-        width: map.width,
-        height: map.height,
-        backgroundColor: map.bgColor,
-        backgroundImage: bgImage,
-        backgroundSize: map.imageUrl ? "100% 100%" : "auto",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      {/* Edge vignette — darkens edges so markers are readable */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ zIndex: 1, boxShadow: "inset 0 0 100px rgba(0,0,0,0.55)" }}
-      />
-
-      {/* Subtle theme tint on corners */}
-      <div
-        className={`absolute inset-0 bg-gradient-to-br ${themeGradient} pointer-events-none`}
-        style={{ zIndex: 1, opacity: 0.35 }}
-      />
-
-      {/* Feature markers */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 3 }}>
-        {features.map((f) =>
-          enabledTypes.has(f.type) ? (
-            <FeatureMarker
-              key={f.id}
-              feature={f}
-              isHovered={hoveredId === f.id}
-              onHover={onHover}
-            />
-          ) : null
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─── Coming soon placeholder ─────────────────────────────────────────────────
+// ─── Coming soon view ────────────────────────────────────────────────────────
 
 function ComingSoonView({ map }: { map: DungeonMap }) {
   return (
     <div
       className="flex-1 flex flex-col items-center justify-center gap-6 select-none"
-      style={{ background: `radial-gradient(ellipse at center, ${map.bgColor.replace("#", "").length === 6 ? map.bgColor : "#0a090f"} 0%, #060508 100%)` }}
+      style={{ background: `radial-gradient(ellipse at center, ${map.bgColor} 0%, #060508 100%)` }}
     >
-      {/* Decorative ring */}
-      <div
-        className="relative flex items-center justify-center"
-        style={{ width: 96, height: 96 }}
-      >
+      <div className="relative flex items-center justify-center" style={{ width: 96, height: 96 }}>
         <div
           className="absolute inset-0 rounded-full"
-          style={{
-            border: `2px solid ${map.accentColor}33`,
-            boxShadow: `0 0 32px ${map.accentColor}22`,
-          }}
+          style={{ border: `2px solid ${map.accentColor}33`, boxShadow: `0 0 32px ${map.accentColor}22` }}
         />
-        <div
-          className="absolute inset-3 rounded-full"
-          style={{ border: `1px solid ${map.accentColor}55` }}
-        />
-        <Clock
-          style={{ width: 36, height: 36, color: map.accentColor, opacity: 0.85 }}
-        />
+        <div className="absolute inset-3 rounded-full" style={{ border: `1px solid ${map.accentColor}55` }} />
+        <Clock style={{ width: 36, height: 36, color: map.accentColor, opacity: 0.85 }} />
       </div>
 
-      {/* Text block */}
       <div className="text-center space-y-2 max-w-xs px-4">
-        <p
-          className="font-cinzel font-bold text-xl tracking-wide"
-          style={{ color: map.accentColor }}
-        >
+        <p className="font-cinzel font-bold text-xl tracking-wide" style={{ color: map.accentColor }}>
           {map.name}
         </p>
-        <p className="text-xs text-text-secondary/60 uppercase tracking-widest">
-          {map.subtitle}
-        </p>
+        <p className="text-xs text-text-secondary/60 uppercase tracking-widest">{map.subtitle}</p>
         <div
           className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-sm border text-xs font-bold uppercase tracking-widest"
           style={{
@@ -329,137 +130,341 @@ function ComingSoonView({ map }: { map: DungeonMap }) {
           <Clock className="w-3 h-3" />
           Coming Soon
         </div>
-        <p className="text-[11px] text-text-secondary/50 leading-relaxed pt-2">
-          {map.description}
-        </p>
+        <p className="text-[11px] text-text-secondary/50 leading-relaxed pt-2">{map.description}</p>
       </div>
     </div>
+  );
+}
+
+// ─── Dungeon reference view ──────────────────────────────────────────────────
+
+interface ReferenceViewProps {
+  map: DungeonMap;
+  highlightedMonsterId: string | null;
+  onSelectMap: (id: string) => void;
+  onClearHighlight: () => void;
+}
+
+function DungeonReferenceView({
+  map,
+  highlightedMonsterId,
+  onSelectMap,
+  onClearHighlight,
+}: ReferenceViewProps) {
+  const { main: mainBosses, sub: subBosses } = useMemo(() => uniqueBosses(map), [map]);
+  const counts = useMemo(() => featureCounts(map), [map]);
+  const modules = useMemo(() => notableModules(map), [map]);
+  const mobs = useMemo(() => mobsForMap(map.id), [map.id]);
+
+  const highlightedMonster = highlightedMonsterId
+    ? MONSTERS.find((m) => m.id === highlightedMonsterId) ?? null
+    : null;
+  const highlightDungeons = highlightedMonsterId
+    ? dungeonsForMonster(highlightedMonsterId)
+    : [];
+
+  return (
+    <div className="flex-1 overflow-y-auto">
+      <motion.div
+        key={map.id}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25 }}
+        className="max-w-4xl mx-auto px-5 sm:px-8 py-8 space-y-8"
+      >
+        {/* Header */}
+        <header className="space-y-2">
+          <p
+            className="text-[11px] uppercase tracking-[0.25em] font-bold"
+            style={{ color: map.accentColor, opacity: 0.85 }}
+          >
+            {map.subtitle}
+          </p>
+          <ShimmerText as="h2" className="text-3xl sm:text-4xl">
+            {map.name}
+          </ShimmerText>
+          <p className="text-sm text-text-secondary leading-relaxed max-w-3xl">
+            {map.description}
+          </p>
+        </header>
+
+        {/* Highlighted monster banner */}
+        {highlightedMonster && (
+          <div
+            className="rounded-sm border px-4 py-3 flex flex-wrap items-center gap-x-3 gap-y-2"
+            style={{
+              backgroundColor: FEATURE_META.monster_spawn.bgColor,
+              borderColor: FEATURE_META.monster_spawn.borderColor,
+            }}
+          >
+            <Target className="w-4 h-4 shrink-0" style={{ color: FEATURE_META.monster_spawn.color }} />
+            <span className="text-xs font-cinzel font-bold uppercase tracking-widest" style={{ color: FEATURE_META.monster_spawn.color }}>
+              Tracking
+            </span>
+            <span className="text-sm font-medium text-text-primary">{highlightedMonster.name}</span>
+            {highlightDungeons.length > 0 && (
+              <>
+                <span className="text-[11px] text-text-secondary">·</span>
+                <span className="text-[11px] text-text-secondary mr-1">Spawns in:</span>
+                <div className="flex flex-wrap gap-1">
+                  {highlightDungeons.map((id) => {
+                    const dungeon = MAPS.find((m) => m.id === id);
+                    if (!dungeon) return null;
+                    const isCurrent = id === map.id;
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => onSelectMap(id)}
+                        disabled={isCurrent}
+                        className={`text-[11px] px-2 py-0.5 rounded-sm border transition-colors ${
+                          isCurrent
+                            ? "border-gold-primary/50 bg-gold-primary/10 text-gold-primary cursor-default"
+                            : "border-border-subtle text-text-secondary hover:text-gold-primary hover:border-gold-primary/40"
+                        }`}
+                      >
+                        {dungeon.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+            <button
+              onClick={onClearHighlight}
+              className="ml-auto text-[11px] text-text-secondary hover:text-gold-primary flex items-center gap-1"
+            >
+              <X className="w-3 h-3" />
+              Clear
+            </button>
+          </div>
+        )}
+
+        {/* Bosses */}
+        {(mainBosses.length > 0 || subBosses.length > 0) && (
+          <Section title="Bosses" icon={Skull} accentColor={FEATURE_META.boss.color}>
+            {mainBosses.length > 0 && (
+              <ul className="space-y-1.5 mb-3">
+                {mainBosses.map((b) => (
+                  <li key={b.label} className="flex items-start gap-2 text-sm">
+                    <Skull className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: FEATURE_META.boss.color }} />
+                    <div>
+                      <span className="font-cinzel font-bold text-text-primary">{b.label}</span>
+                      {b.description && (
+                        <span className="text-text-secondary text-[12px] block leading-snug">
+                          {b.description.replace(/^Boss:\s*/i, "")}
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {subBosses.length > 0 && (
+              <div className="text-[12px] text-text-secondary">
+                <span className="text-gold-dark font-cinzel font-bold uppercase tracking-widest text-[10px] mr-2">
+                  Subbosses
+                </span>
+                {subBosses.map((b, i) => (
+                  <span key={b.label}>
+                    <span className="text-text-primary">{b.label}</span>
+                    {i < subBosses.length - 1 && <span className="text-text-secondary/50">, </span>}
+                  </span>
+                ))}
+              </div>
+            )}
+          </Section>
+        )}
+
+        {/* Mob pool */}
+        {mobs.length > 0 && (
+          <Section title="Mob Pool" icon={Target} accentColor={FEATURE_META.monster_spawn.color}>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+              {mobs.map((m) => {
+                const isHighlighted = m.id === highlightedMonsterId;
+                return (
+                  <li
+                    key={m.id}
+                    className={`flex items-center gap-2 px-2.5 py-1.5 rounded-sm border text-sm ${
+                      isHighlighted
+                        ? "border-pink-400/60 bg-pink-500/10"
+                        : "border-border-subtle bg-bg-secondary/40"
+                    }`}
+                  >
+                    <Target
+                      className="w-3.5 h-3.5 shrink-0"
+                      style={{ color: isHighlighted ? FEATURE_META.monster_spawn.color : "#8a8693" }}
+                    />
+                    <span className={isHighlighted ? "text-text-primary font-medium" : "text-text-secondary"}>
+                      {m.name}
+                    </span>
+                    {m.aliases && m.aliases.length > 0 && (
+                      <span className="text-[10px] text-text-secondary/50">
+                        ({m.aliases.join(", ")})
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="text-[10px] text-text-secondary/50 mt-2 italic">
+              Documented spawns — list may be incomplete.
+            </p>
+          </Section>
+        )}
+
+        {/* Features */}
+        <Section title="Features" icon={Layers} accentColor="#a89060">
+          <p className="text-[11px] text-text-secondary/60 mb-3 italic">
+            Spawn locations are randomized per run — counts below are documented candidate positions
+            from common module layouts, not guaranteed spawns.
+          </p>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            {FEATURE_DISPLAY_ORDER.map((type) => {
+              const count = counts[type];
+              if (!count) return null;
+              const meta = FEATURE_META[type];
+              const Icon = FEATURE_ICONS[type];
+              return (
+                <li
+                  key={type}
+                  className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-sm border border-border-subtle bg-bg-secondary/40 text-sm"
+                >
+                  <div
+                    className="w-6 h-6 rounded flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: meta.bgColor, border: `1px solid ${meta.borderColor}` }}
+                  >
+                    <Icon className="w-3 h-3" style={{ color: meta.color }} />
+                  </div>
+                  <span className="text-text-secondary flex-1">{meta.label}</span>
+                  <span className="text-[11px] text-text-secondary/50 font-mono">×{count}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </Section>
+
+        {/* Notable modules */}
+        {modules.length > 0 && (
+          <Section title="Notable Modules" icon={Gem} accentColor={FEATURE_META.treasure.color}>
+            <ul className="space-y-2">
+              {modules.map((m) => (
+                <li key={m.id} className="text-sm">
+                  <span className="font-cinzel font-bold text-text-primary">{m.label}</span>
+                  {m.description && (
+                    <span className="text-text-secondary text-[12px] block leading-snug">
+                      {m.description}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </Section>
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── Section wrapper ─────────────────────────────────────────────────────────
+
+function Section({
+  title,
+  icon: Icon,
+  accentColor,
+  children,
+}: {
+  title: string;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  accentColor: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-sm border border-border-subtle bg-bg-secondary/30 p-4 sm:p-5">
+      <h3 className="flex items-center gap-2 mb-3 font-cinzel font-bold text-sm uppercase tracking-widest">
+        <Icon className="w-4 h-4" style={{ color: accentColor }} />
+        <span style={{ color: accentColor }}>{title}</span>
+      </h3>
+      {children}
+    </section>
   );
 }
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
 function MapsClientInner() {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [selectedMap, setSelectedMap] = useState<DungeonMap>(MAPS[0]);
-  const [enabledTypes, setEnabledTypes] = useState<Set<FeatureType>>(
-    () => new Set([...FEATURE_TYPES, "monster_spawn" as FeatureType])
-  );
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [showInfo, setShowInfo] = useState(false);
-  const [highlightedMonsterId, setHighlightedMonsterId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const mapParam = searchParams.get("map");
-    const highlightParam = searchParams.get("highlight");
-    if (mapParam) {
-      const found = MAPS.find((m) => m.id === mapParam);
-      if (found) setSelectedMap(found);
+  // URL is the source of truth for which dungeon and which monster highlight.
+  const urlMapId = searchParams.get("map");
+  const highlightedMonsterId = searchParams.get("highlight");
+
+  const selectedMap = useMemo<DungeonMap>(() => {
+    if (urlMapId) {
+      const found = MAPS.find((m) => m.id === urlMapId);
+      if (found) return found;
     }
-    setHighlightedMonsterId(highlightParam);
-  }, [searchParams]);
+    if (highlightedMonsterId) {
+      const dungeons = dungeonsForMonster(highlightedMonsterId);
+      const found = dungeons.length > 0 ? MAPS.find((m) => m.id === dungeons[0]) : undefined;
+      if (found) return found;
+    }
+    return MAPS[0];
+  }, [urlMapId, highlightedMonsterId]);
 
-  const toggleType = useCallback((type: FeatureType) => {
-    setEnabledTypes((prev) => {
-      const next = new Set(prev);
-      if (next.has(type)) next.delete(type);
-      else next.add(type);
-      return next;
-    });
-  }, []);
-
-  const toggleAll = useCallback(() => {
-    setEnabledTypes((prev) =>
-      prev.size === FEATURE_TYPES.length ? new Set() : new Set(FEATURE_TYPES)
-    );
-  }, []);
-
-  const highlightedMonster = useMemo(
-    () => (highlightedMonsterId ? MONSTERS.find((m) => m.id === highlightedMonsterId) ?? null : null),
-    [highlightedMonsterId],
+  const buildHref = useCallback(
+    (mutate: (params: URLSearchParams) => void) => {
+      const params = new URLSearchParams(searchParams.toString());
+      mutate(params);
+      const qs = params.toString();
+      return qs ? `${pathname}?${qs}` : pathname;
+    },
+    [pathname, searchParams],
   );
 
-  const renderedFeatures = useMemo<MapFeature[]>(() => {
-    const base = selectedMap.features;
-    if (!highlightedMonsterId) return base;
-    const spawns = MONSTER_SPAWNS.filter(
-      (s) => s.monsterId === highlightedMonsterId && s.mapId === selectedMap.id,
-    );
-    const monsterName = highlightedMonster?.name ?? highlightedMonsterId;
-    const synthetic: MapFeature[] = spawns.map((s, i) => ({
-      id: `highlight_${highlightedMonsterId}_${selectedMap.id}_${i}`,
-      type: "monster_spawn" as FeatureType,
-      label: monsterName,
-      x: s.x ?? 50,
-      y: s.y ?? 50,
-      description: s.module ? `${monsterName} spawn — ${s.module}` : `${monsterName} spawn location`,
-    }));
-    return [...base, ...synthetic];
-  }, [selectedMap, highlightedMonsterId, highlightedMonster]);
+  const selectMapById = useCallback(
+    (id: string) => {
+      router.replace(
+        buildHref((p) => p.set("map", id)),
+        { scroll: false },
+      );
+    },
+    [router, buildHref],
+  );
 
   const clearHighlight = useCallback(() => {
-    setHighlightedMonsterId(null);
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      url.searchParams.delete("highlight");
-      window.history.replaceState({}, "", url.toString());
-    }
-  }, []);
-
-  const visibleCount = renderedFeatures.filter((f) => enabledTypes.has(f.type)).length;
+    router.replace(
+      buildHref((p) => p.delete("highlight")),
+      { scroll: false },
+    );
+  }, [router, buildHref]);
 
   return (
     <div className="flex flex-col" style={{ height: "calc(100vh - 56px)" }}>
-      {/* ── Page header ── */}
+      {/* Page header */}
       <div className="shrink-0 px-4 sm:px-6 pt-5 pb-3 flex items-center justify-between gap-4 border-b border-border-subtle">
         <div>
           <ShimmerText as="h1" className="text-2xl sm:text-3xl leading-tight">
-            Dungeon Maps
+            Dungeon Reference
           </ShimmerText>
           <p className="text-xs text-text-secondary mt-0.5">
-            Interactive reference maps — feature positions are representative
+            Bosses, mob pools, and feature counts per dungeon — DaD layouts are procedurally generated, so positions are not.
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => setShowInfo((v) => !v)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-text-secondary border border-border-subtle rounded-sm hover:text-gold-primary hover:border-gold-primary/30 transition-all"
-          >
-            <Info className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => setSidebarOpen((v) => !v)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-text-secondary border border-border-subtle rounded-sm hover:text-gold-primary hover:border-gold-primary/30 transition-all"
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{sidebarOpen ? "Hide Panel" : "Show Panel"}</span>
-          </button>
-        </div>
+        <button
+          onClick={() => setSidebarOpen((v) => !v)}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-text-secondary border border-border-subtle rounded-sm hover:text-gold-primary hover:border-gold-primary/30 transition-all shrink-0"
+        >
+          <Layers className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">{sidebarOpen ? "Hide Panel" : "Show Panel"}</span>
+        </button>
       </div>
 
-      {/* ── Info banner ── */}
-      <AnimatePresence>
-        {showInfo && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="shrink-0 overflow-hidden"
-          >
-            <div className="px-4 sm:px-6 py-2.5 bg-gold-primary/5 border-b border-gold-primary/15 text-xs text-text-secondary">
-              <strong className="text-gold-dark">Note:</strong> Dark &amp; Darker dungeons are procedurally generated —
-              feature positions vary each run. Markers show <em>representative</em> locations based on common module
-              layouts. Scroll or pinch to zoom. Click and drag to pan.
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Body ── */}
+      {/* Body */}
       <div className="flex flex-1 min-h-0">
-
-        {/* ── Sidebar ── */}
+        {/* Sidebar — dungeon picker */}
         <AnimatePresence initial={false}>
           {sidebarOpen && (
             <motion.aside
@@ -471,194 +476,57 @@ function MapsClientInner() {
               className="shrink-0 overflow-hidden border-r border-border-subtle bg-bg-primary flex flex-col"
               style={{ minWidth: 0 }}
             >
-              <div className="flex flex-col gap-4 p-3 overflow-y-auto flex-1" style={{ width: 220 }}>
-
-                {/* Map selector */}
-                <div>
-                  <p className="text-[10px] uppercase tracking-widest font-bold text-gold-dark mb-1.5 px-1">
-                    Dungeons
-                  </p>
-                  <div className="space-y-1">
-                    {MAPS.map((m) => {
-                      const active = m.id === selectedMap.id;
-                      return (
-                        <button
-                          key={m.id}
-                          onClick={() => { setSelectedMap(m); setHoveredId(null); }}
-                          className={`w-full text-left px-2.5 py-2 rounded-sm border transition-all ${
-                            active
-                              ? "border-gold-primary/40 bg-gold-primary/10"
-                              : "border-border-subtle hover:border-gold-primary/25 hover:bg-bg-secondary"
+              <div className="flex flex-col gap-2 p-3 overflow-y-auto flex-1" style={{ width: 220 }}>
+                <p className="text-[10px] uppercase tracking-widest font-bold text-gold-dark mb-1 px-1">
+                  Dungeons
+                </p>
+                <div className="space-y-1">
+                  {MAPS.map((m) => {
+                    const active = m.id === selectedMap.id;
+                    return (
+                      <button
+                        key={m.id}
+                        onClick={() => selectMapById(m.id)}
+                        className={`w-full text-left px-2.5 py-2 rounded-sm border transition-all ${
+                          active
+                            ? "border-gold-primary/40 bg-gold-primary/10"
+                            : "border-border-subtle hover:border-gold-primary/25 hover:bg-bg-secondary"
+                        }`}
+                      >
+                        <span
+                          className={`text-xs font-cinzel font-bold block ${
+                            active ? "text-gold-primary" : "text-text-primary"
                           }`}
                         >
-                          <span className={`text-xs font-cinzel font-bold block ${active ? "text-gold-primary" : "text-text-primary"}`}>
-                            {m.name}
-                          </span>
-                          <span className="text-[10px] text-text-secondary/60">
-                            {m.comingSoon ? (
-                              <span style={{ color: m.accentColor, opacity: 0.75 }}>Coming soon</span>
-                            ) : m.subtitle}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Feature toggles */}
-                <div>
-                  <div className="flex items-center justify-between mb-1.5 px-1">
-                    <p className="text-[10px] uppercase tracking-widest font-bold text-gold-dark">
-                      Features
-                    </p>
-                    <button
-                      onClick={toggleAll}
-                      className="text-[10px] text-text-secondary hover:text-gold-primary transition-colors"
-                    >
-                      {enabledTypes.size === FEATURE_TYPES.length ? "Hide all" : "Show all"}
-                    </button>
-                  </div>
-                  <div className="space-y-0.5">
-                    {FEATURE_TYPES.map((type) => {
-                      const meta = FEATURE_META[type];
-                      const Icon = FEATURE_ICONS[type];
-                      const enabled = enabledTypes.has(type);
-                      const count = selectedMap.features.filter((f) => f.type === type).length;
-                      if (count === 0) return null;
-                      return (
-                        <button
-                          key={type}
-                          onClick={() => toggleType(type)}
-                          className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-sm border transition-all ${
-                            enabled
-                              ? "border-transparent bg-bg-secondary hover:bg-bg-tertiary"
-                              : "border-transparent opacity-40 hover:opacity-60"
-                          }`}
-                        >
-                          <div
-                            className="w-5 h-5 rounded flex items-center justify-center shrink-0 transition-all"
-                            style={{
-                              backgroundColor: enabled ? meta.bgColor : "transparent",
-                              border: `1px solid ${enabled ? meta.borderColor : "rgba(255,255,255,0.1)"}`,
-                            }}
-                          >
-                            <Icon className="w-2.5 h-2.5" style={{ color: enabled ? meta.color : "#8a8693" }} />
-                          </div>
-                          <span className="text-[11px] text-text-secondary flex-1 text-left leading-tight">{meta.label}</span>
-                          <span className="text-[10px] text-text-secondary/40 shrink-0">×{count}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Map description */}
-                <div className="px-1 pt-1 border-t border-border-subtle">
-                  <p className="text-[10px] uppercase tracking-widest font-bold text-gold-dark mb-1">
-                    About
-                  </p>
-                  <p className="text-[11px] text-text-secondary leading-relaxed">
-                    {selectedMap.description}
-                  </p>
-                  <p className="text-[10px] text-text-secondary/40 mt-2">
-                    {visibleCount} of {renderedFeatures.length} features visible
-                  </p>
+                          {m.name}
+                        </span>
+                        <span className="text-[10px] text-text-secondary/60">
+                          {m.comingSoon ? (
+                            <span style={{ color: m.accentColor, opacity: 0.75 }}>Coming soon</span>
+                          ) : (
+                            m.subtitle
+                          )}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </motion.aside>
           )}
         </AnimatePresence>
 
-        {/* ── Map viewport ── */}
-        <div className="flex-1 min-w-0 relative bg-bg-primary overflow-hidden flex flex-col">
+        {/* Content */}
+        <div className="flex-1 min-w-0 relative bg-bg-primary flex flex-col">
           {selectedMap.comingSoon ? (
             <ComingSoonView map={selectedMap} />
-          ) : null}
-          {!selectedMap.comingSoon && <TransformWrapper
-            key={selectedMap.id}
-            initialScale={0.45}
-            minScale={0.15}
-            maxScale={6}
-            centerOnInit
-            limitToBounds={false}
-            smooth
-            doubleClick={{ disabled: false, step: 0.5 }}
-            wheel={{ step: 0.0006 }}
-            zoomAnimation={{ animationTime: 120, animationType: "easeOut" }}
-            panning={{ velocityDisabled: false }}
-          >
-            {() => (
-              <>
-                <TransformComponent
-                  wrapperStyle={{ width: "100%", height: "100%", cursor: "grab" }}
-                  contentStyle={{ userSelect: "none" }}
-                >
-                  <MapCanvas
-                    map={selectedMap}
-                    features={renderedFeatures}
-                    enabledTypes={enabledTypes}
-                    hoveredId={hoveredId}
-                    onHover={setHoveredId}
-                  />
-                </TransformComponent>
-
-                {/* Floating zoom controls */}
-                <ZoomControls />
-              </>
-            )}
-          </TransformWrapper>}
-
-          {/* Map name badge (floating over viewport) */}
-          {!selectedMap.comingSoon && <div className="absolute top-3 left-3 z-20 flex items-center gap-2">
-            <div
-              className="px-2.5 py-1 border border-border-subtle rounded-sm pointer-events-none"
-              style={{ backgroundColor: "rgba(10,9,15,0.85)", backdropFilter: "blur(6px)" }}
-            >
-              <p className="font-cinzel font-bold text-xs" style={{ color: selectedMap.accentColor }}>
-                {selectedMap.name}
-              </p>
-              <p className="text-[10px] text-text-secondary/60">{selectedMap.subtitle}</p>
-            </div>
-            {highlightedMonsterId && (
-              <button
-                onClick={clearHighlight}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm border text-[11px] font-medium transition-all"
-                style={{
-                  backgroundColor: FEATURE_META.monster_spawn.bgColor,
-                  borderColor: FEATURE_META.monster_spawn.borderColor,
-                  color: FEATURE_META.monster_spawn.color,
-                }}
-              >
-                <Target className="w-3 h-3" />
-                Highlighting: {highlightedMonster?.name ?? highlightedMonsterId}
-                <X className="w-3 h-3 opacity-70" />
-              </button>
-            )}
-          </div>}
-
-          {/* Legend chips (floating bottom-left) */}
-          {!selectedMap.comingSoon && (
-            <div className="absolute bottom-4 left-3 z-20 flex flex-wrap gap-1 max-w-xs pointer-events-none">
-              {FEATURE_TYPES.filter((t) => enabledTypes.has(t) && selectedMap.features.some((f) => f.type === t)).map((type) => {
-                const meta = FEATURE_META[type];
-                const Icon = FEATURE_ICONS[type];
-                return (
-                  <div
-                    key={type}
-                    className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium"
-                    style={{
-                      backgroundColor: "rgba(10,9,15,0.8)",
-                      border: `1px solid ${meta.borderColor}`,
-                      backdropFilter: "blur(4px)",
-                      color: meta.color,
-                    }}
-                  >
-                    <Icon className="w-2.5 h-2.5" />
-                    {meta.label}
-                  </div>
-                );
-              })}
-            </div>
+          ) : (
+            <DungeonReferenceView
+              map={selectedMap}
+              highlightedMonsterId={highlightedMonsterId}
+              onSelectMap={selectMapById}
+              onClearHighlight={clearHighlight}
+            />
           )}
         </div>
       </div>
@@ -668,7 +536,13 @@ function MapsClientInner() {
 
 export default function MapsClient() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-full text-text-secondary/60 text-sm">Loading maps…</div>}>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-full text-text-secondary/60 text-sm">
+          Loading reference…
+        </div>
+      }
+    >
       <MapsClientInner />
     </Suspense>
   );

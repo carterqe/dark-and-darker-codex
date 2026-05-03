@@ -2,21 +2,21 @@ import type { Metadata } from "next";
 import MapsClient from "./maps-client";
 
 export const metadata: Metadata = {
-  title: "Maps",
+  title: "Dungeon Reference",
   description:
-    "Interactive Dark and Darker dungeon maps — Goblin Cave, Crypts, Ruins, Inferno, Frost Mountain, Ice Abyss, Ship Graveyard and Firedeep — with extracts, portals, shrines and bosses.",
+    "Per-dungeon reference for Dark and Darker — bosses, subbosses, mob pools, and feature counts for Ruins, Crypts, Goblin Cave, Inferno, Frost Mountain, Ice Abyss and Firedeep. Dungeons are procedurally generated; positions are not listed.",
   alternates: { canonical: "/maps" },
   openGraph: {
-    title: "Dark and Darker Maps — Interactive Dungeon Maps",
+    title: "Dark and Darker — Dungeon Reference",
     description:
-      "Interactive Dark and Darker dungeon maps with extracts, portals, shrines, altars, bosses and treasure markers.",
+      "Bosses, subbosses, mob pools, and feature counts per dungeon. Procedurally generated layouts — positions are not fixed.",
     url: "/maps",
     type: "website",
   },
   twitter: {
-    title: "Dark and Darker Maps — Interactive Dungeon Maps",
+    title: "Dark and Darker — Dungeon Reference",
     description:
-      "Interactive Dark and Darker dungeon maps with extracts, portals, shrines, altars, bosses and treasure markers.",
+      "Bosses, subbosses, mob pools, and feature counts per dungeon. Procedurally generated layouts — positions are not fixed.",
   },
 };
 
