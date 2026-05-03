@@ -15,7 +15,7 @@ async function fetchItem(id: string): Promise<DarkerDBItem | null> {
   if (isNaN(numericId)) return null;
   try {
     const res = await fetch(`${DARKERDB_API}/items/${numericId}`, {
-      next: { revalidate: 3600 },
+      next: { revalidate: 300 },
     });
     if (!res.ok) return null;
     const data: DarkerDBResponse<DarkerDBItem> = await res.json();

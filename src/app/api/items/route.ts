@@ -13,11 +13,11 @@ export async function GET(request: NextRequest) {
       const qs = params.toString();
       const res = await fetch(`${API_BASE}/items${qs ? `?${qs}` : ""}`, {
         signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-        next: { revalidate: 3600 },
+        next: { revalidate: 300 },
       });
       const data = await res.json();
       const response = NextResponse.json(data);
-      response.headers.set("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=300");
+      response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=60");
       return response;
     } catch {
       return NextResponse.json({ error: "Failed to fetch items" }, { status: 503 });
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
         pagePromises.push(
           fetch(`${API_BASE}/items?${p.toString()}`, {
             signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-            next: { revalidate: 3600 },
+            next: { revalidate: 300 },
           })
             .then((r) => r.json())
             .then((d) => d.body ?? [])
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
       },
       body: allItems,
     });
-    response.headers.set("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=300");
+    response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=60");
     return response;
   } catch {
     return NextResponse.json({ error: "Failed to fetch items" }, { status: 503 });

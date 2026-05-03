@@ -7,7 +7,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const res = await fetch(`${API_BASE}/items/${id}`);
+  const res = await fetch(`${API_BASE}/items/${id}`, {
+    next: { revalidate: 300 },
+  });
   const data = await res.json();
-  return NextResponse.json(data);
+  const response = NextResponse.json(data);
+  response.headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=60");
+  return response;
 }
