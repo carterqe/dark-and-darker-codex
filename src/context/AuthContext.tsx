@@ -59,26 +59,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [supabase]
   );
 
-  const fetchAdminStatus = useCallback(async () => {
-    try {
-      const res = await fetch("/api/admin/check", { cache: "no-store" });
-      if (!res.ok) {
-        setIsAdmin(false);
-        return;
-      }
-      const json = (await res.json()) as { admin?: boolean };
-      setIsAdmin(Boolean(json.admin));
-    } catch {
-      setIsAdmin(false);
-    }
-  }, []);
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id);
-        fetchAdminStatus();
       }
       setLoading(false);
     });
@@ -89,7 +74,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       if (session?.user) {
         await fetchProfile(session.user.id);
-        await fetchAdminStatus();
       } else {
         setProfile(null);
         setIsAdmin(false);
@@ -101,7 +85,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase, fetchProfile, fetchAdminStatus]);
+  }, [supabase, fetchProfile]);
+
+  // Refetch admin status whenever the user changes. Decoupled from the session
+  // effect above so a stale isAdmin=false can't survive a session that was
+  // already established when ADMIN_EMAILS later included the user.
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    fetch("/api/admin/check", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : { admin: false }))
+      .then((json: { admin?: boolean }) => {
+        if (!cancelled) setIsAdmin(Boolean(json.admin));
+      })
+      .catch(() => {
+        if (!cancelled) setIsAdmin(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const openAuthModal = (tab: "login" | "signup" = "login") => {
     setAuthModalTab(tab);
