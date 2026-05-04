@@ -202,7 +202,7 @@ function QuestList({
 
 // ─── Quest Items tab ─────────────────────────────────────────────────────────
 
-function QuestItemsTab() {
+function QuestItemsTab({ onJumpToQuest }: { onJumpToQuest: (traderId: string, questId: string) => void }) {
   const [search, setSearch] = useState("");
   const allItems = useMemo(() => getQuestItems(), []);
 
@@ -261,16 +261,20 @@ function QuestItemsTab() {
                   ×{entry.totalQuantity} total
                 </span>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {entry.appearances.map((a, i) => (
-                  <div key={i} className="flex items-center justify-between text-[11px]">
-                    <span className="text-text-secondary truncate">
-                      <span className="text-gold-dark">{a.traderName}</span>
+                  <button
+                    key={i}
+                    onClick={() => onJumpToQuest(a.traderId, a.questId)}
+                    className="w-full flex items-center justify-between text-[11px] text-left -mx-1.5 px-1.5 py-1 rounded-sm hover:bg-gold-primary/10 hover:text-gold-primary transition-colors group"
+                  >
+                    <span className="text-text-secondary truncate group-hover:text-gold-primary">
+                      <span className="text-gold-dark group-hover:text-gold-primary">{a.traderName}</span>
                       {" — "}
-                      {a.questName}
+                      <span className="group-hover:underline">{a.questName}</span>
                     </span>
-                    <span className="text-text-secondary/60 shrink-0 ml-2">×{a.quantity}</span>
-                  </div>
+                    <span className="text-text-secondary/60 shrink-0 ml-2 group-hover:text-gold-primary">×{a.quantity}</span>
+                  </button>
                 ))}
               </div>
               {drops.length > 0 && (
@@ -350,6 +354,17 @@ export default function QuestsClient() {
   const handleBackToQuests = () => {
     setSelectedQuest(null);
     setMobileStep("quests");
+  };
+
+  const handleJumpToQuest = (traderId: string, questId: string) => {
+    const trader = TRADERS.find((t) => t.id === traderId);
+    if (!trader) return;
+    const quest = trader.quests.find((q) => q.id === questId);
+    if (!quest) return;
+    setSelectedTrader(trader);
+    setSelectedQuest(quest);
+    setActiveTab("traders");
+    setMobileStep("detail");
   };
 
   return (
@@ -472,7 +487,7 @@ export default function QuestsClient() {
       )}
 
       {/* ── Quest Items tab ── */}
-      {activeTab === "items" && <QuestItemsTab />}
+      {activeTab === "items" && <QuestItemsTab onJumpToQuest={handleJumpToQuest} />}
     </div>
   );
 }

@@ -1780,10 +1780,18 @@ export const TRADERS: Trader[] = [
 ];
 
 // Derive a flat list of all quest items with context, deduplicated by item name + aggregated
+export interface QuestItemAppearance {
+  traderId: string;
+  traderName: string;
+  questId: string;
+  questName: string;
+  quantity: number;
+}
+
 export interface QuestItemEntry {
   item: string;
   rarity: string;
-  appearances: { traderName: string; questName: string; quantity: number }[];
+  appearances: QuestItemAppearance[];
   totalQuantity: number;
 }
 
@@ -1800,7 +1808,9 @@ export function getQuestItems(): QuestItemEntry[] {
         }
         const entry = map.get(key)!;
         entry.appearances.push({
+          traderId: trader.id,
           traderName: trader.name,
+          questId: quest.id,
           questName: quest.name,
           quantity: req.quantity ?? 1,
         });
