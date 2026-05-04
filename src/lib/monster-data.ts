@@ -1,6 +1,8 @@
 export interface Monster {
   id: string;
   name: string;
+  /** True for documented main/sub bosses; false/undefined for normal mobs. */
+  isBoss?: boolean;
   aliases?: string[];
 }
 
@@ -19,11 +21,18 @@ export interface ItemDrop {
 }
 
 export const MONSTERS: Monster[] = [
+  // ── Mobs ────────────────────────────────────────────────────────────────────
   { id: "skeleton", name: "Skeleton" },
   { id: "wraith", name: "Wraith" },
   { id: "zombie", name: "Zombie" },
   { id: "lava_turtle", name: "Lava Turtle" },
   { id: "plant_node", name: "Plant Node", aliases: ["Wardweed", "Lifeleaf"] },
+
+  // ── Bosses with documented signature drops (per map-data feature descriptions) ─
+  { id: "skeleton_warlord", name: "Skeleton Warlord", isBoss: true },
+  { id: "cyclops", name: "Cyclops", isBoss: true },
+  { id: "crocodilian", name: "Crocodilian", isBoss: true },
+  { id: "wendigo", name: "Wendigo", isBoss: true },
 ];
 
 export const MONSTER_SPAWNS: MonsterSpawn[] = [
@@ -55,6 +64,12 @@ export const MONSTER_SPAWNS: MonsterSpawn[] = [
   { monsterId: "plant_node", mapId: "goblin_cave", x: 36, y: 52 },
   { monsterId: "plant_node", mapId: "goblin_cave", x: 58, y: 68 },
   { monsterId: "plant_node", mapId: "frost_mountain", x: 48, y: 56 },
+
+  // Boss spawns mirror the boss feature locations in map-data.ts
+  { monsterId: "skeleton_warlord", mapId: "crypts" },
+  { monsterId: "cyclops", mapId: "goblin_cave" },
+  { monsterId: "crocodilian", mapId: "shipgraveyard" },
+  { monsterId: "wendigo", mapId: "ice_abyss" },
 ];
 
 export const ITEM_DROPS: ItemDrop[] = [
@@ -65,12 +80,21 @@ export const ITEM_DROPS: ItemDrop[] = [
   { itemName: "Wardweed", monsterIds: ["plant_node"] },
   { itemName: "Lifeleaf", monsterIds: ["plant_node"] },
   { itemName: "Hardened Shell Fragment", monsterIds: ["lava_turtle"] },
+
+  // Signature boss drops — names match the descriptions in src/lib/map-data.ts.
+  { itemName: "Warlord's Broken Sword Blade", monsterIds: ["skeleton_warlord"] },
+  { itemName: "Cyclops Precious Mirror", monsterIds: ["cyclops"] },
+  { itemName: "Crocodilian Eyeball", monsterIds: ["crocodilian"] },
+  { itemName: "Wendigo's Hoof", monsterIds: ["wendigo"] },
 ];
 
+/** Returns the monsters (and their spawns) that drop the given item name. */
 export function getDropsFor(
   itemName: string,
 ): Array<{ monster: Monster; spawns: MonsterSpawn[] }> {
-  const drop = ITEM_DROPS.find((d) => d.itemName === itemName);
+  const drop = ITEM_DROPS.find(
+    (d) => d.itemName.toLowerCase() === itemName.toLowerCase(),
+  );
   if (!drop) return [];
   const results: Array<{ monster: Monster; spawns: MonsterSpawn[] }> = [];
   for (const monsterId of drop.monsterIds) {
@@ -80,4 +104,21 @@ export function getDropsFor(
     results.push({ monster, spawns });
   }
   return results;
+}
+
+/** Returns every item known to drop from the given monster id. */
+export function getDropsForMonster(monsterId: string): string[] {
+  return ITEM_DROPS.filter((d) => d.monsterIds.includes(monsterId)).map(
+    (d) => d.itemName,
+  );
+}
+
+/** Looks up a monster by case-insensitive name match (used to bridge map-data boss labels). */
+export function findMonsterByName(name: string): Monster | undefined {
+  const target = name.toLowerCase();
+  return MONSTERS.find(
+    (m) =>
+      m.name.toLowerCase() === target ||
+      m.aliases?.some((a) => a.toLowerCase() === target),
+  );
 }

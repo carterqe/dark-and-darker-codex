@@ -25,7 +25,12 @@ import {
   type DungeonMap,
   type FeatureType,
 } from "@/lib/map-data";
-import { MONSTERS, MONSTER_SPAWNS } from "@/lib/monster-data";
+import {
+  MONSTERS,
+  MONSTER_SPAWNS,
+  findMonsterByName,
+  getDropsForMonster,
+} from "@/lib/monster-data";
 import ShimmerText from "@/components/ui/ShimmerText";
 
 // ─── Feature icons (used as list bullets, not positional markers) ────────────
@@ -244,19 +249,29 @@ function DungeonReferenceView({
           <Section title="Bosses" icon={Skull} accentColor={FEATURE_META.boss.color}>
             {mainBosses.length > 0 && (
               <ul className="space-y-1.5 mb-3">
-                {mainBosses.map((b) => (
-                  <li key={b.label} className="flex items-start gap-2 text-sm">
-                    <Skull className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: FEATURE_META.boss.color }} />
-                    <div>
-                      <span className="font-cinzel font-bold text-text-primary">{b.label}</span>
-                      {b.description && (
-                        <span className="text-text-secondary text-[12px] block leading-snug">
-                          {b.description.replace(/^Boss:\s*/i, "")}
-                        </span>
-                      )}
-                    </div>
-                  </li>
-                ))}
+                {mainBosses.map((b) => {
+                  const monster = findMonsterByName(b.label);
+                  const drops = monster ? getDropsForMonster(monster.id) : [];
+                  return (
+                    <li key={b.label} className="flex items-start gap-2 text-sm">
+                      <Skull className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: FEATURE_META.boss.color }} />
+                      <div>
+                        <span className="font-cinzel font-bold text-text-primary">{b.label}</span>
+                        {b.description && (
+                          <span className="text-text-secondary text-[12px] block leading-snug">
+                            {b.description.replace(/^Boss:\s*/i, "")}
+                          </span>
+                        )}
+                        {drops.length > 0 && (
+                          <span className="text-[11px] block leading-snug mt-0.5">
+                            <span className="text-gold-dark">Drops:</span>{" "}
+                            <span className="text-text-secondary">{drops.join(", ")}</span>
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
             {subBosses.length > 0 && (
@@ -281,26 +296,35 @@ function DungeonReferenceView({
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
               {mobs.map((m) => {
                 const isHighlighted = m.id === highlightedMonsterId;
+                const drops = getDropsForMonster(m.id);
                 return (
                   <li
                     key={m.id}
-                    className={`flex items-center gap-2 px-2.5 py-1.5 rounded-sm border text-sm ${
+                    className={`px-2.5 py-1.5 rounded-sm border text-sm ${
                       isHighlighted
                         ? "border-pink-400/60 bg-pink-500/10"
                         : "border-border-subtle bg-bg-secondary/40"
                     }`}
                   >
-                    <Target
-                      className="w-3.5 h-3.5 shrink-0"
-                      style={{ color: isHighlighted ? FEATURE_META.monster_spawn.color : "#8a8693" }}
-                    />
-                    <span className={isHighlighted ? "text-text-primary font-medium" : "text-text-secondary"}>
-                      {m.name}
-                    </span>
-                    {m.aliases && m.aliases.length > 0 && (
-                      <span className="text-[10px] text-text-secondary/50">
-                        ({m.aliases.join(", ")})
+                    <div className="flex items-center gap-2">
+                      <Target
+                        className="w-3.5 h-3.5 shrink-0"
+                        style={{ color: isHighlighted ? FEATURE_META.monster_spawn.color : "#8a8693" }}
+                      />
+                      <span className={isHighlighted ? "text-text-primary font-medium" : "text-text-secondary"}>
+                        {m.name}
                       </span>
+                      {m.aliases && m.aliases.length > 0 && (
+                        <span className="text-[10px] text-text-secondary/50">
+                          ({m.aliases.join(", ")})
+                        </span>
+                      )}
+                    </div>
+                    {drops.length > 0 && (
+                      <p className="mt-1 pl-5 text-[11px] text-text-secondary/70 leading-snug">
+                        <span className="text-gold-dark">Drops:</span>{" "}
+                        <span className="text-text-secondary">{drops.join(", ")}</span>
+                      </p>
                     )}
                   </li>
                 );

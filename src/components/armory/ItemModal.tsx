@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Shield, Coins, Sword, Sparkles, Vault } from "lucide-react";
+import { X, Shield, Coins, Sword, Sparkles, Vault, Skull } from "lucide-react";
 import { DarkerDBItem, getRarityStyle, getItemClasses } from "@/lib/darkerdb";
+import { getDropsFor } from "@/lib/monster-data";
 import { formatNumber } from "@/lib/utils";
 
 interface ItemModalProps {
@@ -76,6 +78,7 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
   const classes = getItemClasses(item.required_class);
   const name = item.name || item.archetype;
   const imgSrcs = [getItemImageUrl(name), getItemImageFallback(name)];
+  const drops = getDropsFor(item.name);
 
   return (
     <AnimatePresence>
@@ -228,6 +231,55 @@ export default function ItemModal({ item, onClose }: ItemModalProps) {
                     </div>
                   )}
                 </div>
+
+                {/* Dropped by */}
+                {drops.length > 0 && (
+                  <div className="mb-4 pb-4 border-b border-border-subtle">
+                    <h3 className="font-cinzel font-bold text-xs text-gold-dark uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <Skull className="w-3.5 h-3.5 text-accent-red" />
+                      Dropped By
+                    </h3>
+                    <ul className="space-y-1.5">
+                      {drops.map(({ monster, spawns }) => {
+                        const mapIds = Array.from(new Set(spawns.map((s) => s.mapId)));
+                        const firstMapId = mapIds[0];
+                        const locationLabel =
+                          mapIds.length === 0
+                            ? "Location unknown"
+                            : mapIds.length === 1
+                              ? firstMapId.replace(/_/g, " ")
+                              : `${mapIds.length} maps`;
+                        return (
+                          <li
+                            key={monster.id}
+                            className="flex items-center justify-between gap-2 py-1.5 px-2.5 bg-bg-primary/30 rounded-sm"
+                          >
+                            <div className="text-xs min-w-0">
+                              <span className="text-text-primary font-medium">{monster.name}</span>
+                              {monster.isBoss && (
+                                <span className="ml-1.5 text-[9px] uppercase tracking-wider text-accent-red/80">
+                                  Boss
+                                </span>
+                              )}
+                              <span className="text-text-secondary/60 text-[10px] ml-1.5 capitalize">
+                                {locationLabel}
+                              </span>
+                            </div>
+                            {firstMapId && (
+                              <Link
+                                href={`/maps?highlight=${monster.id}&map=${firstMapId}`}
+                                onClick={onClose}
+                                className="shrink-0 text-[10px] px-1.5 py-0.5 rounded-sm border border-gold-primary/30 text-gold-primary hover:bg-gold-primary/10 transition-colors"
+                              >
+                                Show on map
+                              </Link>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
 
                 {/* Stats */}
                 {statGroups.length > 0 ? (
