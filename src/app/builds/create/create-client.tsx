@@ -52,6 +52,7 @@ export default function CreateBuildClient() {
   };
 
   const clearAll = () => {
+    if (!window.confirm("Reset all fields?")) return;
     setTitle("");
     setDescription("");
     setSelectedClass("");
@@ -163,6 +164,38 @@ export default function CreateBuildClient() {
         </p>
       </motion.div>
 
+      {/* Step progress indicator */}
+      {(() => {
+        const steps = [
+          { label: "Class", done: !!selectedClass },
+          { label: "Details", done: !!title.trim() },
+          { label: "Tags", done: tags.length > 0 },
+          { label: "Gear", done: Object.keys(equipment).length > 0 },
+          { label: "Perks", done: perks.length > 0 },
+          { label: "Skills", done: skills.length > 0 },
+        ];
+        return (
+          <div className="flex items-center gap-1.5 flex-wrap mb-6">
+            {steps.map((step, i) => (
+              <div key={step.label} className="flex items-center gap-1.5">
+                <span
+                  className={`text-[10px] font-cinzel font-bold px-2 py-0.5 rounded-sm border transition-all ${
+                    step.done
+                      ? "bg-gold-primary/15 border-gold-primary/40 text-gold-primary"
+                      : "border-border-subtle text-text-secondary/40"
+                  }`}
+                >
+                  {step.label}
+                </span>
+                {i < steps.length - 1 && (
+                  <span className="text-text-secondary/20 text-[10px]">›</span>
+                )}
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
       <form onSubmit={handleSubmit} className="space-y-8">
         {error && (
           <div className="flex items-center gap-2.5 bg-accent-red/10 border border-accent-red/30 rounded-sm px-4 py-3">
@@ -180,7 +213,7 @@ export default function CreateBuildClient() {
                 key={cls}
                 type="button"
                 onClick={() => handleClassChange(cls)}
-                className={`flex flex-col items-center gap-1.5 p-2 rounded-sm border transition-all ${
+                className={`flex flex-col items-center gap-1.5 p-2 rounded-sm border transition-all focus-visible:ring-2 focus-visible:ring-gold-primary/50 ${
                   selectedClass === cls
                     ? "border-gold-primary/50 bg-gold-primary/10"
                     : "border-border-subtle hover:border-gold-primary/30"
@@ -314,6 +347,9 @@ export default function CreateBuildClient() {
                 {/* Weapon 2 */}
                 <div>
                   <span className={sectionLabel}>Weapon 2</span>
+                  <p className="text-xs text-text-secondary/60 mb-2">
+                    Optional swap set — useful for carrying a ranged backup or a situational off-hand.
+                  </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <GearSlotEditor
                       slotLabel="Main Hand"
@@ -426,12 +462,6 @@ export default function CreateBuildClient() {
         })()}
 
         {/* Submit */}
-        {error && (
-          <div className="flex items-center gap-2.5 bg-accent-red/10 border border-accent-red/30 rounded-sm px-4 py-3">
-            <AlertCircle className="w-4 h-4 text-accent-red shrink-0" />
-            <p className="text-sm text-accent-red">{error}</p>
-          </div>
-        )}
         <div className="flex items-center justify-end gap-4">
           <button
             type="button"
