@@ -33,6 +33,7 @@ export const MONSTERS: Monster[] = [
   { id: "cyclops", name: "Cyclops", isBoss: true },
   { id: "crocodilian", name: "Crocodilian", isBoss: true },
   { id: "wendigo", name: "Wendigo", isBoss: true },
+  { id: "demon_overseer", name: "Demon Overseer", isBoss: true },
 ];
 
 export const MONSTER_SPAWNS: MonsterSpawn[] = [
@@ -70,6 +71,7 @@ export const MONSTER_SPAWNS: MonsterSpawn[] = [
   { monsterId: "cyclops", mapId: "goblin_cave" },
   { monsterId: "crocodilian", mapId: "shipgraveyard" },
   { monsterId: "wendigo", mapId: "ice_abyss" },
+  { monsterId: "demon_overseer", mapId: "inferno" },
 ];
 
 export const ITEM_DROPS: ItemDrop[] = [

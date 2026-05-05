@@ -195,13 +195,13 @@ export const MAPS: DungeonMap[] = [
     ],
   },
 
-  // ─── GOBLIN CAVE ───────────────────────────────────────────────────────────
+  // ─── THE ASHEN RANGE ───────────────────────────────────────────────────────
   {
     id: "goblin_cave",
-    name: "Goblin Cave",
-    subtitle: "The Firedeep Entrance",
+    name: "The Ashen Range",
+    subtitle: "The Volcanic Depths",
     description:
-      "A cave system riddled with goblins, giant insects, and lava creatures. Features the Cyclops and Cave Troll as boss encounters. Contains Hell Portals leading down to the Firedeep (Season 8 floor 2).",
+      "A volcanic cave system reshaped by Season 9's Inferno revamp. Ash creatures, fire spirits, and lava beasts now roam alongside the remaining goblins. Features the Cyclops and Cave Troll as boss encounters, with Hell Portals leading deeper into the Inferno.",
     theme: "cave",
     width: 1634,
     height: 1634,
@@ -258,7 +258,7 @@ export const MAPS: DungeonMap[] = [
     name: "Inferno",
     subtitle: "The Third Floor",
     description:
-      "The deepest floor beneath the Crypts — a demonic underworld ruled by the Ghost King. Wraiths, demons, and undead champions roam the burning halls. Accessible via red portals from the Crypts or Goblin Cave.",
+      "The deepest floor beneath the Crypts — a demonic underworld now ruled by the Demon Overseer after the Season 9 revamp. Wraiths, demons, and undead champions roam the burning halls. Accessible via red portals from the Crypts or The Ashen Range.",
     theme: "inferno",
     width: 874,
     height: 874,
@@ -283,7 +283,7 @@ export const MAPS: DungeonMap[] = [
       { id: "if_alt2", type: "altar", label: "Altar of Sacrifice", x: 20.5, y: 20.7, description: "One-time resurrection shrine" },
       { id: "if_alt3", type: "altar", label: "Altar of Sacrifice", x: 78.6, y: 80.5, description: "One-time resurrection shrine" },
       { id: "if_alt4", type: "altar", label: "Altar of Sacrifice", x: 16.3, y: 83.7, description: "One-time resurrection shrine" },
-      { id: "if_boss1", type: "boss", label: "Ghost King",        x: 50.0, y: 50.0, description: "Boss: Ghost King — ruler of the Inferno" },
+      { id: "if_boss1", type: "boss", label: "Demon Overseer",    x: 50.0, y: 50.0, description: "Boss: Demon Overseer — ruler of the Inferno (Season 9)" },
       { id: "if_boss2", type: "boss", label: "Demon Berserker",   x: 50.1, y: 88.3, description: "Subboss: Demon Berserker" },
       { id: "if_boss3", type: "boss", label: "Abomination",       x: 68.0, y: 70.0, description: "Subboss: Abomination" },
       { id: "if_boss4", type: "boss", label: "Demon Centaur",     x: 78.6, y: 78.2, description: "Subboss: Demon Centaur" },
@@ -419,9 +419,9 @@ export const MAPS: DungeonMap[] = [
   {
     id: "firedeep",
     name: "The Firedeep",
-    subtitle: "Goblin Caves Floor 2",
+    subtitle: "The Ashen Range Floor 2",
     description:
-      "The molten second floor of the Goblin Caves, introduced in Season 8. A persistent Infernal Heat debuff damages adventurers unless they stay near cooling crystals or Dwarven shrines. Fallen Dark Dwarves, Ifrit, and the Fire Colossus guard its depths.",
+      "The molten second floor of The Ashen Range, introduced in Season 8. A persistent Infernal Heat debuff damages adventurers unless they stay near cooling crystals or Dwarven shrines. Fallen Dark Dwarves, Ifrit, and the Fire Colossus guard its depths.",
     theme: "firedeep",
     width: 1584,
     height: 1093,
@@ -463,12 +463,12 @@ export const MAPS: DungeonMap[] = [
 export const KNOWN_MAPS: ReadonlySet<string> = new Set([
   "Ruins of Forgotten Castle", // wiki parent dungeon; floor 1 is "The Ruins"
   "Crypts",                    // wiki: "The Howling Crypts" (floor 2)
-  "Goblin Cave",               // wiki: "The Goblin Caves"
+  "The Ashen Range",           // renamed from "Goblin Cave" in Season 9
   "Inferno",                   // wiki: floor 3 of Ruins of Forgotten Castle
   "Frost Mountain",            // wiki parent dungeon; floor 1 is "Ice Cavern"
   "Ice Abyss",                 // wiki: floor 2 of Frost Mountain
   "Ship Graveyard",            // placeholder — not yet a canonical wiki dungeon
-  "The Firedeep",              // wiki: Goblin Caves floor 2 (Season 8, launched 2026-01-29)
+  "The Firedeep",              // The Ashen Range floor 2 (Season 8, launched 2026-01-29)
 ]);
 
 // Canonical boss + subboss labels per map id. Entries are required for every
@@ -478,13 +478,13 @@ export const CANONICAL_BOSSES_BY_MAP: Readonly<Record<string, readonly string[]>
   ruins:          ["Spectral Knight", "Banshee", "Giant Worm", "Golem", "Cockatrice", "Skeleton Champion", "Wraith"],
   // Howling Crypts bosses: Skeleton Warlord, Lich. Subbosses: Skeleton Champion, Wraith.
   crypts:         ["Skeleton Warlord", "Lich", "Skeleton Champion", "Wraith"],
-  // Goblin Caves bosses: Cyclops, Cave Troll. Subbosses: Giant Centipede, Skeleton Champion.
+  // The Ashen Range bosses: Cyclops, Cave Troll. Subbosses: Giant Centipede, Skeleton Champion.
   goblin_cave:    ["Cyclops", "Cave Troll", "Giant Centipede", "Skeleton Champion"],
-  // Inferno boss: Ghost King. Subbosses: Demon Berserker, Demon Centaur, Skeleton Champion, Wraith.
+  // Inferno boss: Demon Overseer (replaced Ghost King in Season 9). Subbosses: Demon Berserker, Demon Centaur, Skeleton Champion, Wraith.
   // Abomination is a canonical wiki subboss; its specific spawn map isn't wiki-documented but
   // is retained from prior data. Fire Colossus is NOT an Inferno boss — it is the boss of The
-  // Firedeep (Goblin Caves floor 2) per wiki Bosses page.
-  inferno:        ["Ghost King", "Demon Berserker", "Demon Centaur", "Abomination", "Skeleton Champion", "Wraith"],
+  // Firedeep (The Ashen Range floor 2) per wiki Bosses page.
+  inferno:        ["Demon Overseer", "Demon Berserker", "Demon Centaur", "Abomination", "Skeleton Champion", "Wraith"],
   // Ice Cavern subbosses: Frost Giant Berserker, Frost Giant Shielder, Skeleton Champion, Yeti.
   // Wendigo moved to Ice Abyss per wiki — its Ice Cavern spawn was never wiki-confirmed.
   frost_mountain: ["Frost Giant Berserker", "Frost Giant Shielder", "Skeleton Champion", "Yeti"],
@@ -492,7 +492,7 @@ export const CANONICAL_BOSSES_BY_MAP: Readonly<Record<string, readonly string[]>
   // Frost Giant Shielder, Yeti (some shared with Ice Cavern per wiki).
   ice_abyss:      ["Frost Wyvern", "Wendigo", "Frost Demon", "Frost Giant Berserker", "Frost Giant Shielder", "Yeti"],
   // Firedeep boss: Fire Colossus. Subbosses: Ifrit, Dwarf Knight, Lava Golem (per wiki
-  // Patch:6.10 and Subbosses pages). Introduced Season 8 (2026-01-29) as Goblin Caves floor 2.
+  // Patch:6.10 and Subbosses pages). Introduced Season 8 (2026-01-29) as The Ashen Range floor 2.
   firedeep:       ["Fire Colossus", "Ifrit", "Dwarf Knight", "Lava Golem"],
 };
 

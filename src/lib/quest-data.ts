@@ -41,7 +41,7 @@ export const TRADERS: Trader[] = [
     name: "Alchemist",
     title: "The Brew Master",
     description:
-      "An eccentric scholar obsessed with potions and reagents. She will pay generously for raw magical materials and alchemical samples from across the dungeons.",
+      "An eccentric scholar who now handles potions, reagents, and medical supplies after absorbing the camp's former Surgeon and Fortune Teller roles. She pays generously for alchemical samples, healing materials, and arcane curiosities from across the dungeons.",
     accentColor: "#6bbf8e",
     quests: [
       // Chapter 1 – Other Solutions
@@ -157,7 +157,7 @@ export const TRADERS: Trader[] = [
         chapter: "Land for Alchemy",
         description: "Lava Turtles carry hardened shell material with remarkable heat-resistance properties. Harvest them.",
         requirements: [
-          { type: "kill", monster: "Lava Turtle", location: "Goblin Cave", quantity: 7, description: "Kill 7 Lava Turtles in the Goblin Cave" },
+          { type: "kill", monster: "Lava Turtle", location: "The Ashen Range", quantity: 7, description: "Kill 7 Lava Turtles in the The Ashen Range" },
           { type: "item", item: "Hardened Shell Fragment", rarity: "Common", quantity: 4, description: "Collect 4 Hardened Shell Fragments" },
         ],
         reward: { gold: 125, xp: 200, description: "125 Gold, 4× Rare Arcane Essence, +200 XP" },
@@ -168,7 +168,7 @@ export const TRADERS: Trader[] = [
         chapter: "Land for Alchemy",
         description: "Lava Slimes contain a magma essence that could revolutionise heat-based transmutation.",
         requirements: [
-          { type: "kill", monster: "Lava Slime", location: "Goblin Cave", quantity: 5, description: "Kill 5 Lava Slimes in the Goblin Cave" },
+          { type: "kill", monster: "Lava Slime", location: "The Ashen Range", quantity: 5, description: "Kill 5 Lava Slimes in the The Ashen Range" },
           { type: "item", item: "Magma Essence", rarity: "Uncommon", quantity: 3, description: "Collect 3 Magma Essences" },
         ],
         reward: { gold: 125, xp: 250, description: "125 Gold, 2× Random Rare Weapon, +250 XP" },
@@ -179,7 +179,7 @@ export const TRADERS: Trader[] = [
         chapter: "Land for Alchemy",
         description: "Fire Spirits carry a flickering ember that burns without consuming fuel. I must study it.",
         requirements: [
-          { type: "kill", monster: "Fire Spirit", location: "Goblin Cave", quantity: 3, description: "Kill 3 Fire Spirits in the Goblin Cave" },
+          { type: "kill", monster: "Fire Spirit", location: "The Ashen Range", quantity: 3, description: "Kill 3 Fire Spirits in the The Ashen Range" },
           { type: "item", item: "Flickering Ember", rarity: "Uncommon", quantity: 2, description: "Collect 2 Flickering Embers" },
         ],
         reward: { gold: 125, xp: 350, description: "125 Gold, 2× Random Rare Armor, +350 XP" },
@@ -245,9 +245,9 @@ export const TRADERS: Trader[] = [
         id: "alchemist_18",
         name: "A King Once Past",
         chapter: "The Path to the Inferno",
-        description: "The Ghost King is the final obstacle to the Inferno's secrets. End his reign.",
+        description: "The Demon Overseer is the final obstacle to the Inferno's secrets. End his reign.",
         requirements: [
-          { type: "kill", monster: "Ghost King", location: "Crypt", quantity: 1, description: "Kill the Ghost King in the Crypt" },
+          { type: "kill", monster: "Demon Overseer", location: "Inferno", quantity: 1, description: "Kill the Demon Overseer in the Inferno" },
         ],
         reward: { gold: 200, xp: 1000, description: "200 Gold, Random Epic Weapon, Random Epic Armor, 2× Epic Arcane Essence, +1000 XP" },
       },
@@ -432,146 +432,6 @@ export const TRADERS: Trader[] = [
     ],
   },
 
-  // ─── FORTUNE TELLER ────────────────────────────────────────────────────────
-  {
-    id: "fortune_teller",
-    name: "Fortune Teller",
-    title: "The Seer",
-    description:
-      "A mysterious oracle who reads fate through the artifacts and horrors of the dungeon. She seeks unusual trophies and experiences that feed her visions.",
-    accentColor: "#9b7fc4",
-    quests: [
-      // Chapter 1 – Echoes Of The Damned
-      {
-        id: "fortune_1",
-        name: "Tongue Twister",
-        chapter: "Echoes Of The Damned",
-        description: "A Mimic's tongue holds the memory of every adventurer it has consumed. Bring one to me.",
-        requirements: [
-          { type: "item", item: "Mimic Tongue", rarity: "Common", quantity: 1, description: "Collect 1 Mimic Tongue" },
-        ],
-        reward: { gold: 30, xp: 40, affinity: 25, description: "30 Gold, 2× Uncommon Arcane Essence, +40 XP, +25 Affinity" },
-      },
-      {
-        id: "fortune_2",
-        name: "Premonitions of the Unknown",
-        chapter: "Echoes Of The Damned",
-        description: "Blue Eyeballs from the dungeon's creatures carry visions I cannot ignore.",
-        requirements: [
-          { type: "item", item: "Blue Eyeballs", rarity: "Common", quantity: 1, description: "Collect 1 Blue Eyeballs" },
-        ],
-        reward: { gold: 30, xp: 25, description: "30 Gold, Random Uncommon Armor, +25 XP" },
-      },
-      {
-        id: "fortune_3",
-        name: "Voices of the Dead",
-        chapter: "Echoes Of The Damned",
-        description: "Giant Bat Ears can hear frequencies that mortals cannot. I need one to tune my sight.",
-        requirements: [
-          { type: "item", item: "Giant Bat Ear", rarity: "Common", quantity: 1, description: "Collect 1 Giant Bat Ear" },
-        ],
-        reward: { gold: 30, xp: 40, affinity: 25, description: "30 Gold, Random Uncommon Weapon, +40 XP, +25 Affinity" },
-      },
-      // Chapter 2 – Dark Omens
-      {
-        id: "fortune_4",
-        name: "Lights Out",
-        chapter: "Dark Omens",
-        description: "In total darkness, the future becomes clear. Extinguish the torches of the Crypt.",
-        requirements: [
-          { type: "interact", item: "Torch", location: "Crypt", quantity: 10, description: "Extinguish 10 Torches in the Crypt (single session)" },
-        ],
-        reward: { gold: 75, xp: 150, description: "75 Gold, Random Uncommon Weapon, Random Uncommon Armor, +150 XP" },
-      },
-      {
-        id: "fortune_5",
-        name: "Webs of Fate",
-        chapter: "Dark Omens",
-        description: "Spider pots in the Crypt are focal points of dark energy. Destroy them to release it.",
-        requirements: [
-          { type: "destroy", item: "Spider Pot", location: "Crypt", quantity: 7, description: "Destroy 7 Spider Pots in the Crypt" },
-        ],
-        reward: { gold: 75, xp: 125, description: "75 Gold, 2× Random Uncommon Armor, +125 XP" },
-      },
-      {
-        id: "fortune_6",
-        name: "That's Batty",
-        chapter: "Dark Omens",
-        description: "A torn bat wing carries the echoes of its flight through cursed air. Bring one back intact.",
-        requirements: [
-          { type: "item", item: "Torn Bat Wing", rarity: "Common", quantity: 1, description: "Collect 1 Torn Bat Wing" },
-        ],
-        reward: { gold: 75, xp: 150, affinity: 25, description: "75 Gold, 2× Random Uncommon Weapon, +150 XP, +25 Affinity" },
-      },
-      // Chapter 3 – Guided Path
-      {
-        id: "fortune_7",
-        name: "Reflections of the Cursed",
-        chapter: "Guided Path",
-        description: "A crystal ball and armillary sphere together form the lens through which I see darkest fate.",
-        requirements: [
-          { type: "item", item: "Crystal Ball", rarity: "Uncommon", quantity: 1, description: "Collect 1 Crystal Ball" },
-          { type: "item", item: "Armillary Sphere", rarity: "Common", quantity: 2, description: "Collect 2 Armillary Spheres" },
-        ],
-        reward: { gold: 125, xp: 200, description: "125 Gold, 2× Random Rare Armor, +200 XP" },
-      },
-      {
-        id: "fortune_8",
-        name: "Frosty Bracelets",
-        chapter: "Guided Path",
-        description: "The Icicle Cave holds frozen omens I must read. Explore it and bring me primitive bracelets from within.",
-        requirements: [
-          { type: "explore", location: "Ice Cavern — Icicle Cave", quantity: 1, description: "Explore the Icicle Cave in the Ice Cavern" },
-          { type: "item", item: "Primitive Bracelet", rarity: "Common", quantity: 4, description: "Collect 4 Primitive Bracelets" },
-        ],
-        reward: { gold: 125, xp: 200, description: "125 Gold, 2× Rare Arcane Essence, Random Rare Armor, +200 XP" },
-      },
-      {
-        id: "fortune_9",
-        name: "Blood for the Truth",
-        chapter: "Guided Path",
-        description: "The Altars of Sacrifice in the Ice Cavern demand an offering before revealing their secrets.",
-        requirements: [
-          { type: "interact", item: "Altar of Sacrifice", location: "Ice Cavern", quantity: 4, description: "Interact with 4 Altars of Sacrifice in the Ice Cavern" },
-        ],
-        reward: { gold: 125, xp: 250, affinity: 25, description: "125 Gold, 2× Random Rare Weapon, +250 XP, +25 Affinity" },
-      },
-      // Chapter 4 – Knowing The Unknown
-      {
-        id: "fortune_10",
-        name: "Dreamcatcher",
-        chapter: "Knowing The Unknown",
-        description: "The wendigo and ice creatures carry materials that anchor dreams to the waking world.",
-        requirements: [
-          { type: "item", item: "Glowing Blue Ice Eyes", rarity: "Uncommon", quantity: 2, description: "Collect 2 Glowing Blue Ice Eyes" },
-          { type: "item", item: "Frosted Feather", rarity: "Common", quantity: 1, description: "Collect 1 Frosted Feather" },
-        ],
-        reward: { gold: 150, xp: 350, affinity: 25, description: "150 Gold, 2× Random Rare Weapon, +350 XP, +25 Affinity" },
-      },
-      {
-        id: "fortune_11",
-        name: "Self Made Luck",
-        chapter: "Knowing The Unknown",
-        description: "True fortune is made, not given. Use potions of luck in the Ice Cavern and bring me the wendigo's mark.",
-        requirements: [
-          { type: "use", item: "Epic Potion of Luck", location: "Ice Cavern", quantity: 3, description: "Use 3 Epic Potions of Luck in the Ice Cavern" },
-          { type: "item", item: "Wendigo's Hoof", rarity: "Rare", quantity: 1, description: "Collect 1 Wendigo's Hoof" },
-        ],
-        reward: { gold: 150, xp: 350, description: "150 Gold, 2× Random Epic Armor, +350 XP" },
-      },
-      {
-        id: "fortune_12",
-        name: "Icy Fortune",
-        chapter: "Knowing The Unknown",
-        description: "The Treasure Hoards of the Ice Cavern are convergence points of luck. Interact with them.",
-        requirements: [
-          { type: "interact", item: "Treasure Hoard", location: "Ice Cavern", quantity: 3, description: "Interact with 3 Treasure Hoards in the Ice Cavern" },
-        ],
-        reward: { gold: 150, xp: 500, affinity: 25, description: "150 Gold, Random Epic Armor, +500 XP, +25 Affinity" },
-      },
-    ],
-  },
-
   // ─── GOBLIN MERCHANT ───────────────────────────────────────────────────────
   {
     id: "goblin_merchant",
@@ -586,11 +446,11 @@ export const TRADERS: Trader[] = [
         id: "goblin_1",
         name: "Away With The Green Skins",
         chapter: "Kin No More",
-        description: "My kin make for lousy business partners. Thin their numbers in the Goblin Cave.",
+        description: "My kin make for lousy business partners. Thin their numbers in the The Ashen Range.",
         requirements: [
-          { type: "kill", monster: "Goblin Axeman", location: "Goblin Cave", quantity: 3, description: "Kill 3 Goblin Axemen in the Goblin Cave" },
-          { type: "kill", monster: "Goblin Warrior", location: "Goblin Cave", quantity: 3, description: "Kill 3 Goblin Warriors in the Goblin Cave" },
-          { type: "kill", monster: "Goblin Archer", location: "Goblin Cave", quantity: 3, description: "Kill 3 Goblin Archers in the Goblin Cave" },
+          { type: "kill", monster: "Goblin Axeman", location: "The Ashen Range", quantity: 3, description: "Kill 3 Goblin Axemen in the The Ashen Range" },
+          { type: "kill", monster: "Goblin Warrior", location: "The Ashen Range", quantity: 3, description: "Kill 3 Goblin Warriors in the The Ashen Range" },
+          { type: "kill", monster: "Goblin Archer", location: "The Ashen Range", quantity: 3, description: "Kill 3 Goblin Archers in the The Ashen Range" },
         ],
         reward: { gold: 30, xp: 25, description: "30 Gold, Random Uncommon Armor, +25 XP" },
       },
@@ -600,7 +460,7 @@ export const TRADERS: Trader[] = [
         chapter: "Kin No More",
         description: "The Cave Altar is where my kin make their sacrifices. Go see what they're leaving behind.",
         requirements: [
-          { type: "explore", location: "Goblin Cave — Cave Altar A", quantity: 1, description: "Explore the Cave Altar in the Goblin Cave" },
+          { type: "explore", location: "The Ashen Range — Cave Altar A", quantity: 1, description: "Explore the Cave Altar in the The Ashen Range" },
         ],
         reward: { gold: 30, xp: 25, description: "30 Gold, Random Uncommon Weapon, +25 XP" },
       },
@@ -619,7 +479,7 @@ export const TRADERS: Trader[] = [
         id: "goblin_4",
         name: "Questionable Ingredients",
         chapter: "Make Them Pay",
-        description: "A bug shell from the Goblin Cave — don't ask what I'm cooking. You don't want to know.",
+        description: "A bug shell from the The Ashen Range — don't ask what I'm cooking. You don't want to know.",
         requirements: [
           { type: "item", item: "Bug Shell", rarity: "Common", quantity: 1, description: "Collect 1 Bug Shell" },
         ],
@@ -631,9 +491,9 @@ export const TRADERS: Trader[] = [
         chapter: "Make Them Pay",
         description: "Mages, centipedes, spiders — all taste better than they look. Clear them out of my cave.",
         requirements: [
-          { type: "kill", monster: "Goblin Mage", location: "Goblin Cave", quantity: 3, description: "Kill 3 Goblin Mages in the Goblin Cave" },
-          { type: "kill", monster: "Giant Centipede", location: "Goblin Cave", quantity: 2, description: "Kill 2 Giant Centipedes in the Goblin Cave" },
-          { type: "kill", monster: "Giant Spider", location: "Goblin Cave", quantity: 3, description: "Kill 3 Giant Spiders in the Goblin Cave" },
+          { type: "kill", monster: "Goblin Mage", location: "The Ashen Range", quantity: 3, description: "Kill 3 Goblin Mages in the The Ashen Range" },
+          { type: "kill", monster: "Giant Centipede", location: "The Ashen Range", quantity: 2, description: "Kill 2 Giant Centipedes in the The Ashen Range" },
+          { type: "kill", monster: "Giant Spider", location: "The Ashen Range", quantity: 3, description: "Kill 3 Giant Spiders in the The Ashen Range" },
         ],
         reward: { gold: 50, xp: 50, description: "50 Gold, 2× Random Uncommon Armor, +50 XP" },
       },
@@ -641,9 +501,9 @@ export const TRADERS: Trader[] = [
         id: "goblin_6",
         name: "The Way Out",
         chapter: "Make Them Pay",
-        description: "Surviving the Goblin Cave is harder than it looks. Prove you can do it repeatedly.",
+        description: "Surviving the The Ashen Range is harder than it looks. Prove you can do it repeatedly.",
         requirements: [
-          { type: "survive", location: "Goblin Cave", quantity: 3, description: "Survive 3 runs in the Goblin Cave" },
+          { type: "survive", location: "The Ashen Range", quantity: 3, description: "Survive 3 runs in the The Ashen Range" },
         ],
         reward: { gold: 50, xp: 50, affinity: 25, description: "50 Gold, Random Uncommon Armor, Random Uncommon Weapon, +50 XP, +25 Affinity" },
       },
@@ -652,9 +512,9 @@ export const TRADERS: Trader[] = [
         id: "goblin_7",
         name: "Easy Pickings",
         chapter: "Gobbo's Little Trick",
-        description: "The ash piles in the Goblin Cave hide things my kin left behind. Sift through them.",
+        description: "The ash piles in the The Ashen Range hide things my kin left behind. Sift through them.",
         requirements: [
-          { type: "interact", item: "Ash Pile", location: "Goblin Cave", quantity: 5, description: "Search 5 Ash Piles in the Goblin Cave" },
+          { type: "interact", item: "Ash Pile", location: "The Ashen Range", quantity: 5, description: "Search 5 Ash Piles in the The Ashen Range" },
         ],
         reward: { gold: 50, xp: 75, description: "50 Gold, 2× Uncommon Arcane Essence, +75 XP" },
       },
@@ -664,7 +524,7 @@ export const TRADERS: Trader[] = [
         chapter: "Gobbo's Little Trick",
         description: "Fire Lizard tail is the finest ingredient in my culinary arsenal. Harvest them and bring me the tail.",
         requirements: [
-          { type: "kill", monster: "Fire Lizard", location: "Goblin Cave", quantity: 10, description: "Kill 10 Fire Lizards in the Goblin Cave" },
+          { type: "kill", monster: "Fire Lizard", location: "The Ashen Range", quantity: 10, description: "Kill 10 Fire Lizards in the The Ashen Range" },
           { type: "item", item: "Blazing Tail", rarity: "Common", quantity: 1, description: "Collect 1 Blazing Tail" },
         ],
         reward: { gold: 50, xp: 75, description: "50 Gold, Random Uncommon Armor, Random Uncommon Weapon, +75 XP" },
@@ -686,7 +546,7 @@ export const TRADERS: Trader[] = [
         chapter: "Favorite Soft Skin",
         description: "Death Beetles are armored pests but they contain something nutritious. Harvest them.",
         requirements: [
-          { type: "kill", monster: "Death Beetle", location: "Goblin Cave", quantity: 5, description: "Kill 5 Death Beetles in the Goblin Cave" },
+          { type: "kill", monster: "Death Beetle", location: "The Ashen Range", quantity: 5, description: "Kill 5 Death Beetles in the The Ashen Range" },
         ],
         reward: { gold: 100, xp: 200, description: "100 Gold, 2× Rare Arcane Essence, Random Rare Armor, +200 XP" },
       },
@@ -694,9 +554,9 @@ export const TRADERS: Trader[] = [
         id: "goblin_11",
         name: "Crate Chaos",
         chapter: "Favorite Soft Skin",
-        description: "The Dwarven crates in the Goblin Cave are full of junk — but my junk. Smash them.",
+        description: "The Dwarven crates in the The Ashen Range are full of junk — but my junk. Smash them.",
         requirements: [
-          { type: "destroy", item: "Dwarven Small Wooden Crate", location: "Goblin Cave", quantity: 15, description: "Destroy 15 Dwarven Small Wooden Crates in the Goblin Cave" },
+          { type: "destroy", item: "Dwarven Small Wooden Crate", location: "The Ashen Range", quantity: 15, description: "Destroy 15 Dwarven Small Wooden Crates in the The Ashen Range" },
         ],
         reward: { gold: 100, xp: 175, description: "100 Gold, 4× Rare Arcane Essence, +175 XP" },
       },
@@ -706,7 +566,7 @@ export const TRADERS: Trader[] = [
         chapter: "Favorite Soft Skin",
         description: "Beast Goblins are the meanest of my kind. Take out a pack of them in a single run.",
         requirements: [
-          { type: "kill", monster: "Beast Goblin", location: "Goblin Cave", quantity: 12, description: "Kill 12 Beast Goblins in the Goblin Cave (single session)" },
+          { type: "kill", monster: "Beast Goblin", location: "The Ashen Range", quantity: 12, description: "Kill 12 Beast Goblins in the The Ashen Range (single session)" },
         ],
         reward: { gold: 100, xp: 200, affinity: 25, description: "100 Gold, 3× Rare Surgical Kit, Random Rare Armor, +200 XP, +25 Affinity" },
       },
@@ -715,9 +575,9 @@ export const TRADERS: Trader[] = [
         id: "goblin_13",
         name: "Shiny Secrets",
         chapter: "Greater Threats",
-        description: "The Lion's Head chests in the Goblin Cave are where my kin stash their best loot. Open two in a single run.",
+        description: "The Lion's Head chests in the The Ashen Range are where my kin stash their best loot. Open two in a single run.",
         requirements: [
-          { type: "interact", item: "Lion's Head Chest", location: "Goblin Cave", quantity: 2, description: "Open 2 Lion's Head Chests in the Goblin Cave (single session)" },
+          { type: "interact", item: "Lion's Head Chest", location: "The Ashen Range", quantity: 2, description: "Open 2 Lion's Head Chests in the The Ashen Range (single session)" },
         ],
         reward: { gold: 150, xp: 300, affinity: 25, description: "150 Gold, 2× Random Rare Armor, +300 XP, +25 Affinity" },
       },
@@ -727,8 +587,8 @@ export const TRADERS: Trader[] = [
         chapter: "Greater Threats",
         description: "The Cave Pit Hall is where my kin throw their prisoners. Go look — and deal with the centipedes first.",
         requirements: [
-          { type: "kill", monster: "Giant Centipede", location: "Goblin Cave", quantity: 2, description: "Kill 2 Giant Centipedes in the Goblin Cave" },
-          { type: "explore", location: "Goblin Cave — Cave Pit Hall", quantity: 1, description: "Explore the Cave Pit Hall in the Goblin Cave" },
+          { type: "kill", monster: "Giant Centipede", location: "The Ashen Range", quantity: 2, description: "Kill 2 Giant Centipedes in the The Ashen Range" },
+          { type: "explore", location: "The Ashen Range — Cave Pit Hall", quantity: 1, description: "Explore the Cave Pit Hall in the The Ashen Range" },
         ],
         reward: { gold: 150, xp: 350, description: "150 Gold, Random Epic Weapon, +350 XP" },
       },
@@ -736,9 +596,9 @@ export const TRADERS: Trader[] = [
         id: "goblin_15",
         name: "One Eyed Foe",
         chapter: "Greater Threats",
-        description: "The Cyclops is the biggest bully in the Goblin Cave — and I want his territory.",
+        description: "The Cyclops is the biggest bully in the The Ashen Range — and I want his territory.",
         requirements: [
-          { type: "kill", monster: "Cyclops", location: "Goblin Cave", quantity: 1, description: "Kill the Cyclops in the Goblin Cave" },
+          { type: "kill", monster: "Cyclops", location: "The Ashen Range", quantity: 1, description: "Kill the Cyclops in the The Ashen Range" },
         ],
         reward: { gold: 375, xp: 1000, affinity: 50, description: "375 Gold, Unique Gold Coin Bag, +1000 XP, +50 Affinity" },
       },
@@ -897,7 +757,7 @@ export const TRADERS: Trader[] = [
     name: "Miner",
     title: "The Deeprock Digger",
     description:
-      "A weathered dwarf who has seen the Goblin Cave's fiery depths firsthand. He deals in ore, lava materials, and the remnants of his fallen kin.",
+      "A weathered dwarf who has seen the The Ashen Range's fiery depths firsthand. He deals in ore, lava materials, and the remnants of his fallen kin.",
     accentColor: "#c4783a",
     quests: [
       // Chapter 1 – Into the Firedeep
@@ -905,9 +765,9 @@ export const TRADERS: Trader[] = [
         id: "miner_1",
         name: "The Land in Flames",
         chapter: "Into the Firedeep",
-        description: "The Goblin Cave's lower reaches are burning. Go in and make it out alive — that's step one.",
+        description: "The The Ashen Range's lower reaches are burning. Go in and make it out alive — that's step one.",
         requirements: [
-          { type: "survive", location: "Goblin Cave", quantity: 1, description: "Survive 1 run in the Goblin Cave" },
+          { type: "survive", location: "The Ashen Range", quantity: 1, description: "Survive 1 run in the The Ashen Range" },
         ],
         reward: { gold: 75, xp: 50, description: "75 Gold, Random Uncommon Weapon, +50 XP" },
       },
@@ -915,9 +775,9 @@ export const TRADERS: Trader[] = [
         id: "miner_2",
         name: "Traces of the Scattered",
         chapter: "Into the Firedeep",
-        description: "The Broken Stone Bridge module in the Goblin Cave is where my kin fell. I need to know what's left.",
+        description: "The Broken Stone Bridge module in the The Ashen Range is where my kin fell. I need to know what's left.",
         requirements: [
-          { type: "explore", location: "Goblin Cave — Broken Stone Bridge", quantity: 1, description: "Explore the Broken Stone Bridge in the Goblin Cave" },
+          { type: "explore", location: "The Ashen Range — Broken Stone Bridge", quantity: 1, description: "Explore the Broken Stone Bridge in the The Ashen Range" },
         ],
         reward: { gold: 75, xp: 50, description: "75 Gold, 2× Random Uncommon Weapon, +50 XP" },
       },
@@ -925,11 +785,11 @@ export const TRADERS: Trader[] = [
         id: "miner_3",
         name: "Those Bound in Fire",
         chapter: "Into the Firedeep",
-        description: "Dwarf soldiers bound to the fire still patrol the Goblin Cave. End their suffering.",
+        description: "Dwarf soldiers bound to the fire still patrol the The Ashen Range. End their suffering.",
         requirements: [
-          { type: "kill", monster: "Dwarf Handcannoneer", location: "Goblin Cave", quantity: 5, description: "Kill 5 Dwarf Handcannoneers in the Goblin Cave" },
-          { type: "kill", monster: "Dwarf Mauler", location: "Goblin Cave", quantity: 5, description: "Kill 5 Dwarf Maulers in the Goblin Cave" },
-          { type: "kill", monster: "Dwarf Axeman", location: "Goblin Cave", quantity: 5, description: "Kill 5 Dwarf Axemen in the Goblin Cave" },
+          { type: "kill", monster: "Dwarf Handcannoneer", location: "The Ashen Range", quantity: 5, description: "Kill 5 Dwarf Handcannoneers in the The Ashen Range" },
+          { type: "kill", monster: "Dwarf Mauler", location: "The Ashen Range", quantity: 5, description: "Kill 5 Dwarf Maulers in the The Ashen Range" },
+          { type: "kill", monster: "Dwarf Axeman", location: "The Ashen Range", quantity: 5, description: "Kill 5 Dwarf Axemen in the The Ashen Range" },
         ],
         reward: { gold: 75, xp: 75, description: "75 Gold, Random Uncommon Weapon, Random Uncommon Armor, +75 XP" },
       },
@@ -938,9 +798,9 @@ export const TRADERS: Trader[] = [
         id: "miner_4",
         name: "Beasts in the Flames",
         chapter: "The Broken Remains",
-        description: "Flame Boars have overrun sections of the Goblin Cave. Cull them and bring back their tusks.",
+        description: "Flame Boars have overrun sections of the The Ashen Range. Cull them and bring back their tusks.",
         requirements: [
-          { type: "kill", monster: "Flame Boar", location: "Goblin Cave", quantity: 10, description: "Kill 10 Flame Boars in the Goblin Cave" },
+          { type: "kill", monster: "Flame Boar", location: "The Ashen Range", quantity: 10, description: "Kill 10 Flame Boars in the The Ashen Range" },
           { type: "item", item: "Cracked Tusk", rarity: "Common", quantity: 3, description: "Collect 3 Cracked Tusks" },
         ],
         reward: { gold: 125, xp: 250, description: "125 Gold, 2× Random Rare Armor, +250 XP" },
@@ -949,9 +809,9 @@ export const TRADERS: Trader[] = [
         id: "miner_5",
         name: "Unbelievable News",
         chapter: "The Broken Remains",
-        description: "Fallen Dwarves throughout the Goblin Cave carry messages I never received. Recover them.",
+        description: "Fallen Dwarves throughout the The Ashen Range carry messages I never received. Recover them.",
         requirements: [
-          { type: "interact", item: "Fallen Dwarf", location: "Goblin Cave", quantity: 10, description: "Inspect 10 Fallen Dwarves in the Goblin Cave" },
+          { type: "interact", item: "Fallen Dwarf", location: "The Ashen Range", quantity: 10, description: "Inspect 10 Fallen Dwarves in the The Ashen Range" },
         ],
         reward: { gold: 125, xp: 250, description: "125 Gold, 2× Random Rare Weapon, +250 XP" },
       },
@@ -972,7 +832,7 @@ export const TRADERS: Trader[] = [
         chapter: "The Fire That Will Not End",
         description: "The Burning Court is where the fire converges. Reach it.",
         requirements: [
-          { type: "explore", location: "Goblin Cave — Burning Court", quantity: 1, description: "Explore the Burning Court in the Goblin Cave" },
+          { type: "explore", location: "The Ashen Range — Burning Court", quantity: 1, description: "Explore the Burning Court in the The Ashen Range" },
         ],
         reward: { gold: 150, xp: 300, description: "150 Gold, 2× Random Epic Armor, +300 XP" },
       },
@@ -1146,74 +1006,6 @@ export const TRADERS: Trader[] = [
     ],
   },
 
-  // ─── SURGEON ───────────────────────────────────────────────────────────────
-  {
-    id: "surgeon",
-    name: "Surgeon",
-    title: "The Field Medic",
-    description:
-      "A steady-handed healer who patches up adventurers — for a price. She collects medical supplies from across the dungeons to maintain her stock.",
-    accentColor: "#cf9e6b",
-    quests: [
-      {
-        id: "surgeon_1",
-        name: "Bandage Supply",
-        description: "My bandage supply never lasts long. Bring me whatever you find out there.",
-        requirements: [
-          { type: "item", item: "Bandage", rarity: "Common", quantity: 5, description: "Collect 5 Bandages (looted)" },
-        ],
-        reward: { gold: 50, xp: 25, affinity: 25, description: "50 Gold, Surgical Kit, Ring of Survival, +25 XP, +25 Affinity" },
-      },
-      {
-        id: "surgeon_2",
-        name: "Pest Control",
-        description: "The creatures in the Goblin Cave are carrying disease into my patients. Eliminate them.",
-        requirements: [
-          { type: "kill", monster: "Giant Centipede", location: "Goblin Cave", quantity: 1, description: "Kill 1 Giant Centipede in the Goblin Cave" },
-          { type: "kill", monster: "Goblin Mage", location: "Goblin Cave", quantity: 3, description: "Kill 3 Goblin Mages in the Goblin Cave" },
-        ],
-        reward: { gold: 50, xp: 25, description: "50 Gold, Necklace of Peace, Ring of Vitality, +25 XP" },
-      },
-      {
-        id: "surgeon_3",
-        name: "Stone Graves Recovery",
-        description: "Adventurers die in the Stone Graves of the Goblin Cave and leave their med supplies behind.",
-        requirements: [
-          { type: "explore", location: "Goblin Cave — Stone Graves A", quantity: 1, description: "Explore Stone Graves A in the Goblin Cave" },
-        ],
-        reward: { gold: 50, xp: 25, affinity: 25, description: "50 Gold, 3× Explosive Bottle, 3× Bandage, +25 XP, +25 Affinity" },
-      },
-      {
-        id: "surgeon_4",
-        name: "Field Assessment",
-        description: "I need to know the layout of the Howling Crypts to plan medical resupply routes.",
-        requirements: [
-          { type: "explore", location: "Crypt — Four Rooms", quantity: 4, description: "Explore 4 rooms in the Howling Crypts" },
-        ],
-        reward: { gold: 100, xp: 125, description: "100 Gold, 6× Potion of Healing, 6× Bandage, +125 XP" },
-      },
-      {
-        id: "surgeon_5",
-        name: "Elite Eradication",
-        description: "Elite undead are infecting the dungeon with something I've never seen. Eliminate the worst of them.",
-        requirements: [
-          { type: "kill", monster: "Elite Mummy", quantity: 10, description: "Kill 10 Elite Mummies" },
-          { type: "kill", monster: "Elite Zombie", quantity: 10, description: "Kill 10 Elite Zombies" },
-        ],
-        reward: { gold: 100, xp: 125, description: "100 Gold, Reinforced Gloves, Radiant Cloak, +125 XP" },
-      },
-      {
-        id: "surgeon_6",
-        name: "Field Kit Field Test",
-        description: "I need real usage data on surgical kits. Use five of them in the field.",
-        requirements: [
-          { type: "use", item: "Surgical Kit", quantity: 5, description: "Use 5 Surgical Kits" },
-        ],
-        reward: { gold: 100, xp: 150, affinity: 25, description: "100 Gold, Buckled Boots, Leather Chausses, +150 XP, +25 Affinity" },
-      },
-    ],
-  },
-
   // ─── TAILOR ────────────────────────────────────────────────────────────────
   {
     id: "tailor",
@@ -1266,9 +1058,9 @@ export const TRADERS: Trader[] = [
       {
         id: "tailor_5",
         name: "Shrine of the Craft",
-        description: "The Goblin Cave's Shrines of Health have a peculiar effect on fabrics. Interact with four of them.",
+        description: "The The Ashen Range's Shrines of Health have a peculiar effect on fabrics. Interact with four of them.",
         requirements: [
-          { type: "interact", item: "Shrine of Health", location: "Goblin Cave", quantity: 4, description: "Interact with 4 Shrines of Health in the Goblin Cave" },
+          { type: "interact", item: "Shrine of Health", location: "The Ashen Range", quantity: 4, description: "Interact with 4 Shrines of Health in the The Ashen Range" },
         ],
         reward: { gold: 125, xp: 175, description: "125 Gold, Ring of Vitality, Chaperon, +175 XP" },
       },
@@ -1432,73 +1224,6 @@ export const TRADERS: Trader[] = [
     ],
   },
 
-  // ─── TREASURER ─────────────────────────────────────────────────────────────
-  {
-    id: "treasurer",
-    name: "Treasurer",
-    title: "The Coin Counter",
-    description:
-      "A meticulous accountant who tracks every coin that flows through the camp. He wants ceremonial daggers, silver, and proof that the Crypt's vaults have been properly assessed.",
-    accentColor: "#8ab85a",
-    quests: [
-      {
-        id: "treasurer_1",
-        name: "Dagger Acquisition",
-        description: "Ceremonial daggers from the dungeon are worth far more than their weight in silver. Bring me five.",
-        requirements: [
-          { type: "item", item: "Ceremonial Dagger", rarity: "Uncommon", quantity: 5, description: "Collect 5 Ceremonial Daggers" },
-        ],
-        reward: { gold: 200, xp: 25, description: "200 Gold, Crystal Sword, Castillon Dagger, +25 XP" },
-      },
-      {
-        id: "treasurer_2",
-        name: "Old Tomb Assessment",
-        description: "The Old Tomb in the Howling Crypts may contain unreported assets. Investigate it.",
-        requirements: [
-          { type: "explore", location: "Crypt — Old Tomb", quantity: 1, description: "Explore the Old Tomb in the Howling Crypts" },
-        ],
-        reward: { gold: 50, xp: 25, description: "50 Gold, Adventure Tunic, Adventure Boots, +25 XP" },
-      },
-      {
-        id: "treasurer_3",
-        name: "Wraith Elimination",
-        description: "Wraiths have been disrupting assessments of the Crypt's lower vaults. Destroy three of them.",
-        requirements: [
-          { type: "kill", monster: "Wraith", location: "Crypt", quantity: 3, description: "Kill 3 Wraiths in the Crypt" },
-        ],
-        reward: { gold: 50, xp: 40, affinity: 25, description: "50 Gold, 5× Lockpick, Tattered Cloak, +40 XP, +25 Affinity" },
-      },
-      {
-        id: "treasurer_4",
-        name: "Pyramid Assessment",
-        description: "The Pyramid in the Howling Crypts is a vault we haven't been able to access. Report back on its contents.",
-        requirements: [
-          { type: "explore", location: "Crypt — Pyramid", quantity: 1, description: "Explore the Pyramid in the Howling Crypts" },
-        ],
-        reward: { gold: 75, xp: 50, description: "75 Gold, Golden Tooth, Spellbook, +50 XP" },
-      },
-      {
-        id: "treasurer_5",
-        name: "Silver Liquidation",
-        description: "I need silver liquidated at current market rates. Bring me two hundred silver coins.",
-        requirements: [
-          { type: "item", item: "Silver Coin", rarity: "Common", quantity: 200, description: "Collect 200 Silver Coins" },
-        ],
-        reward: { gold: 75, xp: 50, description: "75 Gold, 10× Gold Coin Purse, +50 XP" },
-      },
-      {
-        id: "treasurer_6",
-        name: "Mimic Accounting",
-        description: "Mimics have been stealing inventory from the Crypt's vaults. Kill them and recover Mimic Teeth as proof.",
-        requirements: [
-          { type: "kill", monster: "Mimic", quantity: 7, description: "Kill 7 Mimics" },
-          { type: "item", item: "Mimic Tooth", rarity: "Uncommon", quantity: 2, description: "Collect 2 Mimic Teeth" },
-        ],
-        reward: { gold: 75, xp: 75, affinity: 25, description: "75 Gold, Bear Pendant, Ring of Survival, +75 XP, +25 Affinity" },
-      },
-    ],
-  },
-
   // ─── WEAPONSMITH ───────────────────────────────────────────────────────────
   {
     id: "weaponsmith",
@@ -1576,9 +1301,9 @@ export const TRADERS: Trader[] = [
         id: "weaponsmith_7",
         name: "In Search of the Dwarven Land",
         chapter: "Traces of the Dwarves",
-        description: "The Magma Falls in the Goblin Cave is where the Dwarves once ran their foundries. Go see what remains.",
+        description: "The Magma Falls in the The Ashen Range is where the Dwarves once ran their foundries. Go see what remains.",
         requirements: [
-          { type: "explore", location: "Goblin Cave — Magma Falls", quantity: 1, description: "Explore the Magma Falls module in the Goblin Cave" },
+          { type: "explore", location: "The Ashen Range — Magma Falls", quantity: 1, description: "Explore the Magma Falls module in the The Ashen Range" },
         ],
         reward: { gold: 100, xp: 200, description: "100 Gold, 4× Rare Arcane Essence, +200 XP" },
       },
@@ -1586,7 +1311,7 @@ export const TRADERS: Trader[] = [
         id: "weaponsmith_8",
         name: "The Potential of Obsidian",
         chapter: "Traces of the Dwarves",
-        description: "Obsidian ore from the Goblin Cave is harder than anything I've worked with. I need samples.",
+        description: "Obsidian ore from the The Ashen Range is harder than anything I've worked with. I need samples.",
         requirements: [
           { type: "item", item: "Obsidian Ore", rarity: "Common", quantity: 3, description: "Collect 3 Obsidian Ore" },
         ],
@@ -1598,8 +1323,8 @@ export const TRADERS: Trader[] = [
         chapter: "Traces of the Dwarves",
         description: "The Dwarf soldiers still guard their old forge. Eliminate them and recover what's left of their tools.",
         requirements: [
-          { type: "kill", monster: "Dwarf Handcannoneer", location: "Goblin Cave", quantity: 10, description: "Kill 10 Dwarf Handcannoneers in the Goblin Cave" },
-          { type: "kill", monster: "Dwarf Mauler", location: "Goblin Cave", quantity: 10, description: "Kill 10 Dwarf Maulers in the Goblin Cave" },
+          { type: "kill", monster: "Dwarf Handcannoneer", location: "The Ashen Range", quantity: 10, description: "Kill 10 Dwarf Handcannoneers in the The Ashen Range" },
+          { type: "kill", monster: "Dwarf Mauler", location: "The Ashen Range", quantity: 10, description: "Kill 10 Dwarf Maulers in the The Ashen Range" },
           { type: "item", item: "Melted Pickaxe Head", rarity: "Common", quantity: 7, description: "Collect 7 Melted Pickaxe Heads" },
         ],
         reward: { gold: 100, xp: 250, description: "100 Gold, 3× Random Rare Weapon, +250 XP" },
@@ -1700,9 +1425,9 @@ export const TRADERS: Trader[] = [
         id: "weaponsmith_18",
         name: "Out of the Dark",
         chapter: "Steel and Resolve",
-        description: "The Ghost King, the Skeleton Warlord, and the Lich. Three rulers of the Crypt's darkness. End them.",
+        description: "The Demon Overseer, the Skeleton Warlord, and the Lich. Three rulers of the dungeon's darkness. End them.",
         requirements: [
-          { type: "kill", monster: "Ghost King", location: "Crypt", quantity: 1, description: "Kill the Ghost King in the Crypt" },
+          { type: "kill", monster: "Demon Overseer", location: "Inferno", quantity: 1, description: "Kill the Demon Overseer in the Inferno" },
           { type: "kill", monster: "Skeleton Warlord", location: "Crypt", quantity: 1, description: "Kill the Skeleton Warlord in the Crypt" },
           { type: "kill", monster: "Lich", location: "Crypt", quantity: 1, description: "Kill the Lich in the Crypt" },
         ],
