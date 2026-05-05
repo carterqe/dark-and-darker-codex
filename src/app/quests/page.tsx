@@ -2,21 +2,21 @@ import type { Metadata } from "next";
 import QuestsClient from "./quests-client";
 
 export const metadata: Metadata = {
-  title: "Quests",
+  title: "Quest Guide",
   description:
-    "Dark and Darker merchant quests — track every NPC quest, requirements and rewards across each tier and merchant in one place.",
+    "Dark and Darker quest guide — browse every trader quest, track your progress, and share tips with the community.",
   alternates: { canonical: "/quests" },
   openGraph: {
-    title: "Dark and Darker Quests — Merchant Quest Tracker",
+    title: "Dark and Darker Quest Guide — Track & Complete Every Merchant Quest",
     description:
-      "Every merchant quest in Dark and Darker with requirements, rewards and tier progression.",
+      "Browse every trader quest in Dark and Darker, mark quests complete, and share community tips.",
     url: "/quests",
     type: "website",
   },
   twitter: {
-    title: "Dark and Darker Quests — Merchant Quest Tracker",
+    title: "Dark and Darker Quest Guide — Track & Complete Every Merchant Quest",
     description:
-      "Every merchant quest in Dark and Darker with requirements, rewards and tier progression.",
+      "Browse every trader quest in Dark and Darker, mark quests complete, and share community tips.",
   },
 };
 
