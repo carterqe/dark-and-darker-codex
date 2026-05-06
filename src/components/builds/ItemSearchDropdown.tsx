@@ -19,6 +19,10 @@ const CLASS_BITMASK: Record<string, number> = {
   Sorcerer: 512,
 };
 
+const RARITY_RANK: Record<string, number> = {
+  Poor: 0, Common: 1, Uncommon: 2, Rare: 3, Epic: 4, Legendary: 5, Unique: 6, Artifact: 7,
+};
+
 function canClassEquip(requiredClass: unknown, className: string): boolean {
   if (requiredClass == null) return true;
   const mask = typeof requiredClass === "number" ? requiredClass : parseInt(String(requiredClass), 10);
@@ -129,10 +133,16 @@ export default function ItemSearchDropdown({
   }, [open]);
 
   const select = (item: DarkerDBItem) => {
+    const availableRarities = [...new Set(
+      allItems.filter((i) => i.name === item.name).map((i) => i.rarity)
+    )];
+    const defaultRarity = availableRarities.length === 1
+      ? availableRarities[0]
+      : (availableRarities.sort((a, b) => (RARITY_RANK[a] ?? 0) - (RARITY_RANK[b] ?? 0))[0] ?? "Common");
     onChange({
       item_id: item.id,
       item_name: item.name,
-      rarity: "Common",
+      rarity: defaultRarity,
       gear_score: item.gear_score,
     });
     setOpen(false);
