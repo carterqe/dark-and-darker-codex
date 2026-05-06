@@ -160,7 +160,7 @@ export default function CreateBuildClient() {
           New Build
         </ShimmerText>
         <p className="text-text-secondary">
-          Share your loadout with the community
+          Build your loadout and share it with the community.
         </p>
       </motion.div>
 
@@ -169,8 +169,7 @@ export default function CreateBuildClient() {
         const steps = [
           { label: "Class", done: !!selectedClass },
           { label: "Details", done: !!title.trim() },
-          { label: "Tags", done: tags.length > 0 },
-          { label: "Gear", done: Object.keys(equipment).length > 0 },
+          { label: "Gear", done: Object.keys(equipment).filter((k) => equipment[k as GearSlotKey]).length > 0 },
           { label: "Perks", done: perks.length > 0 },
           { label: "Skills", done: skills.length > 0 },
         ];
@@ -444,9 +443,6 @@ export default function CreateBuildClient() {
           return (
             <div className="bg-bg-secondary border border-border-subtle rounded-sm p-6 space-y-4">
               <span className={sectionLabel}>Memorized Spells / Songs / Forms</span>
-              <p className="text-xs text-text-secondary mb-3">
-                Select the spells, songs, or forms your character has memorized.
-              </p>
               {memoryGroups.map((group) => (
                 <SpellSelector
                   key={group.type}

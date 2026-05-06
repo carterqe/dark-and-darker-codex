@@ -82,10 +82,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const validatedSkills = validateStringArray(skills ?? [], 4, 50);
+  const validatedSkills = validateStringArray(skills ?? [], 2, 50);
   if (!validatedSkills) {
     return NextResponse.json(
-      { error: "Skills must be an array of up to 4 strings (max 50 chars each)" },
+      { error: "Skills must be an array of up to 2 strings (max 50 chars each)" },
       { status: 400 },
     );
   }

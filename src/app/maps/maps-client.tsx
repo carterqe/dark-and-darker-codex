@@ -13,7 +13,7 @@ import {
   Plus,
   Skull,
   Gem,
-  ChevronLeft,
+  Flame,
   Clock,
   X,
   Target,
@@ -44,7 +44,7 @@ const FEATURE_ICONS: Record<FeatureType, React.ComponentType<{ className?: strin
   fountain_speed:    Wind,
   altar:             Plus,
   boss:              Skull,
-  campfire:          ChevronLeft, // unused — campfires are player-placed
+  campfire:          Flame, // unused — campfires are player-placed
   treasure:          Gem,
   monster_spawn:     Target,
 };
@@ -354,7 +354,7 @@ function DungeonReferenceView({
                   className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-sm border border-border-subtle bg-bg-secondary/40 text-sm"
                 >
                   <div
-                    className="w-6 h-6 rounded flex items-center justify-center shrink-0"
+                    className="w-6 h-6 rounded-sm flex items-center justify-center shrink-0"
                     style={{ backgroundColor: meta.bgColor, border: `1px solid ${meta.borderColor}` }}
                   >
                     <Icon className="w-3 h-3" style={{ color: meta.color }} />
@@ -474,7 +474,7 @@ function MapsClientInner() {
             Dungeon Reference
           </ShimmerText>
           <p className="text-xs text-text-secondary mt-0.5">
-            Bosses, mob pools, and feature counts per dungeon — DaD layouts are procedurally generated, so positions are not.
+            Bosses, mob pools, and feature counts per dungeon — DaD layouts are procedurally generated, so positions are not fixed.
           </p>
         </div>
         <button

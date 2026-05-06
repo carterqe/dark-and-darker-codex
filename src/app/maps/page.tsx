@@ -4,7 +4,7 @@ import MapsClient from "./maps-client";
 export const metadata: Metadata = {
   title: "Dungeon Reference",
   description:
-    "Per-dungeon reference for Dark and Darker — bosses, subbosses, mob pools, and feature counts for Ruins, Crypts, The Ashen Range, Inferno, Frost Mountain, Ice Abyss and Firedeep. Dungeons are procedurally generated; positions are not listed.",
+    "Per-dungeon reference for Dark and Darker — bosses, subbosses, mob pools, and feature counts for Ruins, Crypts, The Ashen Range, Inferno, Frost Mountain, Ice Abyss, Ship Graveyard and The Firedeep. Dungeons are procedurally generated; positions are not fixed.",
   alternates: { canonical: "/maps" },
   openGraph: {
     title: "Dark and Darker — Dungeon Reference",

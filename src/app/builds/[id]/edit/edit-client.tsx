@@ -158,7 +158,9 @@ export default function EditBuildClient({ id }: { id: string }) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
         <p className="font-cinzel text-lg text-text-secondary">Build not found.</p>
-        <Link href="/builds" className="text-gold-primary hover:text-gold-light text-sm mt-4 inline-block">← Back to Builds</Link>
+        <Link href="/builds" className="flex items-center justify-center gap-1.5 text-gold-primary hover:text-gold-light text-sm mt-4">
+          <ArrowLeft className="w-3 h-3" /> Back to Builds
+        </Link>
       </div>
     );
   }
@@ -190,7 +192,7 @@ export default function EditBuildClient({ id }: { id: string }) {
         <ShimmerText as="h1" className="text-4xl sm:text-5xl mb-3">
           Edit Build
         </ShimmerText>
-        <p className="text-text-secondary">Update your loadout</p>
+        <p className="text-text-secondary">Make changes and save your updated loadout.</p>
       </motion.div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
@@ -245,6 +247,7 @@ export default function EditBuildClient({ id }: { id: string }) {
               onChange={(e) => setDescription(e.target.value)}
               maxLength={2000}
               rows={4}
+              placeholder="Explain your strategy, strengths, weaknesses, tips..."
               className={`${inputClass} resize-none`}
             />
           </div>

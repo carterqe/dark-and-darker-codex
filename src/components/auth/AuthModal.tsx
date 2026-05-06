@@ -131,21 +131,25 @@ export default function AuthModal() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2 }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="auth-modal-title"
             className="relative w-full max-w-md mx-4 bg-bg-secondary border border-border-subtle rounded-sm overflow-hidden shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-border-subtle">
               <div className="flex items-center gap-2">
-                <Swords className="w-5 h-5 text-gold-primary" />
-                <span className="font-cinzel font-bold text-gold-primary">
+                <Swords className="w-5 h-5 text-gold-primary" aria-hidden="true" />
+                <span id="auth-modal-title" className="font-cinzel font-bold text-gold-primary">
                   {tab === "login" ? "Welcome Back" : "Join the Realm"}
                 </span>
               </div>
               <button
                 onClick={closeAuthModal}
+                aria-label="Close"
                 className="text-text-secondary hover:text-text-primary transition-colors p-1"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 
@@ -183,32 +187,36 @@ export default function AuthModal() {
               {tab === "login" ? (
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div>
-                    <label className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">
+                    <label htmlFor="login-email" className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">
                       Email
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" aria-hidden="true" />
                       <input
+                        id="login-email"
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
+                        autoComplete="email"
                         placeholder="your@email.com"
                         className={inputClass}
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">
+                    <label htmlFor="login-password" className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">
                       Password
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" aria-hidden="true" />
                       <input
+                        id="login-password"
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                        autoComplete="current-password"
                         placeholder="••••••••"
                         className={inputClass}
                       />
@@ -235,34 +243,38 @@ export default function AuthModal() {
               ) : (
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div>
-                    <label className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">
+                    <label htmlFor="signup-email" className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">
                       Email
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" aria-hidden="true" />
                       <input
+                        id="signup-email"
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
+                        autoComplete="email"
                         placeholder="your@email.com"
                         className={inputClass}
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">
+                    <label htmlFor="signup-username" className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">
                       Username
                     </label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" aria-hidden="true" />
                       <input
+                        id="signup-username"
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
                         minLength={3}
                         maxLength={20}
+                        autoComplete="username"
                         pattern="^[a-zA-Z0-9_]+$"
                         placeholder="your_username"
                         className={inputClass}
@@ -273,17 +285,19 @@ export default function AuthModal() {
                     </p>
                   </div>
                   <div>
-                    <label className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">
+                    <label htmlFor="signup-password" className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">
                       Password
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" aria-hidden="true" />
                       <input
+                        id="signup-password"
                         type="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
                         minLength={8}
+                        autoComplete="new-password"
                         placeholder="Min. 8 characters"
                         className={inputClass}
                       />
@@ -293,17 +307,19 @@ export default function AuthModal() {
                     </p>
                   </div>
                   <div>
-                    <label className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">
+                    <label htmlFor="signup-confirm-password" className="text-[10px] uppercase tracking-wider text-gold-dark font-bold block mb-1.5">
                       Confirm Password
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" aria-hidden="true" />
                       <input
+                        id="signup-confirm-password"
                         type="password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                         minLength={8}
+                        autoComplete="new-password"
                         placeholder="Re-enter password"
                         className={inputClass}
                       />

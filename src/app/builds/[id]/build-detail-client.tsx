@@ -178,8 +178,9 @@ export default function BuildDetailClient({ id }: { id: string }) {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
         <Hammer className="w-12 h-12 text-gold-dark mx-auto mb-4" />
         <h2 className="font-cinzel font-bold text-xl text-text-secondary">Build not found</h2>
-        <Link href="/builds" className="text-gold-primary hover:text-gold-light text-sm mt-4 inline-block">
-          ← Back to Builds
+        <p className="text-sm text-text-secondary/60 mt-2">This build may have been deleted or the link is invalid.</p>
+        <Link href="/builds" className="flex items-center justify-center gap-1.5 text-gold-primary hover:text-gold-light text-sm mt-4">
+          <ArrowLeft className="w-3 h-3" /> Back to Builds
         </Link>
       </div>
     );
@@ -351,7 +352,7 @@ export default function BuildDetailClient({ id }: { id: string }) {
                       </Link>
                       {item.hand && item.hand.length > 0 && item.hand.map((h) => (
                         <span key={h} className="text-[9px] px-1.5 py-0.5 bg-gold-primary/10 text-gold-dark border border-gold-primary/20 rounded-sm">
-                          {h === "main" ? "Main Hand" : "Off Hand"}
+                          {h === "main" ? "Main Hand" : "Off-hand"}
                         </span>
                       ))}
                       {item.gear_score > 0 && (
@@ -433,7 +434,7 @@ export default function BuildDetailClient({ id }: { id: string }) {
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               maxLength={500}
-              placeholder="Share your thoughts..."
+              placeholder="Share your thoughts on this build..."
               className="flex-1 px-3 py-2 bg-bg-primary border border-border-subtle rounded-sm text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-gold-primary/50 transition-all"
             />
             <button
@@ -462,7 +463,7 @@ export default function BuildDetailClient({ id }: { id: string }) {
         <div className="space-y-4">
           {comments.length === 0 ? (
             <p className="text-sm text-text-secondary/50 text-center py-4">
-              No comments yet. Be the first!
+              No comments yet.
             </p>
           ) : (
             comments.map((comment) => (
@@ -584,7 +585,6 @@ function MemoryDisplay({
   selected: string[];
 }) {
   const groups = getMemoryItems(className, skills);
-  const selectedSet = new Set(selected);
 
   const sections = groups
     .map((g) => {
@@ -597,7 +597,7 @@ function MemoryDisplay({
     .filter((s) => s.items.length > 0);
 
   const claimed = new Set(sections.flatMap((s) => s.items.map((i) => i.name)));
-  const orphans = selected.filter((s) => selectedSet.has(s) && !claimed.has(s));
+  const orphans = selected.filter((s) => !claimed.has(s));
 
   if (sections.length === 0 && orphans.length === 0) return null;
 
@@ -626,7 +626,7 @@ function MemoryDisplay({
       ))}
       {orphans.length > 0 && (
         <div>
-          <h2 className="font-cinzel font-bold text-sm text-purple-400 mb-3">Memorized</h2>
+          <h2 className="font-cinzel font-bold text-sm text-purple-400 mb-3">Memorized Spells</h2>
           <div className="flex flex-wrap gap-1.5">
             {orphans.map((name) => (
               <span

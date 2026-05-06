@@ -134,9 +134,10 @@ export default function BuildsClient() {
             {search && (
               <button
                 onClick={() => setSearch("")}
+                aria-label="Clear search"
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-text-secondary/60 hover:text-text-primary"
               >
-                <X className="w-3 h-3" />
+                <X className="w-3 h-3" aria-hidden="true" />
               </button>
             )}
           </div>
@@ -172,9 +173,9 @@ export default function BuildsClient() {
               </MedievalButton>
             </Link>
           ) : (
-            <MedievalButton variant="primary" onClick={() => openAuthModal("login")}>
+            <MedievalButton variant="secondary" onClick={() => openAuthModal("login")}>
               <Plus className="w-4 h-4" />
-              New Build
+              Sign in to Build
             </MedievalButton>
           )}
         </div>
@@ -251,8 +252,8 @@ function BuildCard({ build, index }: { build: Build; index: number }) {
                 {build.class}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-text-secondary">
-              <ThumbsUp className="w-3 h-3" />
+            <div className="flex items-center gap-2 text-xs text-text-secondary" aria-label={`${build.vote_count} vote${build.vote_count !== 1 ? "s" : ""}`}>
+              <ThumbsUp className="w-3 h-3" aria-hidden="true" />
               {build.vote_count}
             </div>
           </div>
@@ -306,7 +307,9 @@ function BuildCard({ build, index }: { build: Build; index: number }) {
               )}
               {(build.perks.length > 0 || build.skills.length > 0) && (
                 <span>
-                  {build.perks.length}P/{build.skills.length}S
+                  {build.perks.length > 0 && `${build.perks.length} perk${build.perks.length !== 1 ? "s" : ""}`}
+                  {build.perks.length > 0 && build.skills.length > 0 && " · "}
+                  {build.skills.length > 0 && `${build.skills.length} skill${build.skills.length !== 1 ? "s" : ""}`}
                 </span>
               )}
             </div>

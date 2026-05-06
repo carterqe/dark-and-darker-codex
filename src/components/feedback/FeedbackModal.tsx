@@ -99,12 +99,15 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2 }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="feedback-modal-title"
             className="relative w-full max-w-md mx-4 bg-bg-secondary border border-border-subtle rounded-sm overflow-hidden shadow-2xl"
           >
             <div className="flex items-center justify-between px-6 py-5 border-b border-border-subtle">
               <div className="flex items-center gap-2">
-                <MessageSquarePlus className="w-5 h-5 text-gold-primary" />
-                <span className="font-cinzel font-bold text-gold-primary">
+                <MessageSquarePlus className="w-5 h-5 text-gold-primary" aria-hidden="true" />
+                <span id="feedback-modal-title" className="font-cinzel font-bold text-gold-primary">
                   Send Feedback
                 </span>
               </div>
@@ -143,8 +146,9 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className={sectionLabel}>Category</label>
+                  <label htmlFor="feedback-category" className={sectionLabel}>Category</label>
                   <select
+                    id="feedback-category"
                     value={category}
                     onChange={(e) => setCategory(e.target.value as Category)}
                     className={inputClass}

@@ -44,8 +44,8 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group shrink-0">
-              <Swords className="w-5 h-5 sm:w-6 sm:h-6 text-gold-primary group-hover:text-gold-light transition-colors" />
+            <Link href="/" aria-label="DaD Codex — Home" className="flex items-center gap-2 group shrink-0">
+              <Swords className="w-5 h-5 sm:w-6 sm:h-6 text-gold-primary group-hover:text-gold-light transition-colors" aria-hidden="true" />
               <span className="font-cinzel font-bold text-base sm:text-lg text-gold-primary group-hover:text-gold-light transition-colors hidden sm:inline">
                 DaD Codex
               </span>
@@ -88,9 +88,10 @@ export default function Navbar() {
                     <button
                       onClick={signOut}
                       title="Sign out"
+                      aria-label="Sign out"
                       className="flex items-center px-2 py-2 text-text-secondary hover:text-accent-red border border-transparent hover:border-accent-red/30 rounded-sm transition-all text-xs"
                     >
-                      <LogOut className="w-4 h-4" />
+                      <LogOut className="w-4 h-4" aria-hidden="true" />
                     </button>
                   </>
                 ) : (
@@ -106,9 +107,12 @@ export default function Navbar() {
               {/* Mobile hamburger */}
               <button
                 onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
+                aria-expanded={mobileOpen}
+                aria-controls="mobile-nav"
                 className="md:hidden flex items-center px-2 py-2 text-text-secondary hover:text-gold-primary transition-colors"
               >
-                {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {mobileOpen ? <X className="w-5 h-5" aria-hidden="true" /> : <Menu className="w-5 h-5" aria-hidden="true" />}
               </button>
             </div>
           </div>
@@ -116,7 +120,7 @@ export default function Navbar() {
 
         {/* Mobile nav drawer */}
         {mobileOpen && (
-          <div className="md:hidden border-t border-border-subtle bg-bg-primary/95 backdrop-blur-md">
+          <div id="mobile-nav" className="md:hidden border-t border-border-subtle bg-bg-primary/95 backdrop-blur-md">
             <div className="px-4 py-3 space-y-1">
               {links.map((link) => {
                 const isActive =
