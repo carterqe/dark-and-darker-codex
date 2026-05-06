@@ -36,7 +36,13 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, profile, isAdmin, loading, openAuthModal, signOut, toast, clearToast } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [signOutConfirm, setSignOutConfirm] = useState(false);
   const links = isAdmin ? [...navLinks, adminLink] : navLinks;
+
+  async function handleSignOut() {
+    setSignOutConfirm(false);
+    await signOut();
+  }
 
   return (
     <>
@@ -87,7 +93,7 @@ export default function Navbar() {
                       {profile?.username ?? user.email?.split("@")[0]}
                     </span>
                     <button
-                      onClick={signOut}
+                      onClick={() => setSignOutConfirm(true)}
                       title="Sign out"
                       aria-label="Sign out"
                       className="flex items-center px-2 py-2 text-text-secondary hover:text-accent-red border border-transparent hover:border-accent-red/30 rounded-sm transition-all text-xs"
@@ -150,6 +156,45 @@ export default function Navbar() {
           </div>
         )}
       </nav>
+      {/* Sign-out confirmation */}
+      {signOutConfirm && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setSignOutConfirm(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="signout-title"
+            className="bg-bg-secondary border border-border-subtle rounded-sm p-6 w-full max-w-sm shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <LogOut className="w-5 h-5 text-accent-red shrink-0" aria-hidden="true" />
+              <h2 id="signout-title" className="font-cinzel font-bold text-base text-text-primary">
+                Sign Out?
+              </h2>
+            </div>
+            <p className="text-sm text-text-secondary mb-6">
+              Your session will end. You can sign back in at any time.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setSignOutConfirm(false)}
+                className="px-4 py-2 text-xs font-medium text-text-secondary border border-border-subtle rounded-sm hover:text-text-primary hover:border-text-secondary/30 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="px-4 py-2 text-xs font-medium text-accent-red border border-accent-red/30 rounded-sm hover:bg-accent-red/10 transition-all"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <AuthModal />
       <Toast message={toast} onClose={clearToast} duration={5000} />
     </>
