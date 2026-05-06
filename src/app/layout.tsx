@@ -139,10 +139,16 @@ export default function RootLayout({
           }}
         />
         <AuthProvider>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[200] focus:px-4 focus:py-2 focus:bg-bg-secondary focus:text-gold-primary focus:border focus:border-gold-primary/40 focus:rounded-sm focus:text-sm focus:font-cinzel"
+          >
+            Skip to main content
+          </a>
           <ParticleBackground />
           <BetaBanner />
           <Navbar />
-          <main className="flex-1 pt-[84px] sm:pt-[92px] relative z-10">{children}</main>
+          <main id="main-content" className="flex-1 pt-[84px] sm:pt-[92px] relative z-10">{children}</main>
           <Footer />
           <FeedbackButton />
           <SpeedInsights />

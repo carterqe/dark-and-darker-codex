@@ -130,14 +130,14 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
               </p>
 
               {error && (
-                <div className="flex items-center gap-2.5 bg-accent-red/10 border border-accent-red/30 rounded-sm px-4 py-3">
-                  <AlertCircle className="w-4 h-4 text-accent-red shrink-0" />
+                <div role="alert" className="flex items-center gap-2.5 bg-accent-red/10 border border-accent-red/30 rounded-sm px-4 py-3">
+                  <AlertCircle className="w-4 h-4 text-accent-red shrink-0" aria-hidden="true" />
                   <p className="text-xs text-accent-red">{error}</p>
                 </div>
               )}
               {success && (
-                <div className="flex items-center gap-2.5 bg-accent-emerald/10 border border-accent-emerald/30 rounded-sm px-4 py-3">
-                  <CheckCircle className="w-4 h-4 text-accent-emerald shrink-0" />
+                <div role="status" aria-live="polite" className="flex items-center gap-2.5 bg-accent-emerald/10 border border-accent-emerald/30 rounded-sm px-4 py-3">
+                  <CheckCircle className="w-4 h-4 text-accent-emerald shrink-0" aria-hidden="true" />
                   <p className="text-xs text-accent-emerald">
                     Received — thanks for the heads up.
                   </p>
