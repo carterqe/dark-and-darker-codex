@@ -27,7 +27,7 @@ export default function RankBadge({ rank, size = "sm" }: RankBadgeProps) {
   const c = colors[rank as 1 | 2 | 3];
 
   return (
-    <div className={`relative ${sizeClasses} flex items-center justify-center`}>
+    <div className={`relative ${sizeClasses} flex items-center justify-center`} aria-label={`Rank ${rank}`}>
       {/* Shield SVG */}
       <svg
         viewBox="0 0 40 48"
@@ -51,7 +51,7 @@ export default function RankBadge({ rank, size = "sm" }: RankBadgeProps) {
 
       {/* Crown for rank 1, number for others */}
       {rank === 1 ? (
-        <Crown className="w-4 h-4 relative z-10" style={{ color: c.fill }} />
+        <Crown className="w-4 h-4 relative z-10" style={{ color: c.fill }} aria-hidden="true" />
       ) : (
         <span
           className={`font-cinzel font-bold ${textSize} relative z-10`}

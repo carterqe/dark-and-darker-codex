@@ -86,7 +86,7 @@ export default function ClassesClient() {
               style={{ animationDelay: `${Math.min(i * 50, 400)}ms` }}
             >
               <Link href={`/classes/${cls}`}>
-                <div className="h-full bg-bg-secondary border border-border-subtle rounded-sm p-5 hover:border-gold-primary/30 hover:bg-bg-tertiary/50 transition-all group cursor-pointer flex flex-col gap-4">
+                <div className="h-full bg-bg-secondary border border-border-subtle rounded-sm p-5 hover:border-gold-primary/30 hover:bg-bg-tertiary/50 transition-all group flex flex-col gap-4">
                   {/* Header */}
                   <div className="flex items-center gap-3">
                     <div className="relative w-12 h-12 rounded-full border border-border-subtle overflow-hidden shrink-0">

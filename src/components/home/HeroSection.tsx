@@ -27,8 +27,8 @@ export default function HeroSection() {
         </ShimmerText>
 
         <p className="text-text-secondary text-lg sm:text-xl max-w-xl mx-auto leading-relaxed">
-          Where legends share their craft. Forge your loadout, study the meta,
-          and stand alongside fellow adventurers.
+          Track the leaderboards, build your perfect loadout, scout market
+          prices, and master every dungeon — all in one place.
         </p>
       </motion.div>
 

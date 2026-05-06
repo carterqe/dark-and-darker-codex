@@ -106,8 +106,8 @@ export default function QuestTipsPanel({ questId }: { questId: string }) {
         <h3 className="font-cinzel font-bold text-sm text-gold-primary">
           Community Tips
           {tips.length > 0 && (
-            <span className="ml-2 text-[10px] text-text-secondary/60 font-normal">
-              {tips.length}
+            <span className="ml-2 text-[10px] text-text-secondary/60 font-normal font-sans">
+              ({tips.length})
             </span>
           )}
         </h3>

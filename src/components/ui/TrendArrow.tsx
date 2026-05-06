@@ -9,7 +9,7 @@ interface TrendArrowProps {
 
 export default function TrendArrow({ trend }: TrendArrowProps) {
   if (trend === "stable") {
-    return <Minus className="w-4 h-4 text-text-secondary" />;
+    return <Minus className="w-4 h-4 text-text-secondary" aria-label="Stable" />;
   }
 
   const isUp = trend === "up";
@@ -22,7 +22,7 @@ export default function TrendArrow({ trend }: TrendArrowProps) {
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
-      <Icon className={`w-4 h-4 ${color}`} />
+      <Icon className={`w-4 h-4 ${color}`} aria-label={isUp ? "Trending up" : "Trending down"} />
     </motion.div>
   );
 }

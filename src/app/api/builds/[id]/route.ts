@@ -62,8 +62,8 @@ export async function PATCH(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const body = await request.json();
-  const { title, description, class: cls, tags, equipment, perks, skills, spells } = body;
+  const body = await request.json().catch(() => null);
+  const { title, description, class: cls, tags, equipment, perks, skills, spells } = body ?? {};
 
   if (typeof title !== "string" || !title.trim() || title.length > 100) {
     return NextResponse.json(

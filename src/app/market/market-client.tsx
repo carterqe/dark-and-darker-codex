@@ -78,10 +78,8 @@ function extractStats(listing: DarkerDBMarketListing): { name: string; value: st
   const stats: { name: string; value: string }[] = [];
   for (const [key, value] of Object.entries(listing)) {
     if ((key.startsWith("primary_") || key.startsWith("secondary_")) && value != null && value !== 0) {
-      if (key.startsWith("primary_") || key.startsWith("secondary_")) {
-        const name = key.replace(/^(primary_|secondary_)/, "").replace(/_/g, " ");
-        stats.push({ name, value: String(value) });
-      }
+      const name = key.replace(/^(primary_|secondary_)/, "").replace(/_/g, " ");
+      stats.push({ name, value: String(value) });
     }
   }
   return stats;

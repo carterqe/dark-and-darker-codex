@@ -160,7 +160,7 @@ export default function CreateBuildClient() {
           New Build
         </ShimmerText>
         <p className="text-text-secondary">
-          Build your loadout and share it with the community.
+          Craft your loadout, pick your perks, and share your strategy.
         </p>
       </motion.div>
 
@@ -245,7 +245,7 @@ export default function CreateBuildClient() {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              maxLength={80}
+              maxLength={100}
               required
               placeholder="e.g. Dual Wield Speed Fighter, Budget Wizard..."
               className={inputClass}
@@ -266,22 +266,32 @@ export default function CreateBuildClient() {
 
         {/* Tags */}
         <div className="bg-bg-secondary border border-border-subtle rounded-sm p-6">
-          <span className={sectionLabel}>Tags</span>
+          <span className={sectionLabel}>
+            Tags{" "}
+            <span className="text-text-secondary font-normal normal-case">
+              (up to 5)
+            </span>
+          </span>
           <div className="flex flex-wrap gap-2">
-            {BUILD_TAGS.map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => toggleTag(tag)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-sm border transition-all cursor-pointer ${
-                  tags.includes(tag)
-                    ? "text-gold-light bg-bg-tertiary border-gold-primary/40"
-                    : "text-text-secondary border-border-subtle hover:text-gold-primary hover:border-gold-dark"
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
+            {BUILD_TAGS.map((tag) => {
+              const selected = tags.includes(tag);
+              const disabled = !selected && tags.length >= 5;
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => !disabled && toggleTag(tag)}
+                  disabled={disabled}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-sm border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                    selected
+                      ? "text-gold-light bg-bg-tertiary border-gold-primary/40"
+                      : "text-text-secondary border-border-subtle hover:text-gold-primary hover:border-gold-dark"
+                  }`}
+                >
+                  {tag}
+                </button>
+              );
+            })}
           </div>
         </div>
 

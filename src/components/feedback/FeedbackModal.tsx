@@ -115,9 +115,9 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                 onClick={onClose}
                 className="text-text-secondary hover:text-text-primary transition-colors p-1"
                 type="button"
-                aria-label="Close"
+                aria-label="Close feedback dialog"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 
@@ -161,8 +161,9 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                   </select>
                 </div>
                 <div>
-                  <label className={sectionLabel}>Message *</label>
+                  <label htmlFor="feedback-message" className={sectionLabel}>Message *</label>
                   <textarea
+                    id="feedback-message"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     required

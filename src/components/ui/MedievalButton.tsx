@@ -41,17 +41,18 @@ export default function MedievalButton({
       whileTap={!disabled ? { scale: 0.98 } : undefined}
     >
       {/* Corner decorations */}
-      <span className="absolute top-0 left-0 w-2 h-2 border-t border-l border-gold-primary" />
-      <span className="absolute top-0 right-0 w-2 h-2 border-t border-r border-gold-primary" />
-      <span className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-gold-primary" />
-      <span className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-gold-primary" />
+      <span aria-hidden="true" className="absolute top-0 left-0 w-2 h-2 border-t border-l border-gold-primary" />
+      <span aria-hidden="true" className="absolute top-0 right-0 w-2 h-2 border-t border-r border-gold-primary" />
+      <span aria-hidden="true" className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-gold-primary" />
+      <span aria-hidden="true" className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-gold-primary" />
 
       {loading ? (
-        <span className="flex items-center gap-2">
+        <span role="status" className="flex items-center gap-2">
           <svg
             className="animate-spin h-4 w-4"
             viewBox="0 0 24 24"
             fill="none"
+            aria-hidden="true"
           >
             <circle
               className="opacity-25"
@@ -67,7 +68,7 @@ export default function MedievalButton({
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
             />
           </svg>
-          Loading...
+          <span>Loading…</span>
         </span>
       ) : (
         children

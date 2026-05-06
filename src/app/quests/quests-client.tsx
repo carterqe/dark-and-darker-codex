@@ -190,7 +190,12 @@ function QuestList({
     let quests = trader.quests;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      quests = quests.filter((quest) => quest.name.toLowerCase().includes(q));
+      quests = quests.filter(
+        (quest) =>
+          quest.name.toLowerCase().includes(q) ||
+          quest.description.toLowerCase().includes(q) ||
+          quest.requirements.some((r) => r.description.toLowerCase().includes(q)),
+      );
     }
     if (reqTypeFilter) {
       quests = quests.filter((quest) =>
@@ -268,7 +273,7 @@ function QuestList({
                       {reqIcon(req.type)}
                       {req.type === "item" && req.item ? (
                         <>
-                          {req.quantity}× {req.item}{" "}
+                          {req.quantity != null ? `${req.quantity}×` : ""} {req.item}{" "}
                           {req.rarity && (
                             <span className={getRarityStyle(req.rarity).text}>({req.rarity})</span>
                           )}
@@ -462,7 +467,7 @@ function ProgressTab({
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {TRADERS.map((trader) => {
           const done = trader.quests.filter((q) => completedIds.has(q.id)).length;
-          const allDone = done === trader.quests.length;
+          const allDone = trader.quests.length > 0 && done === trader.quests.length;
           return (
             <div
               key={trader.id}
@@ -602,7 +607,7 @@ export default function QuestsClient() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-1.5 text-xs font-medium rounded-sm transition-all ${
+            className={`px-4 py-1.5 text-xs font-cinzel font-bold rounded-sm transition-all ${
               activeTab === tab
                 ? "bg-gold-primary/15 text-gold-primary border border-gold-primary/30"
                 : "text-text-secondary hover:text-text-primary"
@@ -634,7 +639,7 @@ export default function QuestsClient() {
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-secondary/60 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search quests…"
+                placeholder="Search by name, monster, item…"
                 value={questSearch}
                 onChange={(e) => setQuestSearch(e.target.value)}
                 className="w-full pl-8 pr-7 py-1.5 text-xs bg-bg-secondary border border-border-subtle rounded-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none focus:border-gold-primary/40"

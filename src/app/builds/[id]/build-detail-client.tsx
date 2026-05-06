@@ -255,7 +255,7 @@ export default function BuildDetailClient({ id }: { id: string }) {
 
                 {/* Author controls */}
                 {isAuthor && (
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     <Link
                       href={`/builds/${id}/edit`}
                       className="flex items-center gap-1.5 px-3 py-2 rounded-sm border border-border-subtle text-text-secondary/50 hover:border-gold-primary/40 hover:text-gold-primary text-xs font-cinzel font-bold transition-all"
@@ -263,6 +263,11 @@ export default function BuildDetailClient({ id }: { id: string }) {
                       <Pencil className="w-3.5 h-3.5" />
                       Edit
                     </Link>
+                    {confirmDelete && (
+                      <span className="text-[10px] text-accent-red/70">
+                        Permanently delete?
+                      </span>
+                    )}
                     {confirmDelete && (
                       <button
                         onClick={() => setConfirmDelete(false)}
@@ -281,7 +286,7 @@ export default function BuildDetailClient({ id }: { id: string }) {
                       }`}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
-                      {confirmDelete ? "Confirm" : "Delete"}
+                      {confirmDelete ? "Confirm Delete" : "Delete"}
                     </button>
                   </div>
                 )}
@@ -463,7 +468,7 @@ export default function BuildDetailClient({ id }: { id: string }) {
         <div className="space-y-4">
           {comments.length === 0 ? (
             <p className="text-sm text-text-secondary/50 text-center py-4">
-              No comments yet.
+              No one has commented yet. Be the first to share your thoughts.
             </p>
           ) : (
             comments.map((comment) => (

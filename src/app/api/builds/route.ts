@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const body = await request.json();
-  const { title, description, class: cls, tags, equipment, perks, skills, spells } = body;
+  const body = await request.json().catch(() => null);
+  const { title, description, class: cls, tags, equipment, perks, skills, spells } = body ?? {};
 
   // --- Input validation ---
 

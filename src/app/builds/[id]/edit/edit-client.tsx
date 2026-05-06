@@ -157,7 +157,9 @@ export default function EditBuildClient({ id }: { id: string }) {
   if (notFound) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-        <p className="font-cinzel text-lg text-text-secondary">Build not found.</p>
+        <Hammer className="w-12 h-12 text-gold-dark mx-auto mb-4" />
+        <h2 className="font-cinzel font-bold text-xl text-text-secondary">Build not found</h2>
+        <p className="text-sm text-text-secondary/60 mt-2">This build may have been deleted or the link is invalid.</p>
         <Link href="/builds" className="flex items-center justify-center gap-1.5 text-gold-primary hover:text-gold-light text-sm mt-4">
           <ArrowLeft className="w-3 h-3" /> Back to Builds
         </Link>
@@ -170,7 +172,9 @@ export default function EditBuildClient({ id }: { id: string }) {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
         <Lock className="w-12 h-12 text-gold-dark mx-auto mb-4" />
         <p className="font-cinzel text-lg text-text-secondary">You don&apos;t have permission to edit this build.</p>
-        <Link href={`/builds/${id}`} className="text-gold-primary hover:text-gold-light text-sm mt-4 inline-block">← Back to Build</Link>
+        <Link href={`/builds/${id}`} className="flex items-center justify-center gap-1.5 text-gold-primary hover:text-gold-light text-sm mt-4">
+          <ArrowLeft className="w-3 h-3" /> Back to Build
+        </Link>
       </div>
     );
   }
@@ -192,7 +196,7 @@ export default function EditBuildClient({ id }: { id: string }) {
         <ShimmerText as="h1" className="text-4xl sm:text-5xl mb-3">
           Edit Build
         </ShimmerText>
-        <p className="text-text-secondary">Make changes and save your updated loadout.</p>
+        <p className="text-text-secondary">Refine your strategy and update your loadout.</p>
       </motion.div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
@@ -235,7 +239,7 @@ export default function EditBuildClient({ id }: { id: string }) {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              maxLength={80}
+              maxLength={100}
               required
               className={inputClass}
             />
@@ -255,22 +259,32 @@ export default function EditBuildClient({ id }: { id: string }) {
 
         {/* Tags */}
         <div className="bg-bg-secondary border border-border-subtle rounded-sm p-6">
-          <span className={sectionLabel}>Tags</span>
+          <span className={sectionLabel}>
+            Tags{" "}
+            <span className="text-text-secondary font-normal normal-case">
+              (up to 5)
+            </span>
+          </span>
           <div className="flex flex-wrap gap-2">
-            {BUILD_TAGS.map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => toggleTag(tag)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-sm border transition-all cursor-pointer ${
-                  tags.includes(tag)
-                    ? "text-gold-light bg-bg-tertiary border-gold-primary/40"
-                    : "text-text-secondary border-border-subtle hover:text-gold-primary hover:border-gold-dark"
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
+            {BUILD_TAGS.map((tag) => {
+              const selected = tags.includes(tag);
+              const disabled = !selected && tags.length >= 5;
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => !disabled && toggleTag(tag)}
+                  disabled={disabled}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-sm border transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                    selected
+                      ? "text-gold-light bg-bg-tertiary border-gold-primary/40"
+                      : "text-text-secondary border-border-subtle hover:text-gold-primary hover:border-gold-dark"
+                  }`}
+                >
+                  {tag}
+                </button>
+              );
+            })}
           </div>
         </div>
 

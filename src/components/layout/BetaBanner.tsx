@@ -10,7 +10,7 @@ export default function BetaBanner() {
       aria-label="Beta notice"
     >
       <div className="flex items-center gap-2 text-[11px] sm:text-xs font-medium text-gold-light tracking-wide">
-        <AlertTriangle className="w-3.5 h-3.5 text-gold-primary flex-shrink-0" />
+        <AlertTriangle className="w-3.5 h-3.5 text-gold-primary flex-shrink-0" aria-hidden="true" />
         <span>
           <span className="font-bold text-gold-primary uppercase tracking-wider">Beta</span>
           <span className="text-gold-light/80 ml-2">— data may be incomplete or inaccurate while we refine the experience.</span>

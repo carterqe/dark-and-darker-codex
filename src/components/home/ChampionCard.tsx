@@ -51,10 +51,10 @@ export default function ChampionCard({ entry, displayRank }: ChampionCardProps) 
         />
 
         {/* Corner ornaments */}
-        <span className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-inherit" />
-        <span className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-inherit" />
-        <span className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-inherit" />
-        <span className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-inherit" />
+        <span aria-hidden="true" className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-inherit" />
+        <span aria-hidden="true" className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-inherit" />
+        <span aria-hidden="true" className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-inherit" />
+        <span aria-hidden="true" className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-inherit" />
 
         <div className="relative z-10">
           {/* Crown for rank 1 */}
@@ -68,10 +68,11 @@ export default function ChampionCard({ entry, displayRank }: ChampionCardProps) 
           >
             <Image
               src={getClassPortrait(entry.class)}
-              alt={entry.class}
+              alt=""
               fill
               sizes="80px"
               className="object-cover"
+              aria-hidden="true"
             />
           </div>
 

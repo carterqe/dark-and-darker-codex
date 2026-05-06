@@ -12,16 +12,16 @@ import ShimmerText from "@/components/ui/ShimmerText";
 const CLASSES = ["Fighter", "Barbarian", "Rogue", "Ranger", "Wizard", "Cleric", "Bard", "Warlock", "Druid", "Sorcerer"];
 
 const CLASS_DESCRIPTIONS: Record<string, string> = {
-  Fighter:   "A versatile frontline combatant skilled with swords, shields, and heavy armor. Excels at controlling engagements and sustaining through fights.",
-  Barbarian: "A ferocious berserker who trades defense for raw power. Massive health pools and devastating two-handed weapons make them a terrifying presence.",
-  Rogue:     "A nimble assassin who strikes from the shadows. Masters of stealth, traps, and burst damage — deadly if you never see them coming.",
-  Ranger:    "A patient hunter who dominates at range with bows and spears. Superior tracking and mobility make them difficult to pin down.",
-  Wizard:    "A fragile but devastating spellcaster. Commands arcane, fire, and ice magic capable of wiping entire rooms in seconds.",
-  Cleric:    "A holy warrior who heals allies and smites the undead. One of the most team-dependent classes, but invaluable in a party.",
-  Bard:      "A support class that buffs allies through music. Deceptively strong solo fighter with access to disabling songs and social tools.",
-  Warlock:   "A dark magic user who drains life and curses enemies. Sustains through damage dealt and punishes targets with damage-over-time.",
-  Druid:     "A shapeshifter who alternates between human spell-casting and powerful animal forms. Highly versatile but demanding to master.",
-  Sorcerer:  "A dual-spell weaver who merges elemental magic for unique effects. Extremely high skill ceiling with some of the strongest burst potential.",
+  Fighter:   "A versatile frontline combatant skilled with swords, shields, and heavy armor. Excels at controlling engagements and outlasting opponents through high base health and recovery skills.",
+  Barbarian: "A ferocious berserker who trades armor for raw power. Enormous health pools and devastating two-handed weapons make them one of the most feared presences in any dungeon.",
+  Rogue:     "A nimble assassin who strikes from the shadows. Masters of stealth, traps, and burst damage — a Rogue you never spotted has already won.",
+  Ranger:    "A patient hunter who dominates at range with bows and spears. Superior tracking and high mobility make them extremely difficult to pin down in open spaces.",
+  Wizard:    "A fragile but devastating spellcaster. Commands arcane, fire, and ice magic capable of clearing entire rooms — if you can keep them alive long enough to cast.",
+  Cleric:    "A holy warrior who heals allies and smites the undead. Powerful in a coordinated group and surprisingly durable solo, with the highest healing output of any class.",
+  Bard:      "A support class that empowers allies through music. Deceptively strong in a fight, with access to disabling songs and one of the widest skill toolkits in the game.",
+  Warlock:   "A dark magic user who drains life and curses enemies. Sustains through the damage they deal and punishes enemies with stacking damage-over-time effects.",
+  Druid:     "A shapeshifter who alternates between spellcasting and powerful animal forms. Highly versatile but one of the steepest learning curves in the roster.",
+  Sorcerer:  "A dual-spell weaver who merges elemental magic for compounding effects. Extremely high skill ceiling with burst potential that surpasses any other caster.",
 };
 
 function IconImg({ src, alt }: { src: string; alt: string }) {
@@ -217,7 +217,7 @@ export default function ClassDetailClient({ className }: { className: string }) 
 
       {/* Class nav */}
       <div className="mt-12 pt-6 border-t border-border-subtle">
-        <p className="text-[10px] uppercase tracking-wider text-text-secondary/40 mb-3">Other Classes</p>
+        <p className="text-[10px] uppercase tracking-wider text-text-secondary/60 mb-3">Other Classes</p>
         <div className="flex flex-wrap gap-2">
           {CLASSES.filter((c) => c !== className).map((c) => (
             <Link

@@ -108,10 +108,11 @@ export default function RecentBuilds() {
                 <div className="flex items-start gap-3 mb-3">
                   <Image
                     src={getClassPortrait(build.class)}
-                    alt={build.class}
+                    alt=""
                     width={48}
                     height={48}
                     className="rounded-sm object-cover opacity-90 shrink-0"
+                    aria-hidden="true"
                   />
                   <div className="flex-1 min-w-0">
                     <span className={`text-[10px] font-cinzel font-bold ${classColor} block uppercase tracking-wider`}>
@@ -129,8 +130,8 @@ export default function RecentBuilds() {
                   <span>{timeAgo(build.created_at)}</span>
                 </div>
                 <div className="mt-3 pt-3 border-t border-border-subtle/50 flex items-center gap-1.5 text-[11px] text-text-secondary">
-                  <ThumbsUp className="w-3 h-3" />
-                  <span>{build.vote_count ?? 0}</span>
+                  <ThumbsUp className="w-3 h-3" aria-hidden="true" />
+                  <span aria-label={`${build.vote_count ?? 0} votes`}>{build.vote_count ?? 0}</span>
                 </div>
               </Link>
             </motion.div>

@@ -32,10 +32,10 @@ export default function MedievalCard({
       transition={{ duration: 0.3 }}
     >
       {/* Corner ornaments */}
-      <span className="absolute top-0 left-0 w-4 h-4 border-t border-l border-gold-dark/40" />
-      <span className="absolute top-0 right-0 w-4 h-4 border-t border-r border-gold-dark/40" />
-      <span className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-gold-dark/40" />
-      <span className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-gold-dark/40" />
+      <span aria-hidden="true" className="absolute top-0 left-0 w-4 h-4 border-t border-l border-gold-dark/40" />
+      <span aria-hidden="true" className="absolute top-0 right-0 w-4 h-4 border-t border-r border-gold-dark/40" />
+      <span aria-hidden="true" className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-gold-dark/40" />
+      <span aria-hidden="true" className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-gold-dark/40" />
 
       {children}
     </motion.div>

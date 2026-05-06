@@ -16,6 +16,8 @@ import {
   Menu,
   X,
   ShieldCheck,
+  Trophy,
+  Map,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/auth/AuthModal";
@@ -23,10 +25,12 @@ import Toast from "@/components/ui/Toast";
 
 const navLinks = [
   { href: "/", label: "Hall", icon: Shield },
+  { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/builds", label: "Builds", icon: Hammer },
   { href: "/classes", label: "Classes", icon: Users },
   { href: "/armory", label: "Armory", icon: Sword },
   { href: "/market", label: "Market", icon: Store },
+  { href: "/maps", label: "Maps", icon: Map },
   { href: "/quests", label: "Quests", icon: ScrollText },
 ];
 
@@ -62,6 +66,7 @@ export default function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
+                    aria-current={isActive ? "page" : undefined}
                     className={`flex items-center gap-1.5 px-3 py-2 rounded-sm text-sm font-medium transition-all duration-200
                       ${
                         isActive
@@ -132,6 +137,7 @@ export default function Navbar() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
+                    aria-current={isActive ? "page" : undefined}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-medium transition-all
                       ${
                         isActive

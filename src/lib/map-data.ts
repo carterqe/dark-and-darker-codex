@@ -31,7 +31,7 @@ export interface DungeonMap {
   /** Logical canvas size in px — should match imageUrl natural dimensions when provided */
   width: number;
   height: number;
-  /** Path to a static map image in /public, e.g. "/maps/goblin-cave.png". Falls back to CSS grid. */
+  /** Path to a static map image in /public, e.g. "/maps/ruins.webp". Falls back to CSS grid. */
   imageUrl?: string;
   /** If true, the map viewer shows a "Coming soon" placeholder instead of the canvas. */
   comingSoon?: boolean;

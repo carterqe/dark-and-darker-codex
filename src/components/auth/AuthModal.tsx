@@ -109,7 +109,7 @@ export default function AuthModal() {
     }
 
     setSuccess(
-      "Account created! If email confirmation is required, check your inbox. Otherwise you're already signed in."
+      "Account created! Check your inbox to confirm your email, then sign in."
     );
     setLoading(false);
   };
@@ -146,7 +146,7 @@ export default function AuthModal() {
               </div>
               <button
                 onClick={closeAuthModal}
-                aria-label="Close"
+                aria-label="Close authentication dialog"
                 className="text-text-secondary hover:text-text-primary transition-colors p-1"
               >
                 <X className="w-4 h-4" aria-hidden="true" />
@@ -172,14 +172,14 @@ export default function AuthModal() {
 
             <div className="p-6 space-y-4">
               {error && (
-                <div className="flex items-center gap-2.5 bg-accent-red/10 border border-accent-red/30 rounded-sm px-4 py-3">
-                  <AlertCircle className="w-4 h-4 text-accent-red shrink-0" />
+                <div role="alert" className="flex items-center gap-2.5 bg-accent-red/10 border border-accent-red/30 rounded-sm px-4 py-3">
+                  <AlertCircle className="w-4 h-4 text-accent-red shrink-0" aria-hidden="true" />
                   <p className="text-xs text-accent-red">{error}</p>
                 </div>
               )}
               {success && (
-                <div className="flex items-center gap-2.5 bg-accent-emerald/10 border border-accent-emerald/30 rounded-sm px-4 py-3">
-                  <CheckCircle className="w-4 h-4 text-accent-emerald shrink-0" />
+                <div role="status" aria-live="polite" className="flex items-center gap-2.5 bg-accent-emerald/10 border border-accent-emerald/30 rounded-sm px-4 py-3">
+                  <CheckCircle className="w-4 h-4 text-accent-emerald shrink-0" aria-hidden="true" />
                   <p className="text-xs text-accent-emerald">{success}</p>
                 </div>
               )}
