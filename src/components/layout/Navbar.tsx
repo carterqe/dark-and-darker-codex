@@ -25,7 +25,7 @@ import Toast from "@/components/ui/Toast";
 
 const navLinks = [
   { href: "/", label: "Hall", icon: Shield },
-  { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
+  { href: "/leaderboard", label: "Ranks", icon: Trophy },
   { href: "/builds", label: "Builds", icon: Hammer },
   { href: "/classes", label: "Classes", icon: Users },
   { href: "/armory", label: "Armory", icon: Sword },
@@ -44,7 +44,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-7 left-0 right-0 z-50 border-b border-border-subtle bg-bg-primary/80 backdrop-blur-md">
+      <nav aria-label="Main navigation" className="fixed top-7 left-0 right-0 z-50 border-b border-border-subtle bg-bg-primary/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}

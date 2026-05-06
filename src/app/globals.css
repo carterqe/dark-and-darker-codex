@@ -49,6 +49,12 @@ input, textarea, [contenteditable] {
   cursor: text;
 }
 
+/* Allow selecting readable content */
+p, h1, h2, h3, h4, h5, h6, li, td, th, blockquote, pre, code, span, a {
+  user-select: text;
+  cursor: auto;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;

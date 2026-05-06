@@ -1,6 +1,12 @@
+import { useId } from "react";
+
 export default function GoldDivider({ className = "" }: { className?: string }) {
+  const uid = useId();
+  const leftId = `goldGradientLeft-${uid}`;
+  const rightId = `goldGradientRight-${uid}`;
+
   return (
-    <div className={`flex items-center justify-center py-6 ${className}`}>
+    <div className={`flex items-center justify-center py-6 ${className}`} aria-hidden="true">
       <svg
         width="400"
         height="24"
@@ -11,7 +17,7 @@ export default function GoldDivider({ className = "" }: { className?: string }) 
         {/* Left flourish */}
         <path
           d="M0 12h140"
-          stroke="url(#goldGradientLeft)"
+          stroke={`url(#${leftId})`}
           strokeWidth="1"
         />
         <path
@@ -55,7 +61,7 @@ export default function GoldDivider({ className = "" }: { className?: string }) 
         {/* Right flourish */}
         <path
           d="M260 12h140"
-          stroke="url(#goldGradientRight)"
+          stroke={`url(#${rightId})`}
           strokeWidth="1"
         />
         <path
@@ -72,11 +78,11 @@ export default function GoldDivider({ className = "" }: { className?: string }) 
         />
 
         <defs>
-          <linearGradient id="goldGradientLeft" x1="0" y1="0" x2="140" y2="0">
+          <linearGradient id={leftId} x1="0" y1="0" x2="140" y2="0">
             <stop offset="0%" stopColor="var(--gold-primary)" stopOpacity="0" />
             <stop offset="100%" stopColor="var(--gold-primary)" stopOpacity="1" />
           </linearGradient>
-          <linearGradient id="goldGradientRight" x1="260" y1="0" x2="400" y2="0">
+          <linearGradient id={rightId} x1="260" y1="0" x2="400" y2="0">
             <stop offset="0%" stopColor="var(--gold-primary)" stopOpacity="1" />
             <stop offset="100%" stopColor="var(--gold-primary)" stopOpacity="0" />
           </linearGradient>

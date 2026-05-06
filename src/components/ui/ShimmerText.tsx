@@ -1,7 +1,7 @@
 interface ShimmerTextProps {
   children: React.ReactNode;
   className?: string;
-  as?: "h1" | "h2" | "h3" | "span";
+  as?: "h1" | "h2" | "h3" | "h4" | "span" | "p";
 }
 
 export default function ShimmerText({

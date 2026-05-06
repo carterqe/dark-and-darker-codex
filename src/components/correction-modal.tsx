@@ -120,13 +120,16 @@ export default function CorrectionModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2 }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="correction-modal-title"
             className="relative w-full max-w-md mx-4 bg-bg-secondary border border-border-subtle rounded-sm overflow-hidden shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-border-subtle">
               <div className="flex items-center gap-2">
-                <Flag className="w-5 h-5 text-gold-primary" />
-                <span className="font-cinzel font-bold text-gold-primary">
+                <Flag className="w-5 h-5 text-gold-primary" aria-hidden="true" />
+                <span id="correction-modal-title" className="font-cinzel font-bold text-gold-primary">
                   Report Inaccuracy
                 </span>
               </div>
@@ -134,9 +137,9 @@ export default function CorrectionModal({
                 onClick={onClose}
                 className="text-text-secondary hover:text-text-primary transition-colors p-1"
                 type="button"
-                aria-label="Close"
+                aria-label="Close correction dialog"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4" aria-hidden="true" />
               </button>
             </div>
 
@@ -203,14 +206,14 @@ export default function CorrectionModal({
                   </div>
 
                   {error && (
-                    <div className="flex items-center gap-2.5 bg-accent-red/10 border border-accent-red/30 rounded-sm px-4 py-3">
-                      <AlertCircle className="w-4 h-4 text-accent-red shrink-0" />
+                    <div role="alert" className="flex items-center gap-2.5 bg-accent-red/10 border border-accent-red/30 rounded-sm px-4 py-3">
+                      <AlertCircle className="w-4 h-4 text-accent-red shrink-0" aria-hidden="true" />
                       <p className="text-xs text-accent-red">{error}</p>
                     </div>
                   )}
                   {success && (
-                    <div className="flex items-center gap-2.5 bg-accent-emerald/10 border border-accent-emerald/30 rounded-sm px-4 py-3">
-                      <CheckCircle className="w-4 h-4 text-accent-emerald shrink-0" />
+                    <div role="status" aria-live="polite" className="flex items-center gap-2.5 bg-accent-emerald/10 border border-accent-emerald/30 rounded-sm px-4 py-3">
+                      <CheckCircle className="w-4 h-4 text-accent-emerald shrink-0" aria-hidden="true" />
                       <p className="text-xs text-accent-emerald">
                         Submitted — a maintainer will review this soon.
                       </p>
@@ -219,10 +222,11 @@ export default function CorrectionModal({
 
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                      <label className={sectionLabel}>
+                      <label htmlFor="correction-suggested-value" className={sectionLabel}>
                         Suggested value *
                       </label>
                       <textarea
+                        id="correction-suggested-value"
                         value={suggestedValue}
                         onChange={(e) => setSuggestedValue(e.target.value)}
                         required
@@ -233,10 +237,11 @@ export default function CorrectionModal({
                       />
                     </div>
                     <div>
-                      <label className={sectionLabel}>
+                      <label htmlFor="correction-reason" className={sectionLabel}>
                         Reason <span className="text-text-secondary font-normal normal-case">(optional)</span>
                       </label>
                       <textarea
+                        id="correction-reason"
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
                         maxLength={1000}
