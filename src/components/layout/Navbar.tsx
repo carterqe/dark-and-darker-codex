@@ -16,7 +16,6 @@ import {
   Menu,
   X,
   ShieldCheck,
-  Trophy,
   Map,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -25,7 +24,6 @@ import Toast from "@/components/ui/Toast";
 
 const navLinks = [
   { href: "/", label: "Hall", icon: Shield },
-  { href: "/leaderboard", label: "Ranks", icon: Trophy },
   { href: "/builds", label: "Builds", icon: Hammer },
   { href: "/classes", label: "Classes", icon: Users },
   { href: "/armory", label: "Armory", icon: Sword },
