@@ -13,7 +13,7 @@ export const SITE = {
   fullName: "Dark and Darker Codex",
   url: normalizeUrl(rawUrl),
   description:
-    "Dark and Darker companion site — leaderboards, builds, market prices, dungeon maps, classes, and quests for the worthy champion.",
+    "Dark and Darker companion site — leaderboards, builds, market prices, dungeon maps, and classes for the worthy champion.",
   shortDescription:
     "Leaderboards, builds, market, and maps for Dark and Darker.",
   locale: "en_US",

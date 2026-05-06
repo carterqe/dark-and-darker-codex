@@ -38,7 +38,6 @@ export const metadata: Metadata = {
     "Dark and Darker market",
     "Dark and Darker maps",
     "Dark and Darker classes",
-    "Dark and Darker quests",
     "DaD",
     "DaD Codex",
     "Ironmace",

@@ -10,6 +10,8 @@ import { formatNumber, timeAgo } from "@/lib/utils";
 import ShimmerText from "@/components/ui/ShimmerText";
 import MedievalButton from "@/components/ui/MedievalButton";
 
+const MARKET_UNAVAILABLE = true;
+
 const RARITIES = ["", "Poor", "Common", "Uncommon", "Rare", "Epic", "Legendary", "Unique", "Artifact"];
 const STATUS_FILTERS = [
   { value: "", label: "All" },
@@ -26,26 +28,26 @@ const SORT_OPTIONS = [
 // Slot labels like "Chest" or "Legs" never appear in item names themselves — items are named
 // "Gambeson", "Hauberk", "Leggings", "Hosen", etc.
 const SLOT_SEARCH_TERMS: Record<string, string[]> = {
-  Boots:    ["boots", "shoe", "sabaton"],
-  Chest:    ["gambeson", "armor", "robe", "mail", "brigandine", "hauberk", "cuirass",
-             "doublet", "surcoat", "regalia", "vestment", "cassock", "harness", "breastplate", "tunic"],
-  Gloves:   ["gloves", "gauntlet", "mitten"],
-  Helmet:   ["helm", "hood", "hat", "cap", "coif", "barbute", "armet", "kettle", "skull", "crown"],
-  Legs:     ["leggings", "hosen", "pants", "breeches", "chaps", "tights", "kilt"],
-  Cape:     ["cloak", "cape", "mantle"],
+  Boots: ["boots", "shoe", "sabaton"],
+  Chest: ["gambeson", "armor", "robe", "mail", "brigandine", "hauberk", "cuirass",
+    "doublet", "surcoat", "regalia", "vestment", "cassock", "harness", "breastplate", "tunic"],
+  Gloves: ["gloves", "gauntlet", "mitten"],
+  Helmet: ["helm", "hood", "hat", "cap", "coif", "barbute", "armet", "kettle", "skull", "crown"],
+  Legs: ["leggings", "hosen", "pants", "breeches", "chaps", "tights", "kilt"],
+  Cape: ["cloak", "cape", "mantle"],
   Necklace: ["necklace", "pendant", "amulet", "collar", "talisman"],
-  Ring:     ["ring", "band", "signet"],
-  Sword:    ["sword", "rapier", "falchion", "saber"],
-  Axe:      ["axe", "hatchet"],
-  Mace:     ["mace", "flail", "morningstar", "club", "warhammer", "hammer"],
-  Dagger:   ["dagger", "knife", "stiletto", "kris"],
-  Staff:    ["staff", "scepter", "crystal ball", "spellbook"],
-  Bow:      ["bow"],
+  Ring: ["ring", "band", "signet"],
+  Sword: ["sword", "rapier", "falchion", "saber"],
+  Axe: ["axe", "hatchet"],
+  Mace: ["mace", "flail", "morningstar", "club", "warhammer", "hammer"],
+  Dagger: ["dagger", "knife", "stiletto", "kris"],
+  Staff: ["staff", "scepter", "crystal ball", "spellbook"],
+  Bow: ["bow"],
   Crossbow: ["crossbow", "arbalest"],
-  Shield:   ["shield", "buckler", "pavise"],
-  Potion:   ["potion", "flask", "elixir", "tonic", "draught"],
-  Lantern:  ["lantern"],
-  Torch:    ["torch"],
+  Shield: ["shield", "buckler", "pavise"],
+  Potion: ["potion", "flask", "elixir", "tonic", "draught"],
+  Lantern: ["lantern"],
+  Torch: ["torch"],
 };
 
 const ALL_MARKET_STATS = [
@@ -64,10 +66,9 @@ function formatStatLabel(s: string): string {
 }
 
 const pillClass = (active: boolean) =>
-  `px-3 py-1.5 text-xs font-medium rounded-sm cursor-pointer transition-all duration-200 whitespace-nowrap ${
-    active
-      ? "text-gold-light bg-bg-tertiary border border-gold-primary/40"
-      : "text-text-secondary border border-border-subtle hover:text-gold-primary hover:border-gold-dark"
+  `px-3 py-1.5 text-xs font-medium rounded-sm cursor-pointer transition-all duration-200 whitespace-nowrap ${active
+    ? "text-gold-light bg-bg-tertiary border border-gold-primary/40"
+    : "text-text-secondary border border-border-subtle hover:text-gold-primary hover:border-gold-dark"
   }`;
 const selectClass =
   "bg-bg-secondary border border-border-subtle rounded-sm px-3 py-1.5 text-xs text-text-primary focus:outline-none focus:border-gold-primary/50 transition-all cursor-pointer appearance-none pr-7";
@@ -172,7 +173,7 @@ export default function MarketClient() {
         const pKey = `primary_${s}`;
         const sKey = `secondary_${s}`;
         if ((listing[pKey] != null && listing[pKey] !== 0) ||
-            (listing[sKey] != null && listing[sKey] !== 0)) {
+          (listing[sKey] != null && listing[sKey] !== 0)) {
           found.add(s);
         }
       }
@@ -265,6 +266,26 @@ export default function MarketClient() {
       lastSoldPrice: sold.length ? sold[0].price : null,
     };
   }, [listings, search]);
+
+  if (MARKET_UNAVAILABLE) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-10 animate-fade-in-up">
+          <ShimmerText as="h1" className="text-4xl sm:text-5xl mb-3">
+            The Market
+          </ShimmerText>
+          <p className="text-text-secondary">
+            Real-time marketplace &mdash; monitor prices, find deals, track sales
+          </p>
+        </div>
+        <div className="flex flex-col items-center justify-center py-20 animate-fade-in-up">
+          <Store className="w-12 h-12 text-gold-dark/50 mx-auto mb-4" />
+          <p className="font-cinzel text-lg text-text-secondary">The market is currently unavailable</p>
+          <p className="text-sm text-text-secondary/60 mt-2">Data will populate as soon as it becomes available.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -619,11 +640,10 @@ export default function MarketClient() {
                             {stats.slice(0, 3).map((s) => (
                               <span
                                 key={s.name}
-                                className={`text-[10px] px-1.5 py-0.5 rounded-sm ${
-                                  Number(s.value) >= 0
+                                className={`text-[10px] px-1.5 py-0.5 rounded-sm ${Number(s.value) >= 0
                                     ? "bg-accent-emerald/10 text-accent-emerald"
                                     : "bg-accent-red/10 text-accent-red"
-                                }`}
+                                  }`}
                               >
                                 {s.name.slice(0, 12)} {Number(s.value) > 0 ? "+" : ""}{s.value}
                               </span>
@@ -647,13 +667,12 @@ export default function MarketClient() {
 
                       {/* Status */}
                       <td className="py-3 px-4 text-right align-top">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-sm ${
-                          listing.has_sold
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-sm ${listing.has_sold
                             ? "bg-accent-emerald/20 text-accent-emerald"
                             : listing.has_expired
                               ? "bg-accent-red/20 text-accent-red"
                               : "bg-gold-primary/20 text-gold-primary"
-                        }`}>
+                          }`}>
                           {listing.has_sold ? "SOLD" : listing.has_expired ? "EXPIRED" : "ACTIVE"}
                         </span>
                       </td>

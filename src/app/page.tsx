@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     absolute: "DaD Codex — Dark and Darker Leaderboards, Builds & Market",
   },
   description:
-    "Track Dark and Darker leaderboards, top champions, live server population, character builds, market prices, dungeon maps, classes and quests — all in one companion site.",
+    "Track Dark and Darker leaderboards, top champions, live server population, character builds, market prices, dungeon maps, and classes — all in one companion site.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "DaD Codex — Dark and Darker Leaderboards, Builds & Market",

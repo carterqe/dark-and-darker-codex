@@ -10,7 +10,6 @@ import {
   Users,
   Swords,
   Hammer,
-  ScrollText,
   LogOut,
   LogIn,
   Menu,
@@ -27,7 +26,6 @@ const navLinks = [
   { href: "/classes", label: "Classes", icon: Users },
   { href: "/armory", label: "Armory", icon: Sword },
   { href: "/market", label: "Market", icon: Store },
-  { href: "/quests", label: "Quests", icon: ScrollText },
 ];
 
 const adminLink = { href: "/admin/feedback", label: "Admin", icon: ShieldCheck };
@@ -50,7 +48,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
-            <Link href="/" aria-label="DaD Codex — Home" className="flex items-center gap-2 group shrink-0">
+            <Link href="/" aria-label="DaD Codex — Home" className="flex items-center gap-2 group shrink-0 cursor-pointer">
               <Swords className="w-5 h-5 sm:w-6 sm:h-6 text-gold-primary group-hover:text-gold-light transition-colors" aria-hidden="true" />
               <span className="font-cinzel font-bold text-base sm:text-lg text-gold-primary group-hover:text-gold-light transition-colors hidden sm:inline">
                 DaD Codex
@@ -69,7 +67,7 @@ export default function Navbar() {
                     key={link.href}
                     href={link.href}
                     aria-current={isActive ? "page" : undefined}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-sm text-sm font-medium transition-all duration-200
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-sm text-sm font-medium transition-all duration-200 cursor-pointer
                       ${
                         isActive
                           ? "text-gold-light bg-gold-primary/10 border border-gold-primary/30"
@@ -96,7 +94,7 @@ export default function Navbar() {
                       onClick={() => setSignOutConfirm(true)}
                       title="Sign out"
                       aria-label="Sign out"
-                      className="flex items-center px-2 py-2 text-text-secondary hover:text-accent-red border border-transparent hover:border-accent-red/30 rounded-sm transition-all text-xs"
+                      className="flex items-center px-2 py-2 text-text-secondary hover:text-accent-red border border-transparent hover:border-accent-red/30 rounded-sm transition-all text-xs cursor-pointer"
                     >
                       <LogOut className="w-4 h-4" aria-hidden="true" />
                     </button>
@@ -104,7 +102,7 @@ export default function Navbar() {
                 ) : (
                   <button
                     onClick={() => openAuthModal("login")}
-                    className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-gold-primary border border-gold-primary/30 rounded-sm hover:bg-gold-primary/10 transition-all"
+                    className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-gold-primary border border-gold-primary/30 rounded-sm hover:bg-gold-primary/10 transition-all cursor-pointer"
                   >
                     <LogIn className="w-4 h-4" />
                     <span className="hidden sm:inline">Login</span>
@@ -117,7 +115,7 @@ export default function Navbar() {
                 aria-label={mobileOpen ? "Close navigation menu" : "Open navigation menu"}
                 aria-expanded={mobileOpen}
                 aria-controls="mobile-nav"
-                className="md:hidden flex items-center px-2 py-2 text-text-secondary hover:text-gold-primary transition-colors"
+                className="md:hidden flex items-center px-2 py-2 text-text-secondary hover:text-gold-primary transition-colors cursor-pointer"
               >
                 {mobileOpen ? <X className="w-5 h-5" aria-hidden="true" /> : <Menu className="w-5 h-5" aria-hidden="true" />}
               </button>
@@ -140,7 +138,7 @@ export default function Navbar() {
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
                     aria-current={isActive ? "page" : undefined}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-medium transition-all
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm font-medium transition-all cursor-pointer
                       ${
                         isActive
                           ? "text-gold-light bg-gold-primary/10 border border-gold-primary/30"

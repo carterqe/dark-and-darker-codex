@@ -12,7 +12,6 @@ const STATIC_ROUTES: Array<{
   { path: "/market", changeFrequency: "hourly", priority: 0.9 },
   { path: "/classes", changeFrequency: "weekly", priority: 0.9 },
   { path: "/armory", changeFrequency: "daily", priority: 0.85 },
-  { path: "/quests", changeFrequency: "monthly", priority: 0.75 },
   { path: "/maps", changeFrequency: "monthly", priority: 0.5 },
 ];
 
