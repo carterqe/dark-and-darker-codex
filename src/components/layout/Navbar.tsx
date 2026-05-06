@@ -16,7 +16,6 @@ import {
   Menu,
   X,
   ShieldCheck,
-  Map,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/auth/AuthModal";
@@ -28,7 +27,6 @@ const navLinks = [
   { href: "/classes", label: "Classes", icon: Users },
   { href: "/armory", label: "Armory", icon: Sword },
   { href: "/market", label: "Market", icon: Store },
-  { href: "/maps", label: "Maps", icon: Map },
   { href: "/quests", label: "Quests", icon: ScrollText },
 ];
 
