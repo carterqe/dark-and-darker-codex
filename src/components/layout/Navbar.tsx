@@ -11,6 +11,7 @@ import {
   Swords,
   Hammer,
   ScrollText,
+  Newspaper,
   LogOut,
   LogIn,
   Menu,
@@ -28,6 +29,7 @@ const navLinks = [
   { href: "/armory", label: "Armory", icon: Sword },
   { href: "/market", label: "Market", icon: Store },
   { href: "/quests", label: "Quests", icon: ScrollText },
+  { href: "/patch-notes", label: "Patch Notes", icon: Newspaper },
 ];
 
 const adminLink = { href: "/admin/feedback", label: "Admin", icon: ShieldCheck };
