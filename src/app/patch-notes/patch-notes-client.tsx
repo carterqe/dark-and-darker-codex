@@ -14,11 +14,17 @@ function stripHtml(html: string): string {
     .replace(/<\/h[1-6]>/gi, "\n")
     // Strip remaining HTML tags
     .replace(/<[^>]+>/g, "")
-    // BBCode: list items → bullet
-    .replace(/\[\*\]/g, "• ")
+    // BBCode: drop media tags entirely (content between is a URL/ID, not prose)
+    .replace(/\[(img|video|previewyoutube|youtube)[^\]]*\][\s\S]*?\[\/\1\]/gi, "")
+    // BBCode: orphan media tags with no closer
+    .replace(/\[(img|video|previewyoutube|youtube)[^\]]*\]/gi, "")
+    // BBCode: list items → newline + bullet (each on its own line)
+    .replace(/\[\*\]\s*/g, "\n• ")
+    // BBCode: heading openers → blank line before so they don't run into prior text
+    .replace(/\[h[1-3]\]/gi, "\n\n")
     // BBCode: block-level closers → newline
     .replace(/\[\/(?:list|h[1-3]|quote)\]/gi, "\n")
-    // BBCode: [url=...] links → keep just the label text
+    // BBCode: [url=...]label[/url] → keep just the label
     .replace(/\[url=[^\]]*\]([^\[]*)\[\/url\]/gi, "$1")
     // Strip all remaining BBCode tags [tag] and [/tag]
     .replace(/\[[^\]]+\]/g, "")
@@ -27,8 +33,21 @@ function stripHtml(html: string): string {
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, " ")
+    .replace(/&hellip;/g, "…")
+    .replace(/&mdash;/g, "—")
+    .replace(/&ndash;/g, "–")
+    .replace(/&[lr]squo;/g, "'")
+    .replace(/&[lr]dquo;/g, '"')
+    // Numeric entities (decimal + hex)
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCodePoint(parseInt(n, 16)))
+    // Collapse runs of spaces/tabs (but preserve newlines)
+    .replace(/[ \t]{2,}/g, " ")
+    // Trim trailing spaces on each line
+    .replace(/[ \t]+\n/g, "\n")
     // Collapse excess blank lines
     .replace(/\n{3,}/g, "\n\n")
     .trim();
