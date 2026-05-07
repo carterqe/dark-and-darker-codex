@@ -7,15 +7,29 @@ import ShimmerText from "@/components/ui/ShimmerText";
 
 function stripHtml(html: string): string {
   return html
+    // HTML block elements → newlines
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/p>/gi, "\n")
+    .replace(/<\/li>/gi, "\n")
+    .replace(/<\/h[1-6]>/gi, "\n")
+    // Strip remaining HTML tags
     .replace(/<[^>]+>/g, "")
+    // BBCode: list items → bullet
+    .replace(/\[\*\]/g, "• ")
+    // BBCode: block-level closers → newline
+    .replace(/\[\/(?:list|h[1-3]|quote)\]/gi, "\n")
+    // BBCode: [url=...] links → keep just the label text
+    .replace(/\[url=[^\]]*\]([^\[]*)\[\/url\]/gi, "$1")
+    // Strip all remaining BBCode tags [tag] and [/tag]
+    .replace(/\[[^\]]+\]/g, "")
+    // Decode HTML entities
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, " ")
+    // Collapse excess blank lines
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
